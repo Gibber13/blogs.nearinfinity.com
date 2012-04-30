@@ -14,7 +14,7 @@ tags: Java
 
 <p>It's generally accepted that guarding your log statements with an if block will improve performance if your log statements involve some kind of string concatenation, such as the example above. But what kind of performance improvement are we really talking about here?</p>
 
-<p>To determine the impact of this log guarding, I wrote a simple program that repeatedly calls log statements with three different logging implementations. See <a href="/blogs/jeff_kunkle/_posts/assets/logguard.zip">attachment</a> for the actual code.</p>
+<p>To determine the impact of this log guarding, I wrote a simple program that repeatedly calls log statements with three different logging implementations. See <a href="./assets/logguard.zip">attachment</a> for the actual code.</p>
 
 <ol>
 <li>UnguardedLogger.java has no if block guarding the log statement at all.</li>
