@@ -1,0 +1,399 @@
+--- 
+permalink: /blogs/projecteuler_problem_1_in_c.html
+layout: blogs
+title: ProjectEuler problem 1 in C, Groovy, Lisp, Perl, Python, and Ruby
+date: 2008-04-29 08:37:50 -04:00
+tags: Groovy Java Ruby
+---
+<p>Updated 2008-05-02: new Python implementation using sum() -- thanks Pete!
+</p><p>My <a href="http://www.nearinfinity.com/blogs/page/seths?entry=nice_python">blog post</a> about the <a href="http://projecteuler.net/index.php?section=problems&amp;id=1">first problem</a> in <a href="http://projecteuler.net/">Project Euler</a> went strange places. I was just trying to learn Python by solving a barely non-trivial problem. Maybe it was a full moon, not sure, but it wound up in a tangle of gcc, groovyc, and <a href="http://www.emacswiki.org/cgi-bin/wiki/CompiledFile">.elc</a>. Happily, some good performance improvements were suggested and I've tried to incorporate them below.
+<a name="toc"> </a>
+
+</p><p>This is a really long post. Here's the skeleton:
+  </p><ol>
+    <li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#runtime">Runtime environment</a>
+    </li><li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#results">Results</a>
+    </li><li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#code">Code</a> (alphabetically by language)
+      <ol type="a">
+        <li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_c">C</a>
+        </li><li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_g">Groovy</a>
+        </li><li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_l">Lisp</a>
+        </li><li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_pe">Perl</a>
+        </li><li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_py">Python</a>
+        </li><li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_r">Ruby</a>
+      </li></ol>
+    </li><li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#facepalm">Big O(rly)?</a>
+    </li><li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#wrapup">Wrap up</a>
+    </li><li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#extras">Extras</a>
+  </li></ol>
+<p></p>
+<a name="runtime"> </a><h2>Runtime environment</h2>
+<ul>
+  <li><b>Machine</b>: Powerbook Pro, 10.5.2, 2x 2.16 GHz Core 2 Duo
+  </li><li><b>Userspace programs</b>: Finder, Terminal
+  </li><li><b>Battery conservation mode</b>: Better Performance (plugged in)
+  </li><li><b>C</b>: GCC 4.0.1 (Apple Inc. build 5465)
+  </li><li><b>Groovy</b>: 1.5.5 JVM: 1.5.0_13-119
+  </li><li><b>Lisp</b>: GNU Emacs 22.1.1
+  </li><li><b>Perl</b>: v5.8.8, built for darwin-thread-multi-2level
+  </li><li><b>Python</b>: 2.5.1
+  </li><li><b>Ruby</b>: 1.8.6 (2007-09-24 patchlevel 111) [universal-darwin9.0]
+</li></ul>
+<a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#toc">(top)</a>
+<a name="results"> </a>
+<h2>Results</h2>
+<p>No cheesy graphs this time, just better organized numbers. Each row has one implementation of the problem. The 10**x columns show how many milliseconds it took the implementation to sum the multiples of three and five less than that number. Each implementation was run seven times for each column, and the average runtime is shown below. A test harness was written to execute the scripts automatically; I disabled the screensaver, started the tests, and went to bed.</p>
+<table>
+  <thead>
+    <tr>
+      <th>Code</th>
+      <th>10**1</th>
+      <th>10**2</th>
+      <th>10**3</th>
+      <th>10**4</th>
+      <th>10**5</th>
+      <th>10**6</th>
+      <th>10**7</th>
+      <th>Comments</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_c">first.c</a></td><td>5</td><td>5</td><td>5</td><td>5</td><td>11</td><td>65</td><td>648</td><td></td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_g1">first.groovy</a></td><td>928</td><td>929</td><td>1065</td><td>1643</td><td>2155</td><td>7998</td><td>52732</td><td></td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_g2">second.groovy</a></td><td>920</td><td>1004</td><td>1189</td><td>1353</td><td>1806</td><td>3243</td><td>19620</td><td></td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_g3">third.groovy</a></td><td>914</td><td>880</td><td>936</td><td>1181</td><td>1421</td><td>2545</td><td>12835</td><td></td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_pl1">first.pl</a></td><td>8</td><td>8</td><td>10</td><td>26</td><td>192</td><td>1886</td><td>18845</td><td></td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_pl2">second.pl</a></td><td>8</td><td>8</td><td>8</td><td>11</td><td>36</td><td>378</td><td>3062</td><td></td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_py1">first.py</a></td><td>22</td><td>22</td><td>23</td><td>35</td><td>160</td><td>1506</td><td>14939</td><td></td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_py2">second.py</a></td><td>147</td><td>22</td><td>21</td><td>24</td><td>53</td><td>422</td><td>4242</td><td></td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_py3">third.py</a></td><td>22</td><td>22</td><td>22</td><td>24</td><td>51</td><td>405</td><td>4081</td><td></td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_py4">fourth.py</a></td><td>21</td><td>22</td><td>21</td><td>22</td><td>26</td><td>156</td><td>1580</td><td>Credit goes to Pete <a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#comment4">below</a></td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_r1">first.rb</a></td><td>9</td><td>8</td><td>9</td><td>20</td><td>134</td><td>1420</td><td>14288</td><td></td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_r2">second.rb</a></td><td>9</td><td>8</td><td>9</td><td>17</td><td>100</td><td>1075</td><td>10818</td><td></td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_l">first.el</a></td><td></td><td></td><td></td><td></td><td></td><td></td><td>20141</td><td>10^1...6 not available</td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_l">second.el</a></td><td></td><td></td><td></td><td></td><td></td><td></td><td>8172</td><td>Actually first.elc</td></tr>
+    <tr><td><a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#lang_ri">instant.rb</a></td><td>8</td><td>8</td><td>8</td><td>8</td><td>8</td><td>8</td><td>8</td><td></td></tr>
+  </tbody>
+</table>
+<p>
+<a name="code"> </a>
+</p><h2>Code</h2>
+<a name="lang_c"> </a>
+<h3>C</h3>
+<pre class="prettyprint">#include &lt;stdio.h>
+#include &lt;math.h>
+
+#define multiple_of(a, b) ((a == 0 || b == 0) ? 0 : a % b == 0)
+
+int main(int argc, char** argv)
+{
+    int exp = atoi(argv[1]);
+    double sum = 0;
+    int i;
+
+    for (i = 3; i &lt; pow(10, exp); i++)
+        if (multiple_of(i, 3) || multiple_of(i, 5))
+            sum += i;
+
+    printf("%0.0f\n", sum);
+
+    return 0;
+}
+
+</pre>
+<a name="lang_g"> </a>
+<h3>Groovy</h3>
+<a name="lang_g1"> </a><pre class="prettyprint">// first.groovy
+exp = Integer.parseInt(args[0])
+
+mof = { val, test -> val &amp;&amp; test &amp;&amp; test % val == 0 }
+mof3 = mof.curry(3)
+mof5 = mof.curry(5)
+
+sum = 0 as BigDecimal
+
+(3..&lt;(10**exp)).each {
+    if (mof3(it) || mof5(it)) {
+        sum += it
+    }
+}
+
+println sum
+</pre>
+<hr>
+<a name="lang_g2"> </a><pre class="prettyprint">// second.groovy
+def exp = Integer.parseInt(args[0])
+
+def mof = { val, test -> val &amp;&amp; test &amp;&amp; test % val == 0 }
+def mof3 = mof.curry(3)
+def mof5 = mof.curry(5)
+
+def sum = 0 as BigInteger
+
+(3..&lt;(10**exp)).each {
+    if (mof3(it) || mof5(it)) {
+        sum += it
+    }
+}
+
+println sum
+</pre>
+<hr>
+<a name="lang_g3"> </a><pre class="prettyprint">// third.groovy
+def exp = Integer.parseInt(args[0])
+
+def sum = 0 as BigInteger
+
+for (int i = 3; i &lt; 10 ** exp; i++)
+    if (i % 3 == 0 || i % 5 == 0)
+        sum += i
+
+println sum
+</pre>
+<a name="lang_l"> </a>
+<h3>Lisp</h3>
+<pre class="prettyprint">; first.el
+(defun multiple_of (a b)
+  (= 0 (% a b))
+)
+
+(defun val-to-add (val)
+  (cond
+   ((multiple_of val 3) val)
+   ((multiple_of val 5) val)
+   (0)
+   )
+  )
+
+(defun sum-of-3or5-multiples (exp)
+  (let ((num 3) (sum 0.0))
+    (while (&lt; num (expt 10 exp))
+      (setq sum (+ sum (val-to-add num)))
+      (setq num (1+ num))
+      )
+    sum
+    )
+  )
+
+(sum-of-3or5-multiples 7)
+</pre>
+<a name="lang_pe"> </a>
+<h3>Perl</h3>
+<a name="lang_pl1"> </a><pre class="prettyprint">#!/usr/bin/env perl -w
+# first.pl
+use strict;
+
+my $exp = $ARGV[0];
+my $sum = 0;
+
+sub multiple_of {
+    my ($val, $tgt) = @_;
+    return $val % $tgt == 0;
+}
+
+for my $i (3 ... 10 ** $exp - 1) {
+    if (multiple_of($i, 3) || multiple_of($i, 5)) {
+        $sum += $i
+    }
+}
+
+print "$sum\n"
+</pre>
+<hr>
+<a name="lang_pl2"> </a><pre class="prettyprint">#!/usr/bin/env perl -w
+# second.pl
+
+use strict;
+
+my $exp = $ARGV[0];
+my $sum = 0;
+
+for my $i (3 ... 10 ** $exp - 1) {
+    if ($i % 3 == 0 || $i % 5 == 0) {
+        $sum += $i
+    }
+}
+
+print "$sum\n"
+</pre>
+<a name="lang_py"> </a>
+<h3>Python</h3>
+<a name="lang_py1"> </a><pre class="prettyprint"># first.py
+import sys
+
+def multiple_checker(val):
+    return lambda test: test and val and test % val == 0
+
+mof3 = multiple_checker(3)
+mof5 = multiple_checker(5)
+
+sum = 0
+
+for i in range(10 ** int(sys.argv[1])):
+    if mof3(i) or mof5(i):
+        sum = sum + i
+
+print sum
+</pre>
+<hr>
+<a name="lang_py2"> </a><pre class="prettyprint"># second.py
+import sys
+
+exp = int(sys.argv[1])
+sum = 0
+
+for mof3or5 in set(range(3, 10**exp, 3)) | set(range(5, 10**exp, 5)):
+    sum = sum + mof3or5
+
+print sum
+</pre>
+<hr>
+<a name="lang_py3"> </a><pre class="prettyprint"># third.py
+import sys
+
+exp = int(sys.argv[1])
+sum = 0
+
+for mof3or5 in set(xrange(3, 10**exp, 3)) | set(xrange(5, 10**exp, 5)):
+    sum = sum + mof3or5
+
+print sum
+</pre>
+<hr>
+<a name="lang_py4"> </a><pre class="prettyprint"># fourth.py
+import sys
+
+exp = int(sys.argv[1])
+total = sum(xrange(3, 10**exp, 3)) + sum(xrange(5, 10**exp, 5)) - sum(xrange(15, 10**exp, 15))
+
+print total
+</pre>
+<a name="lang_r"> </a>
+<h3>Ruby</h3>
+<a name="lang_r1"> </a><pre class="prettyprint"># first.rb
+exp = ARGV[0].to_i
+sum = 0
+
+def is_mult(large, small)
+  large % small == 0
+end
+
+for i in 3..(10 ** exp - 1)
+  next unless is_mult(i, 3) or is_mult(i, 5)
+  sum = sum + i
+end
+
+puts sum
+</pre>
+<hr>
+<a name="lang_r2"> </a><pre class="prettyprint"># second.rb
+exp = ARGV[0].to_i
+sum = 0
+
+for i in 3..(10 ** exp - 1)
+  next unless i % 3 == 0 or i % 5 == 0
+  sum = sum + i
+end
+
+puts sum
+</pre>
+<a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#toc">(top)</a>
+<p>
+<a name="facepalm"> </a>
+</p><h2>Big O(rly)?</h2>
+<p>Well... sigh... all of the code above works correctly but is slow and naïve. All of the approaches above take more time as the largest multiple increases. I was ignorantly, happily tweaking code down this road until fortunately <a href="http://www.nearinfinity.com/blogs/page/rdonaway">Bob</a> clued me in. The <b>best</b> approach takes the same amount of time as the largest multiple increases. Why? There's a simple equation for this, calculating an  <a href="http://en.wikipedia.org/wiki/Evaluating_sums#Arithmetic_series">arithmetic series</a>.
+<a name="lang_ri"> </a></p><pre class="prettyprint"># instant.rb
+ceil = 10 ** ARGV[0].to_i - 1
+
+def series_of_multiples(val, ceiling)
+  diff = val
+  vals = ceiling / val
+  last_val = val + diff * (vals - 1)
+  (val + last_val) / 2.0 * vals
+end
+
+def som(v, c) series_of_multiples(v, c).to_i end
+
+puts som(3, ceil) + som(5, ceil) - som(15, ceil)
+</pre>
+
+<a name="wrapup"> </a>
+<h2>Wrap up</h2>
+<ul>
+  <li>I got a lot more out of this than a quick glance at Python. It was good to calculate a series or two, but much better to build a little test harness.
+  </li><li>Groovy performance tested out well here. I would avoid using some of its features in tight loops. I'm confident that <i>Monsieur LaForge et son amis</i> will optimize that concern away eventually.
+  </li><li>I thought I could love it, I really wanted to love it, it's loved by many for many good reasons, but Python started to chafe me. It's so hard to nail down exactly why... it's chock full of goodness, but just seems to need more Kool-Aid than Groovy and especially Ruby. Perl's Kool-Aid threshold is a well-known constant, at least until the <a href="http://www.parrotcode.org/">Parrot</a> changes things drastically.
+  </li><li>Cosine similarity + arithmetic series = it's good to work with a friendly, helpful PhD. in math. Thanks Bob :-)
+</li></ul>
+<h2>Extras</h2>
+<p>The Python test harness. Probably needs tweaking for Wintel boxes.
+</p><pre class="prettyprint">import sys
+import re
+from datetime import timedelta, datetime
+from os import system
+
+#
+# prefix used to run scripts. Trailing whitespace matters!
+#
+vms = { 
+        'el':           'emacs --script ',
+        'elc':          'emacs --script ',
+        'groovy':       'groovy ',
+        'out':          './',
+        'pl':           'perl ',
+        'py':           'python ',
+        'rb':           'ruby '
+        }
+
+# Configurable parameters
+# 
+DEFAULT_MIN = 1
+DEFAULT_MAX = 7
+min = DEFAULT_MIN       # min "max" val = 10 ** min
+max = DEFAULT_MAX       # max "max" val = 10 ** max
+reps = 7                # times to repeat each test, then average the results
+
+
+# Helper method
+def td_to_ms(delta):
+    val = delta.microseconds / 1000.0
+    val = val + delta.seconds * 1000
+    val = val + delta.days * 24 * 60 * 60 * 1000
+    return val
+
+#
+# "main"
+#
+for script in sys.argv[1:]:
+    ext = script.split('.').pop()
+    if not ext in vms:
+        print 'ignoring', script, 'unrecognized extension'
+        continue
+
+    vm = vms[ext]
+
+    # the lisp files hardcode the max values :(
+    if re.search('^el', ext):
+        max = min
+    else: # reset to defaults, needed when running multiple types of tests
+        max = DEFAULT_MAX
+        min = DEFAULT_MIN
+
+    # gotta like list comprehensions
+    runs = [0 for x in range(max - min + 1)]
+
+    for rep in xrange(reps):
+        for exp in xrange(min, max + 1):
+            start = datetime.now()
+            system('%s%s %s >/dev/null' % (vm, script, exp))
+            end = datetime.now()
+            runs[exp - min] = runs[exp - min] + td_to_ms(end - start)
+
+    for i in xrange(len(runs)):
+        runs[i] = int(runs[i] / reps)
+
+    print script.split('/').pop(), runs
+
+    # see, isn't it strange how python leaves you hanging at the end
+    # of the last scope in the file?
+</pre> 

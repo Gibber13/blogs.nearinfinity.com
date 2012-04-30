@@ -1,0 +1,112 @@
+--- 
+permalink: /blogs/mapping_a_universal_comment_table.html
+layout: blogs
+title: Mapping a universal comment table using Hibernate 3.0
+date: 2007-04-10 18:00:00 -04:00
+tags: Java
+---
+<p>I have used Hibernate on several projects that required the users be able to enter rich text comments for many of the major domain objects.  In each case there needed to be a one-to-many relationship between each entity and comments, so that different users could comment on an entity over time.  To store these in the database, my DBA's have requested a universal <code>COMMENT</code> table that would hold comments for any entity in a CLOB column.  Among other benefits, this allows for easy searching over the entire set of comments.</p>
+
+<p>Here is the (Oracle) DDL for a situation like this, where two domain objects, <code>Person</code> and <code>Vehicle</code>, stored in the <code>PERSON</code> and <code>VEHICLE</code> tables, store their comments in the <code>COMMENTS</code> table:</p>
+
+<pre class="prettyprint">CREATE TABLE COMMENTS
+( COMMENT_ID   NUMERIC(12) NOT NULL
+, CREATED_ON   DATE        NOT NULL
+, CREATED_BY   VARCHAR(50) NOT NULL
+, COMMENT_TYPE CHAR(1)     NOT NULL
+, PERSON_ID    NUMERIC(12)
+, VEHICLE_ID   NUMERIC(12)
+, COMMENT_TEXT CLOB        NOT NULL
+, PRIMARY KEY (COMMENT_ID)
+, FOREIGN KEY (PERSON_ID)  REFERENCES PERSON(PERSON_ID)
+, FOREIGN KEY (VEHICLE_ID) REFERENCES VEHICLE(VEHICLE_ID)
+, CHECK (COMMENT TYPE IN ('P', 'V'))
+, CHECK ((PERSON_ID IS NULL AND VEHICLE_ID IS NOT NULL) OR (PERSON_ID IS NOT NULL AND VEHICLE_ID IS NULL))
+);
+</pre>
+
+<p>Note that this table has a single synthetic primary key, which is generated sequentially as records are inserted.  Also, I chose to have separate columns for the <code>PERSON</code> and <code>VEHICLE</code> keys so that I can enforce integrity with a foreign key constraint.  The check constraint ensures that exactly one of these is not null.  The <code>COMMENT_TYPE</code> column will be 'P' if the comment is about a <code>Person</code> and 'V' if the comment is about a <code>Vehicle</code>.  Of course, the <code>COMMENT_TYPE</code> can be inferred from the data in the <code>PERSON_ID</code>
+and <code>VEHICLE_ID</code> columns, but it will come in handy, as we will see later. </p>
+
+<p>In our Java application, both the <code>Person</code> and <code>Vehicle</code> objects have a collection of <code>Comment</code> objects.  
+However, a <code>Comment</code> object should also have a reference back to its domain object, so that we can navigate to it easily.  
+One way to model this type of relationship is to create specific <code>PersonComment</code> and <code>VehicleComment</code> classes, which extend the generic <code>Comment</code> class.  Here is some sample code, leaving out the accessor methods and other details:</p>
+
+<pre class="prettyprint">public class Person {
+    private Long personId;
+    ...
+    private Set&lt;PersonComment&gt; comments;
+    ...
+}
+
+public class Vehicle {
+    private Long vehicleId;
+    ...
+    private Set&lt;VehicleComment&gt; comments;
+    ...
+}
+
+public abstract class Comment {
+    private Long commentId;
+    private Date createdOn;
+    private String createdBy;
+    private String commentText;
+    ...
+}
+
+public class PersonComment extends Comment {
+    private Person person;
+    ...
+}
+
+public class VehicleComment extends Comment {
+    private Vehicle vehicle;
+    ...
+}
+</pre>
+
+<p>So how do we map these classes using Hibernate?  Since all instances of a <code>Comment</code> will be stored in the <code>COMMENTS</code> table,
+we use the "Table per class hierarchy" mapping strategy.  The <code>COMMENT_TYPE</code> column will be the discriminator that tells
+Hibernate what concrete type to construct when querying for <code>Comment</code> objects.  Here is the main part of the mapping file, Comment.hbm.xml, 
+that maps the <code>PersonComment</code> and <code>VehicleComment</code> classes to the <code>COMMENTS</code> table:</p>
+
+<pre class="prettyprint">&lt;hibernate-mapping&gt;
+&lt;class name="Comment" table="COMMENTS"&gt;
+    &lt;id name="commentId" column="COMMENT_ID"&gt; ... &lt;/id&gt;
+    &lt;discriminator column="COMMENT_TYPE"/&gt;
+    &lt;property name="createdOn" column="CREATED_ON"/&gt;
+    &lt;property name="createdBy" column="CREATED_BY"/&gt;
+    &lt;property name="commentText" column="COMMENT_TEXT" type="clob"/&gt;
+    
+    &lt;subclass name="PersonComment" discriminator-value="P"&gt;
+        &lt;many-to-one name="person" class="Person" not-null="true"&gt;
+            &lt;column name="PERSON_ID"/&gt;
+        &lt;/many-to-one&gt;
+    &lt;/subclass&gt;
+    
+    &lt;subclass name="VehicleComment" discriminator-value="V"&gt;
+        &lt;many-to-one name="vehicle" class="Vehicle" not-null="true"&gt;
+            &lt;column name="VEHICLE_ID"/&gt;
+        &lt;/many-to-one&gt;
+    &lt;/subclass&gt;
+&lt;/class&gt;
+&lt;/hibernate-mapping&gt;
+</pre>
+
+<p>Notice that there is no Java property that maps to the discriminator column.  Once we specify it in the <code>subclass</code> tag, we can forget 
+about it since Hibernate takes care of populating it in the database.  The collection mappings for the <code>Person</code> and <code>Vehicle</code> 
+classes are straightforward.  Here is the one for <code>Person</code>:</p>
+
+<pre class="code">    &lt;set name="comments" inverse="true"&gt;
+        &lt;key&gt;&lt;column="PERSON_ID"/&gt;&lt;/key&gt;
+        &lt;one-to-many class="PersonComment"/&gt;
+    &lt;/set&gt;
+</pre>
+
+<p>One very nice feature of this mapping strategy is the way queries work.  If you are using HQL, the query "from Comment where ..." will 
+return a list of <code>Comment</code> objects of varying concrete types, either <code>PersonComment</code> or <code>VehicleComment</code> depending 
+on the value of the discriminator column in the corresponding row.  When iterating through this list, you can use the <code>instanceof</code> keyword 
+to determine whether the object has a <code>getPerson()</code> or <code>getVehicle()</code> method.  This will allow you to get at the details of the 
+entity the comment is about.</p>
+
+<p>A while back I tried this mapping strategy using Hibernate 2, but it didn't give me predictable results.  With Hibernate 3 it works well.</p> 

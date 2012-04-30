@@ -1,0 +1,46 @@
+--- 
+permalink: /blogs/type-safe_entity_framework_inc.html
+layout: blogs
+title: Type-Safe Entity Framework Include
+date: 2010-11-18 15:27:48 -05:00
+tags: .NET
+---
+<p>Unlike many ORM solutions MS Entity Framework does not lazy fetch accessed tables. Coming from LINQ to SQL I didn't like this feature at first because it meant adding a bunch of loosely typed include statements to every SQL call. But I quickly realized the performance benefits, not to mention the<a href="http://www.codeproject.com/Articles/102647/Select-Nplus1-Problem-How-to-Decrease-Your-ORM-Per.aspx">N+1</a> problem just goes away. But, I still had heartburn over the loose typing of the include statement, so I came up with my own include. But first to set the stage let me show you what you currently have to write.</p>
+
+<pre class="prettyprint">
+  ctx.Users.Include("Order.Item");
+</pre>
+
+<p>This will fetch all Users as well as all the items that they ordered.</p>
+
+<p>To fix this we need to add some method to Users which is of type ObjectQuery. To do that we will use <a href="http://msdn.microsoft.com/en-us/library/bb383977.aspx">extension methods</a> to add my own include to ObjectQuery. Here is the code for that.</p>
+
+<pre class="prettyprint">
+public static class ObjectQueryExtensionMethods {
+  public static ObjectQuery&lt;T&gt; Include&lt;T&gt;(this ObjectQuery&lt;T&gt; query, Expression&lt;Func&lt;T, object&gt;&gt; exp) {
+    Expression body = exp.Body;
+    MemberExpression memberExpression = (MemberExpression)exp.Body;
+    string path = GetIncludePath(memberExpression);
+    return query.Include(path);
+  }
+ 
+  private static string GetIncludePath(MemberExpression memberExpression) {
+    string path = "";
+    if (memberExpression.Expression is MemberExpression) {
+      path = GetIncludePath((MemberExpression)memberExpression.Expression) + ".";
+    }
+    PropertyInfo propertyInfo = (PropertyInfo)memberExpression.Member;
+    return path + propertyInfo.Name;
+  }
+}
+</pre>
+
+<p>Using C# expressions and extension methods we now can write this</p>
+
+<pre class="prettyprint">
+  ctx.Users.Include(u => u.Order.Item);
+</pre>
+
+<p>Refactor and type-safe</p>
+
+<p>Entity Framework still has it's annoyances, but hopefully this will make it a little less painful. Now if it would only throw an exception if you tried to access a non-included entity instead of just returning null.</p> 

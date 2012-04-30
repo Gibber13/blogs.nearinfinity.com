@@ -1,0 +1,31 @@
+--- 
+permalink: /blogs/javascript_unit_testing.html
+layout: blogs
+title: JavaScript Unit Testing with Crosscheck
+date: 2007-10-08 15:08:12 -04:00
+tags: JavaScript Testing
+---
+<p>Here we are, a couple years since Ajax was coined, JavaScript has become a language that people actually respect. The code being written now is better than ever before. Object-orientation, name-spacing, object detection, and correct scoping are prevalent now. The libraries available (prototype, jquery, yui, dojo) are very well written. What is the next step to improve code quality? If you want my opinion, it's Testing. Otherwise, <a href="http://www.digg.com">here's</a> the door. :) </p> 
+<p>Many experts that advocate testing bring up <a href="http://openqa.org/selenium">selenium</a>. While I think selenium is great, it is a functional test tool. All you are really testing is that you scripts aren't generating errors and working at a basic level. Unit testing ensures that your code is correct, i.e. it does what you think it should.
+
+</p><p>So, how do you unit test JavaScript? I've had good luck with <a href="http://www.thefrontside.net/crosscheck">crosscheck</a>. Here's a synopsis from thefrontside.net...
+</p><blockquote>
+Crosscheck is an open source testing framework for verifying your in-browser javascript. It helps you ensure that your code will run in many different browsers such as Internet Explorer and Firefox, but without needing installations of those browsers. The only thing you need is a Java Virtual Machine.
+</blockquote>
+The cool thing about crosscheck is testing your functions -- including calls to the DOM -- in multiple browsers, without launching any browsers.
+
+<p>Crosscheck tests look like this:
+<code class="prettyprint">
+crosscheck.onSetup(function(){
+  crosscheck.load("prototype.js")
+  crosscheck.load("myScripts.js")
+});
+
+crosscheck.addTest({
+  test_function: function () {
+      ...
+  }
+});
+</code>
+
+</p><p>Now we need a js code coverage tool to show how badly we are doing in respect to JavaScript testing. <a href="http://www.softwareverify.com/javascript/coverage/feature.html">JavaScript Coverage Validator</a> is something that I'll have to try.

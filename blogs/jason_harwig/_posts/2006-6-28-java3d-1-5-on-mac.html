@@ -1,0 +1,31 @@
+--- 
+permalink: /blogs/java3d_1_5_on_mac.html
+layout: blogs
+title: Java3D 1.5 on Mac OS X
+date: 2006-06-28 20:19:45 -04:00
+tags: Java Mac OS X
+---
+<h3>the waiting game</h3>
+<p>No matter what <a href="http://www.apple.com/java">apple</a> says about Java development on the Mac, I always hated the waiting game before I could use some new Java API.  First, it was Java 5 Tiger, which because apple ports it themselves to the platform, lagged considerably behind the Sun release. Then, it was Java3D and the JAI API.  Even now, the Java3D API on OSX is at 1.3. I'm just glad that the JOGL and Java3d folks found a way to bypass Apple's porting process this time with Java3D 1.5.
+
+</p><p>Java3D is currently at 1.4.0 stable and has a 1.5 dev version out. The key to all of this is that the 1.5 branch includes the ability to use JOGL to bind the Java3D API to the native OpenGL implementation.  What does this provide? Well, since JOGL is already ported to OSX, we can install Java3D 1.5 and JOGL and upgrade our outdated Java3D!
+ 
+
+</p><h3>how to do it</h3>
+
+<h4>Prerequisites</h4>
+<ul><li>Java 1.5</li><li>Mac OS 10.4</li></ul>
+<h4>Procedure</h4>
+<ol>
+<li>Download the windows binary of Java3D 1.5 from the <a href="https://java3d.dev.java.net/binary-builds-pre.html">Java 3D site</a></li>
+
+<li>Replace the three jars (j3dcore.jar, j3dutils.jar, vecmath.jar) located in /System/Library/Java/Extensions with the ones in the java3d download. You can back up your old jars to easily revert.</li>
+
+<li>Download <a href="https://jogl.dev.java.net/">JOGL</a> (now called Java Bindings for the OpenGL API). They have a PPC and universal download, as it's a JNI library</li>
+
+<li>Extract the jogl-natives-macosx-[ppc|universal].jar and copy libjogl.jnilib, libjogl_awt.jnilib, and libjogl_cg.jnilib to /System/Library/Java/Extensions.  Make sure to copy jogl.jar here also.</li>
+
+<li><i>Optional: </i>Test out your install by downloading the <a href="https://java3d.dev.java.net/binary-builds.html">j3d-examples</a></li>
+
+
+<p>Have fun with all the new features!</p></ol>

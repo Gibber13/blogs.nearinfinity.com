@@ -1,0 +1,132 @@
+--- 
+permalink: /blogs/activerecord_nested_attributes.html
+layout: blogs
+title: "ActiveRecord: Nested Attributes "
+date: 2011-05-02 23:25:38 -04:00
+tags: Ruby
+---
+<p>My project recently started developing a web app using Rails 3 and Extjs, a pure JavaScript frontend, i.e. no ERB, haml, etc.  We have several multi-page forms where we use a JavaScript model to hold the form data and upon save serialize the JSON back to the server. If successful, the updated data is rendered as JSON and sent back to the client.  
+</p>
+<p>
+The model has a simple one-to-many relationship (parent/children)
+</p>
+
+<pre class="prettyprint">{parent = { id: 1, name: 'Jim', children: 
+[{id: 2, name: 'Larry',parent_id:1},
+{id: 3, name:'Curly',parent_id:1},
+{id:4, name: 'Moe',parent_id:1}] } 
+</pre>
+
+<pre class="prettyprint">class Parent &lt; ActiveRecord::Base
+  attr_accessible :name
+  has_many :children 
+end
+
+class Child &lt; ActiveRecord::Base
+  belongs_to :parent
+end
+</pre>
+
+<p>
+My expectation was that when I save the parent data, via update_attributes, both the parent and child data save together in a single transaction. 
+</p>
+
+<pre class="prettyprint">class ParentsController&lt; ApplicationController
+  ...
+  def update
+    parent = Parent.find(params[:id])
+    parent.update_attributes(params)
+    ...
+  end
+end
+</pre>
+
+<p>
+Being new to developing Rails apps in the "real world" I had not dealt with this, what I thought to be, common scenario.  I found that out of the box the parent data saves, but not the child data.  I first explored the book "Agile Web Development with Rails", but didn't find what I needed.  Next I checked out the Rails Guides, in particular the section on <a href="http://guides.rubyonrails.org/association_basics.html#options-for-has_many">associations</a> The first setting I found was the :autosave setting:
+</p>
+
+<blockquote><em>
+If you set the :autosave option to true, Rails will save any loaded members and destroy members that are marked for 
+destruction whenever you save the parent object.
+</em></blockquote>
+
+<p>
+Seemed like a good fit.
+</p>
+
+<pre class="prettyprint">has_many :children, :autosave =&gt; true
+</pre>
+
+<p>
+However, the children still did not save when calling update_attributes (I'm still not sure exactly what this is used for)
+</p>
+
+<p>
+Next stop, Google. Some searching brought me to the ActiveRecord "accepts_nested_attributes_for" method. It turns out this is exactly what I needed.  So I added "accepts_nested_attributes_for :children" to Parent
+</p>
+
+<pre class="prettyprint">class Parent &lt; ActiveRecord::Base
+  attr_accessible :name
+  has_many :children
+  accepts_nested_attributes_for :children
+end
+</pre>
+
+<p>
+However, just adding "accepts_nested_attributes_for :children" wasn't enough.  It turns out that with the accepts_nested_attributes_for method, the Parent class receives a method called "children_attributes=(attributes)".  This allows for the parent's children attributes to be updated.  This also means I have to update my JSON so that the "children" property is called "children_attributes".  
+</p>
+
+
+<pre class="prettyprint">parent = { id: 1, name: 'Jim', children_attributes: 
+[{id: 2, name: 'Larry',parent_id:1},
+{id: 3, name:'Curly',parent_id:1},
+{id:4, name: 'Moe',parent_id:1}] } 
+</pre>
+<p>
+Since I am using "attr_accessible" I also have to include "children_attributes" in the list
+</p>
+
+<pre class="prettyprint">class Parent &lt; ActiveRecord::Base
+  attr_accessible :name, :children_attributes
+  has_many :children
+  accepts_nested_attributes_for :children
+end
+</pre>
+
+<p>
+Now calling "parent.update_attributes" saves both the parent and its children, within a single transaction.  Rails will handle inserts/updates/deletes appropriately.  If the child has an id, the child is updated.  If the child is missing an id, a new child is added.  If the child has the "_destroy" attribute set, the child is removed.
+</p>
+
+<p>
+The last todo was to serialize the JSON back to the client upon success. When trying this:
+</p>
+
+<pre class="prettyprint">render :json =&gt; parent.to_json(:include =&gt; :children)
+</pre>
+
+<p>my JSON included "children", not "children_attributes":</p>
+<pre class="prettyprint">{parent = { id: 1, name: 'Jim', children: 
+[{id: 2, name: 'Larry',parent_id:1},
+{id: 3, name:'Curly',parent_id:1},
+{id:4, name: 'Moe',parent_id:1}] } 
+</pre>
+
+<p>For the save to work correctly, the JSON needs "children_attributes", (which is a bit of a disconnect between relationship and nested attribute naming conventions) I was not able to figure out how to get Rails and "to_json" to use "children_attributes".  For my solution I did not ":include =&gt; :children" in my call to "to_json" and I overrode "as_json".  In my "as_json" I manually add the "children attributes" to the parent JSON.</p>
+
+<pre class="prettyprint">  def as_json(options={})
+    json = super(options)
+    json[:children_attributes]=[]
+    
+    self.children.each do |child|
+      json[:children_attributes] &lt;&lt; {:id =&gt; child.id, :name =&gt; child.name}
+    end
+    json
+  end
+</pre>
+
+<p>Looking back on getting the save to work, it seems rather simple.  However, several things made this a little harder than it should have been.  The first being the documented coverage.  Surprisingly, this was not covered in the book "AWDR" or Rails Guides. It is spelled out quite well in the API docs, however, but you need to know about the NestedAttributes module  The ":autosave" setting misled me a bit.  I will need to go back and do a bit more research on this.  Lastly, the naming convention for nested attributes threw me off and the fact that I had to "rig" as_json. Perhaps there is a way to handle this by "convention".</p> 
+
+<p>
+For further reading check out <a href="http://ryandaigle.com/articles/2009/2/1/what-s-new-in-edge-rails-nested-attributes">Ryan's blog</a> or <a href="http://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html">the Nested Attributes API docs.</a> 
+</p>
+ 

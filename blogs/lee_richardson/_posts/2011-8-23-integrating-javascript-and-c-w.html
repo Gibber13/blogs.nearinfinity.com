@@ -1,0 +1,194 @@
+--- 
+permalink: /blogs/integrating_javascript_and_c_w.html
+layout: blogs
+title: Integrating JavaScript and C# with Script#
+date: 2011-08-23 23:09:48 -04:00
+tags: .NET JavaScript
+---
+<p>Have you ever had an enum in your server code that you wanted to access in client side code?  Or wanted the safety of compile time errors when there are discrepancies between your server-side and client-side code?  Or had a C# Data Transfer Object (DTO) that you wanted to enable Intellisense for in JavaScript?  I hadn't found a good solution either ... until now.</p>
+<p><b>Compiling C# to What!?</b></p>
+
+<div style="float:right; overflow: auto; margin-left:10px;">
+<script type='text/javascript'> 
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2011/08/integrating-javascript-and-c-with.html';
+ 
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+ 
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+ 
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+ 
+        document.write(div.innerHTML);
+    </script> 
+</div>
+
+<p>Compiling C# code into JavaScript may seem foreign, but <a href=" http://projects.nikhilk.net/ScriptSharp ">Script#</a> is a mature technology that is absolutely worth a look.  Our team has been using it very happily for about three months.  We've found a number of benefits  including:</p>
+
+<ul>
+<li>Consistently working Intellisense</li>
+<li>Better encapsulation</li>
+<li>Simpler Object Orientation</li>
+<li>Easier deployment (Script# compiles multiple files to a single, optionally minified file)</li>
+<li>Safer refactoring</li>
+<li>Simpler unit testing</li>
+<li>Type safety; and</li>
+<li>Design time syntax checking (no more mistyping a variable and accidentally declaring it to the global scope)</li>
+</ul>
+
+<p>Scott Hanselman covered most of these topics in last month's Hanselminutes episode: <a href=" http://www.hanselminutes.com/default.aspx?showID=296">Script# Compiles to JavaScript</a>.  If you have a spare car ride I definitely recommend the listen.  But what wasn't covered were some additional benefits provided by an off the beaten path approach to this great technology.  The main benefit is tighter server side C# to client side JavaScript integration.  A secondary benefit is less of a dependency on Script#.</p>
+
+<p><b>To the Command Line</b></p>
+
+<p>Typically to get going with Script# you: </p>
+
+<ol>
+<li>Install the Script# Visual Studio plug-in</li>
+<li>File -> New project</li>
+<li>Select "Script Library" and</li>
+<li>Compile to generate JavaScript</li>
+</ol>
+
+<p>Nice and easy.  The down side to this approach is you can't easily include files outside of your project.  Specifically, you can't include data transfer objects or enum's from your server side code.  Furthermore, all of your team members must install Script#.  If instead you compile with Script#'s "ssc.exe" command you obtain more control and get less dependency.</p>
+
+<p><b>How-To</b></p>
+
+<p>The how-to looks something like this:</p>
+
+<ol>
+
+<li><a href="http://projects.nikhilk.net/ScriptSharp">Download</a> and install Script#</li>
+<li>Add a Class Library (not a Script# project)</li>
+<li>Project properties -> Build -> Advanced -> "Do not reference mscorlib"<br />
+<a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://4.bp.blogspot.com/-u7QvzHOOfxE/TlRhVwoGyII/AAAAAAAABu8/Vonkzc8nNLc/s1600/mscorlib.png"><img style="cursor:pointer; cursor:hand;width: 400px; height: 235px;" src="http://4.bp.blogspot.com/-u7QvzHOOfxE/TlRhVwoGyII/AAAAAAAABu8/Vonkzc8nNLc/s400/mscorlib.png" border="0" alt=""id="BLOGGER_PHOTO_ID_5644243259460339842" /></a>
+</li>
+
+<li>Ideally move the Script# files (C:\Program Files (x86)\ScriptSharp) locally to the solution and check them into source control to a Libs or something similar</li>
+
+<li>Remove all references, but add: ScriptSharp.dll, ScriptSharp.Web.dll, Script.Jquery</li>
+<li>Edit your .csproj to manually reference Script#'s mscorlib (right click, Unload project, Edit MyProject.csproj)<br />
+    <br />
+    <span style="font-size:9.5pt;line-height:115%;
+font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;
+mso-bidi-language:AR-SA">&lt;</span><span style="font-size:9.5pt;line-height:
+115%;font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;color:#A31515;mso-ansi-language:EN-US;mso-fareast-language:EN-US;
+mso-bidi-language:AR-SA">Reference</span><span style="font-size:9.5pt;
+line-height:115%;font-family:Consolas;mso-fareast-font-family:Calibri;
+mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;
+mso-fareast-language:EN-US;mso-bidi-language:AR-SA"> </span>
+    <span style="font-size:9.5pt;line-height:115%;font-family:Consolas;mso-fareast-font-family:
+Calibri;mso-fareast-theme-font:minor-latin;color:red;mso-ansi-language:EN-US;
+mso-fareast-language:EN-US;mso-bidi-language:AR-SA">Include</span><span style="font-size:9.5pt;line-height:115%;font-family:Consolas;mso-fareast-font-family:
+Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;
+mso-fareast-language:EN-US;mso-bidi-language:AR-SA">=</span><span style="font-size:9.5pt;line-height:115%;font-family:Consolas;mso-fareast-font-family:
+Calibri;mso-fareast-theme-font:minor-latin;mso-ansi-language:EN-US;mso-fareast-language:
+EN-US;mso-bidi-language:AR-SA">&quot;<span style="color:blue">mscorlib, Version=0.7.0.0, 
+    Culture=neutral, PublicKeyToken=8fc0e3af5abcb6c4, processorArchitecture=MSIL</span>&quot;<span 
+        style="color:blue">&gt;<br />
+    <span style="mso-spacerun:yes">&nbsp; </span>&lt;</span><span style="color:#A31515">SpecificVersion</span><span 
+        style="color:blue">&gt;</span>True<span style="color:blue">&lt;/</span><span 
+        style="color:#A31515">SpecificVersion</span><span style="color:blue">&gt;<br />
+    <span style="mso-spacerun:yes">&nbsp; </span>&lt;</span><span style="color:#A31515">HintPath</span><span 
+        style="color:blue">&gt;</span>..\Libs\ScriptSharp\v1.0\mscorlib.dll<span 
+        style="color:blue">&lt;/</span><span style="color:#A31515">HintPath</span><span 
+        style="color:blue">&gt;<br />
+    &lt;/</span><span style="color:#A31515">Reference</span><span style="color:
+blue">&gt;</span></span><br /><br /></li>
+
+<li>Modify AssemblyInfo.cs and remove the following lines:<br />
+<br />
+[assembly: ComVisible(false)]<br />
+[assembly: Guid("b5e2449f-193c-46d1-9023-9143618d8491")]<br />
+<br />
+</li>
+
+<li>Modify AssemblyInfo.cs and add the following:<br />
+<br />
+[assembly: ScriptAssembly("ScriptSharpDemoAssembly")<br />
+<br />
+</li>
+
+<li>Ensure it compiles in Visual Studio</li>
+<li>Create a batch script or PowerShell script that compiles using ssc.exe like this:<br />
+<br />
+..\Libs\ScriptSharp\v1.0\ssc.exe ^<br />
+&nbsp;&nbsp;&nbsp;&nbsp;/debug ^<br />
+&nbsp;&nbsp;&nbsp;&nbsp;/out:MyScriptSharp.js ^<br />
+&nbsp;&nbsp;&nbsp;&nbsp;/ref:"..\Libs\ScriptSharp\v1.0\Framework\mscorlib.dll" ^<br />
+&nbsp;&nbsp;&nbsp;&nbsp;.\Properties\AssemblyInfo.cs ^<br />
+&nbsp;&nbsp;&nbsp;&nbsp;.\Class1.cs<br />
+<br />
+
+</li>
+</ol>
+
+<p>Notice the last two lines in the script are a list of the files that you want to include.  The point of this exercise is that you can now include files outside of your main Script# project in that list.</p>
+<p>Now for completeness if you put a simple static method in Class1.cs, something like this:</p>
+    <p><span style="font-size:9.5pt;line-height:115%;
+font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;
+mso-bidi-language:AR-SA">namespace</span><span style="font-size:9.5pt;
+line-height:115%;font-family:Consolas;mso-fareast-font-family:Calibri;
+mso-fareast-theme-font:minor-latin;mso-ansi-language:EN-US;mso-fareast-language:
+EN-US;mso-bidi-language:AR-SA"> MyScriptSharp<br />
+        {<br />
+        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:blue">public</span>
+        <span style="color:blue">class</span> <span style="color:#2B91AF">Class1<br />
+        </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>{<br />
+        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="color:blue">public</span>
+        <span style="color:blue">static</span> <span style="color:blue">string</span> 
+        HelloWorld()<br />
+        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<br />
+        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="color:blue">
+        return</span> <span style="color:#A31515">&quot;Hello World!&quot;</span>;<br />
+        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}<br />
+        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>}<br />
+        }</span></p>
+
+<p>Then run the batch file you should get something like this:</p>
+
+<p><span style="font-size:9.5pt;line-height:115%;
+font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:
+AR-SA">Type.registerNamespace(<span style="color:maroon">&#39;MyScriptSharp&#39;</span>);<br />
+    <br />
+    <span style="color:darkgreen">
+    ////////////////////////////////////////////////////////////////////////////////<br />
+    // MyScriptSharp.Class1<br />
+    <br />
+    </span>MyScriptSharp.Class1 = <span style="color:blue">function</span> 
+    MyScriptSharp_Class1() {<br />
+    }<br />
+    MyScriptSharp.Class1.helloWorld = <span style="color:blue">function</span> 
+    MyScriptSharp_Class1$helloWorld() {<br />
+    <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:blue">return</span>
+    <span style="color:maroon">&#39;Hello World!&#39;</span>;<br />
+    }<br />
+    <br />
+    MyScriptSharp.Class1.registerClass(<span style="color:maroon">&#39;MyScriptSharp.Class1&#39;</span>);</span></p>
+
+<p>Obviously you could get these results faster with approach #1.  But now you have a lot more control.</p>
+
+<p><b>Summary</b></p>
+
+<p>The main downside to this approach is maintaining the batch file is a bit of a hassle.  But the upsides are that you can include any file from your server-side C# code.  And any changes in that server-side code are automatically reflected in your JavaScript.  And any breaking changes in your server-side code generate compile time errors in your client side code.  And furthermore none of your team members need to install Script#.  For our team it's an easy tradeoff.  What about for yours?  Please share your thoughts in the comments or on <a href="http://twitter.com/#!/lprichar">twitter</a>.</p>
+ 

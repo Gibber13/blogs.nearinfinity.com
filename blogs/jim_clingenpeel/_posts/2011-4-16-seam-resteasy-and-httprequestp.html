@@ -1,0 +1,44 @@
+--- 
+permalink: /blogs/seam_resteasy_and_httprequestp.html
+layout: blogs
+title: Seam, Resteasy, and Capturing Incoming REST Requests
+date: 2011-04-16 23:11:29 -04:00
+tags: Java
+---
+So...I embarked upon a task the other day to ensure that all REST traffic coming into our application would be captured (when turned "on" for a particular end user) and logged to our database so that the support staff could review the traffic and help end users with any issues that they might have while submitting REST requests to our system.<div><br /></div><div>Sounds pretty straightforward...but as usually is the case, things are not always as easy as they first seem. &nbsp;Based on the&nbsp;<a href="http://www.jboss.org/resteasy/docs">Resteasy docs</a>, I immediately gravitated to the PreProcessInterceptor. &nbsp;I mean - hey - that fits the need quite nicely, right? &nbsp;Well, yes, until you account for the need to capture requests that may have failed to resolve properly, e.g., if the user sends a POST versus a PUT to a particular URL. &nbsp;In that scenario, attempting to capture requests in the PreProcessInterceptor will not work since Resteasy will not get far enough into its request dispatching process to map the request to a particular resource method...and if Resteasy does not execute a resource method, then the PreProcessInterceptor does not get called. &nbsp;Fail.</div><div><br /></div><div>I could clearly see in my server logs that Resteasy was logging its failure to find a resource method (for an incorrect request) from its SynchronousDispatcher class:</div><div><br /></div>
+<pre class="prettyprint">org.jboss.resteasy.spi.NotFoundException: Could not find resource for relative : /samplePath/RESOURCEID of full path: http://127.0.0.1:8080/approot/seam/resource/rest/samplePath/RESOURCEID?apikey=API-1234-1234-1234-1234
+	at org.jboss.resteasy.core.registry.RootSegment.matchChildren(RootSegment.java:358)
+	at org.jboss.resteasy.core.registry.RootSegment.matchRoot(RootSegment.java:372)
+	at org.jboss.resteasy.core.registry.RootSegment.matchRoot(RootSegment.java:365)
+	at org.jboss.resteasy.core.ResourceMethodRegistry.getResourceInvoker(ResourceMethodRegistry.java:251)
+	at org.jboss.resteasy.core.SynchronousDispatcher.getInvoker(SynchronousDispatcher.java:155)
+	at org.jboss.resteasy.core.SynchronousDispatcher.invoke(SynchronousDispatcher.java:116)
+</pre><div><br /></div><div>So I began to look more closely at the source code of that class to identify the code execution path and find out what my options were to capture requests prior to resource method resolution. &nbsp;I quickly noticed in the SynchronousDispatcher code the existence of a collection of HttpRequestPreprocessors. &nbsp;Well now - that class sounded more promising...and there is a public method on SynchronousDispatcher to add such a pre-processor. &nbsp;But I wasn't seeing a path forward on how to create a custom HttpRequestPreprocessor and add it to the collection - where do I do that?</div><div><br /></div><div>I looked at the Resteasy configuration docs but those examples weren't helpful - I was forgetting that my Resteasy components are being accessed via&nbsp;<a href="http://docs.jboss.org/seam/2.2.1.Final/reference/en-US/html_single/">JBoss Seam</a>&nbsp;integration. &nbsp;But looking at the Seam / Resteasy integration documentation didn't immediately expose a solution either - no reference directly to HttpRequestPreprocessor at least. &nbsp;(In fact, I didn't see ANY reference to HttpRequestPreprocessor in Resteasy documentation at all.)</div><div><br /></div><div>Ultimately, I found that the Seam / Resteasy integration lies with the existence of the ResteasyBootstrap class which is configured as a Seam Startup component. &nbsp;The ResteasyBootstrap component is what is responsible for constructing the SynchronousDispatcher instance to which we need to add a HttpRequestPreprocessor. &nbsp;My solution was to create my own Seam component that extends Resteasy's ResteasyBootstrap but that has a higher precedence on the @Install annotation - like so:</div><div><br /></div><pre class="prettyprint">/**
+ * Custom Resteasy bootstrapper used to add our own HttpRequestPreprocessor.
+ */
+@Name("org.jboss.seam.resteasy.bootstrap")
+@Scope( ScopeType.APPLICATION)
+@Startup
+@AutoCreate
+@Install(classDependencies = "org.jboss.resteasy.spi.ResteasyProviderFactory", precedence = Install.DEPLOYMENT )
+public class RESTCaptureBootstrap extends ResteasyBootstrap
+{
+    /**
+     * This method overrides RESTEasy's bootstrapping method solely to add our RESTCaptureInterceptor
+     * as an HttpRequestPreprocessor.  We're using that to capture a REST request as early in the pipeline as
+     * possible.
+     *
+     * @param providerFactory Resteasy provider from Seam
+     * @return dispatcher with our added HttpRequestPreprocessor
+     */
+    @Override
+    protected Dispatcher createDispatcher( SeamResteasyProviderFactory providerFactory)
+    {
+        Dispatcher dispatcher = super.createDispatcher( providerFactory );
+        dispatcher.addHttpPreprocessor( new RESTCaptureInterceptor() );
+
+        return dispatcher;
+    }
+}
+</pre>
+<div><br /></div><div>This code will allow our custom HttpRequestPreprocessor to capture and log requests as necessary.</div><div><br /></div> 

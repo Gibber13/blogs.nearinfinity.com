@@ -1,0 +1,68 @@
+--- 
+permalink: /blogs/a_grails_plugin_for_fuzzy.html
+layout: blogs
+title: A Grails plugin for fuzzy string matching
+date: 2008-02-27 23:36:01 -05:00
+tags: Grails
+---
+Long ago at a company which <i>shall not be named</i>, I made the mistake of shunning contemporary technology. Never again! Since Near Infinity honors its training commitment I was able to attend and enjoy the Groovy / Grails NFJS <a href="http://www.groovygrails.com/gg/2gexperience">conference</a>.
+<p>
+Apache Commons <a href="http://commons.apache.org/codec/">Codec</a> implemented soundex, double metaphone, base64, and more. in the spirit of Grails why not stitch them into java.lang.String?
+</p><p>
+
+</p><pre class="prettyprint">import org.apache.commons.codec.language.*
+import org.apache.commons.codec.net.*
+
+class FuzzstrGrailsPlugin {
+    def version = 0.1
+    def dependsOn = [core:grails.util.GrailsUtil.getGrailsVersion()]
+	
+    def doWithDynamicMethods = {
+        def encodingClosure = { it.encode(delegate) }
+        def decodingClosure = { it.decode(delegate) }
+
+        String.metaClass.toSoundex = encodingClosure.curry(new Soundex())
+        String.metaClass.toRefinedSoundex = encodingClosure.curry(new RefinedSoundex())
+        String.metaClass.toMetaphone = encodingClosure.curry(new Metaphone())
+        String.metaClass.toDoubleMetaphone = encodingClosure.curry(new DoubleMetaphone())
+
+        String.metaClass.toBase64 = encodingClosure.curry(new BCodec())
+        String.metaClass.fromBase64 = decodingClosure.curry(new BCodec())
+
+        String.metaClass.toQPrintable = encodingClosure.curry(new QCodec())
+        String.metaClass.fromQPrintable = decodingClosure.curry(new QCodec())
+
+        String.metaClass.toQuotedPrintable = encodingClosure.curry(new QuotedPrintableCodec())
+        String.metaClass.fromQuotedPrintable = decodingClosure.curry(new QuotedPrintableCodec())
+
+        String.metaClass.toUrlEncoded = encodingClosure.curry(new URLCodec())
+        String.metaClass.fromUrlEncoded = decodingClosure.curry(new URLCodec())
+
+        String.metaClass.similarTo = { Cosine.stringSimilarity(delegate, it) }
+        String.metaClass.mostSimilarTo = { Cosine.mostSimilar(delegate, it) }
+        String.metaClass.rankedSimilarity = { Cosine.horseShoes(delegate, it) }
+    }
+}
+</pre>
+<p>
+</p><p>So what? Well, see for yourself:
+</p><p>
+</p><pre class="prettyprint">Loading with installed plug-ins: ["fuzzstr"] ...
+Groovy Shell (1.5.4, JVM: 1.5.0_13-119)
+Type 'help' or '\h' for help.
+-------------------------------------------------------------------------------
+groovy:000> "literal".toSoundex()
+===> L364
+groovy:000> "literal".toDoubleMetaphone()
+===> LTRL
+groovy:000> "literal".toBase64().fromBase64()
+===> literal
+groovy:000> "literal".similarTo("litteral")
+===> 93
+groovy:000> "litteral".mostSimilarTo(['literature', 'litter', 'literal']) 
+===> literal
+</pre>
+<p>
+The plugin's not ready to be released yet but hopefully within a few weeks; localization and caching need some love. Pondering whether GORM might benefit from some of these methods.
+</p><p>
+seth _dot_ schroeder _at_ nearinfinity _dot_ com</p> 

@@ -1,0 +1,62 @@
+--- 
+permalink: /blogs/referential_integrity_data_modeling_mistake.html
+layout: blogs
+title: Referential Integrity - Data Modeling Mistake 1 of 10
+date: 2007-07-18 19:02:03 -04:00
+tags: General SQL
+---
+<p>In my mind data models are like the foundations of a house. Whether you use ORM or a more traditional modeling tool, they form the base of the entire rest of your project. Consequently, every decision you make (or don't make) regarding your data model during the design phase(s) of your project will significantly affect the duration of your project and the maintainability and performance of your application. </p>
+<div style="FLOAT: right; MARGIN-LEFT: 10px">
+<script type="text/javascript">
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2007/07/referential-integrity-data-modeling.html';
+
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+
+        var div = document.createElement('div');
+        div.appendChild(diggIframe);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(dotnetkicksLink);
+
+        document.write(div.innerHTML);
+    </script>
+</div>
+<p>You could de-emphasize up-front planning, but every correction you make to the data model once code has been written on top of it will introduce significant delays to the project as developers refactor data access, business logic, and user interface tiers. That's why mistakes made during design are expensive, and it would behoove any architect (or project manager) to be well aware of the repercussions of data model decisions and minimize mistakes before construction begins.</p>
+<p>After years of working with or maintaining applications based on poorly designed data models, and after years of modeling my own databases from scratch I've seen and made a lot of mistakes. So, I've compiled ten of the most common ones and the arguments for and against them. </p>
+<p>I'll be speaking on this topic in the upcoming <a href="http://www.iasahome.org/web/capitalarea/itarc2007">IASA conference</a> in October, and so I wanted to vet these ideas with the community. I know there are strong feelings on these topics, so please help me out by commenting if you feel I've missed something or am off base. </p>
+<p>I'll start with Mistake #1: Not Using Referential Integrity in this post. I'll give four common reasons for avoiding referential integrity and then rebuff them. I'll then cover the more controversial Mistake #2 Not Using Surrogate Keys in my next post.</p>
+<p><b>Mistake #1 - Not using referential integrity</b></p>
+<p>I've heard a lot of excuses for not using referential integrity, but I've never been swayed by one of them. If you have a record with a foreign key field you should be 100% certain that it will <i>always</i> refer to the primary key of an <i>existing</i> record in <i>one and only one</i> foreign table. The last thing you want to do is write large amounts of conditional logic because you aren't 100% certain that you aren't dealing with orphaned data. Nonetheless, here are some almost compelling arguments I've heard for not using it:</p>
+<p><b>Reason #1: Project Too Small</b></p>
+<p>If your project or database is only a few tables and a couple lines of code then you don't need referential integrity right? Wrong, numerous projects start small, get big, and have major problems because of it. It doesn't take much extra time to put in constraints. Avoid the urge to be lazy.</p>
+<p><b>Reason #2: Accidental Oversight</b></p>
+<p>Numerous applications I've seen forget a relationship or two. This is borne of writing and executing database creation statements by hand and is the reason that data modeling tools exist. When you visualize your database in a model it's hard to miss a relationship. So use a modeling tool and keep it in sync with your database, you won't regret it.</p>
+<p>Incidentally I like Microsoft Visio for data modeling because you can change your schema during development and Visio won't delete your data. This enables you to keep your data model in sync with the database for the entire lifetime of the database. There are other benefits too, if you're interested see my article on <a href="http://blueink.biz/DataModelingVisio.aspx">data modeling in Microsoft Visio</a>.</p>
+<p><b>Reason #3: Maximize Insert Speed</b></p>
+<p>It's a fact: indexes and constraints slow down insert and update operations. If your application is heavy on writing and light on reading, then you could argue referential integrity isn't for you. This argument is often combined with the "Only one application ever uses my database" argument.</p>
+<p>There are two problems with this. One problem comes when either a well meaning DBA modifies data by hand and messes up the state of the database, or more realistically when there's a bug in the application that accidentally orphans data. Orphaned data may not affect your application, but a well designed solution should plan for the future. When that data warehouse project finally gets around to importing data from your database, what do they do with the orphaned data? Ignore it? Try to integrate it? Who knows? If you've been in this position, you'll know what I mean when I say the responsible architect's name (or their app) will be synonymous with a curse word.</p>
+<p>The second problem is that even if a database without referential integrity don't end up with orphaned data, a second application that might want to integrate can still never be 100% certain that foreign keys refer to existing records. It comes down to designing for the future.</p>
+<p>The answer to speed is to build your database with referential integrity, drop or disable your constraints and indexes before a bulk load, and re-enable them after the bulk load. It will increase the duration of your bulk load operation over not using constraints at all, but it will be much faster than leaving them enabled and checking them for each insert. So use referential integrity: the pros outweigh the cons.</p>
+<p><b>Reason #4: Mutually exclusive relationships</b></p>
+<p>Too often I've seen databases with a foreign key that relates to one of five tables based on the value of a char(1) field. The space conserving mindset that comes up with this implementation is admirable, but it produces far too many negative side effects.</p>
+<p>What happens when the char(1) field gets out of sync with the foreign key field? What happens when someone deletes the foreign record or changes its primary key? More orphaned data happens.</p>
+<p>The solution is to use five fields that each refer to a single table. You may have more nullable fields that take up more space in the database, but it's worth it in the long run.</p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://bp1.blogger.com/_gez10dNhuPk/Rp6YOlrrHgI/AAAAAAAAAI0/Nxao5WbYlFM/s1600-h/Mutually+Exclusive+Problem.gif"><img id="BLOGGER_PHOTO_ID_5088672005376122370" style="CURSOR: hand" alt="" src="http://bp1.blogger.com/_gez10dNhuPk/Rp6YOlrrHgI/AAAAAAAAAI0/Nxao5WbYlFM/s400/Mutually+Exclusive+Problem.gif" border="0" /></a></p>
+<p><b>Conclusion</b></p>
+<p>Well, hopefully I've convinced you to avoid the urge to be a lazy data modeler, design for the future, use a data modeling tool, and drop constraints during bulk load operations. In short, always use referential integrity. But if not, hopefully you'll at least understand when people curse your name several years from now. :)</p> 

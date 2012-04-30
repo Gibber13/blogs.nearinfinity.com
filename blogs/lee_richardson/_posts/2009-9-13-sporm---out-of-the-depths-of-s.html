@@ -1,0 +1,145 @@
+--- 
+permalink: /blogs/sporm_-_out_of_the_depths_of_s.html
+layout: blogs
+title: Sporm - Out of the Depths of SharePoint's XML Hell
+date: 2009-09-13 21:10:03 -04:00
+tags: .NET
+---
+<p>In my last post I described how a new open source tool called <a href="http://sporm.codeplex.com/">sporm</a> significantly simplifies <a href=" http://rapidapplicationdevelopment.blogspot.com/2009/09/unit-testing-sharepoint-past-present.html">unit testing SharePoint</a>.  Making SharePoint unit testable is my absolute favorite feature of sporm because SharePoint is notoriously hard to unit test.  But sporm provides other benefits as well and its ability to pull us out of the depths of verbose loosely typed XML hell and into LINQ excellence is next on my list of favorite features.  So in this post I'll describe the pre-sporm technique of querying with CAML, how to query data using sporm, and finally how sporm supports SharePoint's unique architecture of allowing multiple content types per list and what that means to you.</p>
+
+<p><b>Caml's Are Ugly</b></p>
+
+<div style='float:right; margin-left:10px;'>
+<script type='text/javascript'>
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2009/09/sporm-out-of-depths-of-sharepoints-xml.html';
+ 
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+ 
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+ 
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+ 
+        document.write(div.innerHTML);
+    </script>
+</div>
+
+<p><i>Warning: if you're new to SharePoint then what you're about to see may shock and upset you.  If, like me, you hate both XML and loose typing then you will agree that CAML is awful, but bear with me I promise sporm will make it better.  Much better.</i></p>
+
+<p>CAML or Collaborative Application Markup Language is how one queries for data in SharePoint.  A simple query might look like this:</p>
+
+<p>        <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">&lt;</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:#A31515;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">Query</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">&gt;<br />        <span style="mso-spacerun:yes">&nbsp; </span>&lt;</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:#A31515;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">Where</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:#A31515;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">And</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:#A31515;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">And</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:#A31515;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">Eq</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:#A31515;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">FieldRef</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes"> </span>        <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:red;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">Name</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">=</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">&#39;<span style="color:blue">First_Name</span>&#39;<span             style="color:blue"> /&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span             style="color:#A31515">Value</span><span style="color:blue"> </span>        <span style="color:red">Type</span><span style="color:blue">=</span>&#39;<span             style="color:blue">Text</span>&#39;<span style="color:blue">&gt;</span>Lee<span             style="color:blue">&lt;/</span><span style="color:#A31515">Value</span><span             style="color:blue">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;/</span><span             style="color:#A31515">Eq</span><span style="color:blue">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span             style="color:#A31515">BeginsWith</span><span style="color:blue">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span             style="color:#A31515">FieldRef</span><span style="color:blue"> </span>        <span style="color:red">Name</span><span style="color:blue">=</span>&#39;<span             style="color:blue">Last_Name</span>&#39;<span style="color:blue"> /&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span             style="color:#A31515">Value</span><span style="color:blue"> </span>        <span style="color:red">Type</span><span style="color:blue">=</span>&#39;<span             style="color:blue">Text</span>&#39;<span style="color:blue">&gt;</span>Rich<span             style="color:blue">&lt;/</span><span style="color:#A31515">Value</span><span             style="color:blue">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;/</span><span             style="color:#A31515">BeginsWith</span><span style="color:blue">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;/</span><span style="color:#A31515">And</span><span style="color:blue">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span style="color:#A31515">Leq</span><span             style="color:blue">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span             style="color:#A31515">FieldRef</span><span style="color:blue"> </span>        <span style="color:red">Name</span><span style="color:blue">=</span>&#39;<span             style="color:blue">Dob</span>&#39;<span style="color:blue"> /&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span             style="color:#A31515">Value</span><span style="color:blue"> </span>        <span style="color:red">Type</span><span style="color:blue">=</span>&#39;<span             style="color:blue">DateTime</span>&#39;<span style="color:blue">&gt;</span>2009-01-01T00:00:00Z<span             style="color:blue">&lt;/</span><span style="color:#A31515">Value</span><span             style="color:blue">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;/</span><span style="color:#A31515">Leq</span><span style="color:blue">&gt;<br />        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;/</span><span style="color:#A31515">And</span><span            style="color:blue">&gt;<br />        <span style="mso-spacerun:yes">&nbsp; </span>&lt;/</span><span style="color:#A31515">Where</span><span             style="color:blue">&gt;<br />        &lt;/</span><span style="color:#A31515">Query</span><span style="color:blue">&gt;<br             style="mso-special-character:line-break" />        <![if !supportLineBreakNewLine]>        <br style="mso-special-character:line-break" />        <![endif]></span></span>    </p>
+
+<p>Simple right?  ;) In case you didn't catch the meaning from the slightly, uh verbose, query this asks for records with a First_Name of "Lee", a Last_Name starting with "Rich" and a "Dob" less than or equal January 1 2009.</p>
+
+<p>There are a couple of things to note about this query:</p>
+
+<ul>
+<li>Field names are loosly typed.  If Dob were ever renamed to DateOfBirth the query would fail at runtime (probably during a demo to a customer, or if you're lucky during integration tests), but certainly not at compile time.</li>
+<li>And is a binary operator.  This forces explicit precedence and removes the need for parenthesis, but at the cost of readability.</li>
+<li>Types must be explicitly defined.  I guess this is necessary since it's XML, but somehow I just don't feel like this should be necessary.</li>
+<li>It's XML.  Ok obviously, but the point is you have to type everything twice.  &lt;BeginsWith&gt; &lt;/BeginsWith&gt;.  Ouch, so verbose, so angley, I so hate XML.</li>
+</ul>
+
+<p>Now, there are tools that make this better.  U2U's free <a href=" http://www.u2u.be/Res/Tools/CamlQueryBuilder.aspx ">CAML Query Builder</a> tool significantly improves the experience of querying SharePoint data.</p>
+
+<p><a href="http://3.bp.blogspot.com/_gez10dNhuPk/Sq2PcGTvHUI/AAAAAAAABqM/YB6rGTZrIpA/s1600-h/CamlQueryBuilder.jpg"><img style="WIDTH: 400px; HEIGHT: 268px; CURSOR: hand" id="BLOGGER_PHOTO_ID_5381114842670112066" border="0" alt="" src="http://3.bp.blogspot.com/_gez10dNhuPk/Sq2PcGTvHUI/AAAAAAAABqM/YB6rGTZrIpA/s400/CamlQueryBuilder.jpg" /></a></p>
+
+<p>But it makes you wonder if something is wrong when you need a tool to retrieve data from your data store.  Do you typically use tools to assist when you're writing SQL?  Probably not.  But like I said hang in there, sporm make things better.</p>
+
+<p><b>Unlinq my Caml</b></p>
+
+<p>If you were to write the same query as above using sporm it would look like this:</p>
+
+<p>        <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:#2B91AF;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">IQueryable</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">&lt;<span style="color:#2B91AF">Employee</span>&gt; employees =         GetEmployees().Where(e =&gt;<br />        <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>e.FirstName ==        <span style="color:#A31515">&quot;Lee&quot;<br />        </span><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&amp;&amp; e.LastName.StartsWith(<span             style="color:#A31515">&quot;Rich&quot;</span>)<br />        <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&amp;&amp; e.Dob &lt;= <span style="color:blue">        new</span> <span style="color:#2B91AF">DateTime</span>(2009, 1, 1));<br             style="mso-special-character:line-break" />        <![if !supportLineBreakNewLine]>        <br style="mso-special-character:line-break" />        <![endif]></span>    </p>
+
+<p>Just a little easier to read than CAML, right?  A couple of things to note:</p>
+
+<ul>
+<li>Fields are strongly typed.  If you were to rename FirstName the compiler would catch every single instance at design time.</li>
+<li>Operators are standard C# operators.  &&, .StartsWith(), and <= are all familiar and concise and use a standard, known precedence.</li>
+<li>Types are standard C# types.  You never have to explicitly say that "Rich" is a string, it just is.</li>
+<li>Your query is actual C# code.  The lambda (closure) and the fact that it uses <a href="http://rapidapplicationdevelopment.blogspot.com/2008/03/how-systemlinqwhere-really-works.html">deferred execution</a> might throw off a junior developer in some scenarios, but the query is readable and works exactly the same as if you were querying in memory objects or querying a database with LINQ to SQL or the Entity Framework.</li>
+</ul>
+
+<p>Nice!  What's beautiful about this is that sporm converts your C# directly into CAML using C# 3.0's <a href="http://rapidapplicationdevelopment.blogspot.com/2008/03/expression-trees-why-linq-to-sql-is.html">expression trees</a> feature.  What sporm can't convert to CAML it executes in memory transparently to you.  Sporm uses log4net and outputs its CAML queries to the console by default, so it is a good idea to watch the output if you're concerned about performance.</p>
+
+<p>Now the following isn't relevant to the comparison with CAML, but I would be negligent if I didn't explain how the GetEmployees() function works.</p>
+
+<p><b>SP != DB B/C of Content Types</b></p>
+
+<p>First of all GetEmployees looks like this:</p>
+
+<p>        <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">private</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">        <span style="color:#2B91AF">IQueryable</span>&lt;<span style="color:#2B91AF">Employee</span>&gt;         GetEmployees() {<br />        <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="color:blue">return</span>        <span style="color:#2B91AF">MySPDataContext<br />        </span><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>.GetCurrent()<br />        <span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>.GetList&lt;<span             style="color:#2B91AF">Employees</span>&gt;()<br />        <span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>.OfType&lt;<span             style="color:#2B91AF">Employee</span>&gt;();<br />        }<br style="mso-special-character:line-break" />        <![if !supportLineBreakNewLine]>        <br style="mso-special-character:line-break" />        <![endif]></span>   </p>
+
+<p>How it works is that the static GetCurrent() method retrieves sporm's context object, which knows how to query a SharePoint site, from either the web context or thread local storage; next the GetList() method tells sporm which list you want to query; and the OfType() method tells sporm which content type within the list you want to query.  This last part is important because sporm supports SharePoint's ability to have multiple content types per list, which other LINQ providers like LINQ to SharePoint do not.  But what are content types and why should you care?</p>
+
+<p>SharePoint's List/Content Type architecture seems odd at first, but it allows interesting scenarios not available in a traditional database.  For instance you might have a calendar list that contains multiple types of records (list items) in the same list.  Your calendar list might contain some combination of the following three record types: meetings with unique fields like Organizer (a person); iterations with unique fields like DeployedToProduction (a Boolean); and actions with unique fields like RelatedEmployee (a reference to another list).  This architecture allows SharePoint to view all three types of records in a single view: like a per month calendar view.  The data might look like this:</p>
+
+<table border="1">
+<tr>
+<td><b>Title</b></td>
+<td><b>Start</b></td>
+<td><b>End</b></td>
+<td><b>ContentType</b></td>
+<td><b>Organizer</b></td>
+<td><b>Deployed To Production</b></td>
+<td><b>Related Employee</b></td>
+</tr>
+<tr>
+<td>Iteration16</td>
+<td>1/12/09</td>
+<td>1/19/09</td>
+<td>Iteration</td>
+<td>&nbsp;</td>
+<td>false</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>Stakeholder Demo</td>
+<td>1/19/09 3 PM</td>
+<td>&nbsp;</td>
+<td>Meeting</td>
+<td>Lee Richardson</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>Tag Trunk</td>
+<td>1/19/09</td>
+<td>&nbsp;</td>
+<td>Action</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>Lee Richardson</td>
+</tr>
+</table>
+
+<p>Sporm's unique architecture supports this scenario by allowing you to retrieve iterations like this:</p>
+
+<p>        <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">return</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">        <span style="color:#2B91AF">MySPDataContext<br />        </span><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>.GetCurrent()<br />        <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>.GetList&lt;<span style="color:#2B91AF">Calendar</span>&gt;()<br />        <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>.OfType&lt;<span style="color:#2B91AF">Iteration</span>&gt;();<br             style="mso-special-character:line-break" />        <![if !supportLineBreakNewLine]>        <br style="mso-special-character:line-break" />        <![endif]></span>    </p>
+
+<p>Or get meetings from the same list like this:</p>
+
+<p>        <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">return</span><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">        <span style="color:#2B91AF">MySPDataContext<br />        </span><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>.GetCurrent()<br />        <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>.GetList&lt;<span style="color:#2B91AF">Calendar</span>&gt;()<br />        <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>.OfType&lt;<span style="color:#2B91AF">Meeting</span>&gt;();<br             style="mso-special-character:line-break" />        <![if !supportLineBreakNewLine]>      <br style="mso-special-character:line-break" />        <![endif]></span>    </p>
+
+<p>While you may only use multiple content types per list occasionally you can feel comfortable knowing that sporm will support you when you need it.  The rest of the time you can arrange your architecture to accommodate your 90% scenario of one content type per list.  I'll discuss the architecture I'm using on my current project in my next post.</p>
+
+<p>For now I hope this has clarified some of the benefits of using sporm, and I hope that you'll consider using it on your next SharePoint project.</p> 

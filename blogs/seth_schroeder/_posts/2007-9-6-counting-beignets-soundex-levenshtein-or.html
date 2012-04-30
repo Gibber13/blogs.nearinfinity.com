@@ -1,0 +1,128 @@
+--- 
+permalink: /blogs/counting_beignets_soundex_levenshtein_or.html
+layout: blogs
+title: "Counting beignets: Soundex, Levenshtein, or case &amp; space bashing?"
+date: 2007-09-06 23:13:08 -04:00
+tags: Ruby
+---
+One of the unpleasant tasks on my to-do list is improve the process of searching by name in a database. A parade of errors are just around the bend:  transposed letters, stray punctuation, and even random flecks of whitespace.
+
+Given these silly tables and sample data:
+<code class="prettyprint">
+create table cafe_du_monde (
+    name varchar2(128),
+    beignets integer
+);
+</code>
+<code class="prettyprint">
+create table jackson_square (
+    name varchar2(128),
+    pictures_taken integer
+);
+</code>
+<code class="prettyprint">
+a.) insert into cafe_du_monde (name, beignets) values ('seth', 3);
+b.) insert into cafe_du_monde (name, beignets) values ('seth ', 6);
+c.) insert into jackson_square (name, pictures_taken) values ('Seth', 127);
+d.) insert into jackson_square (name, pictures_taken) values ('seht', 10);
+</code>
+
+Ideally the results would be me eating 9 beignets and taking 137 pictures (let's not mention the cafe au laits :)
+
+<h3>Method A: compare as-is</h3>
+<pre class="prettyprint">select name, sum(beignets), sum(pictures_taken)
+from cafe_du_monde as cdm, jackson_square as js
+where cdm.name = js.name
+group by name;
+</pre>
+
+Bzzzt. Not good. Look at all those rows!
+
+Selected: a, b, c, d
+
+<br />
+<h3>Method B: normalize case</h3>
+<pre class="prettyprint">select name, sum(beignets), sum(pictures_taken)
+from cafe_du_monde as cdm, jackson_square as js
+where lower(cdm.name) = lower(js.name)
+group by name;
+</pre>
+
+Selected: a+c, b, d
+<h3>Method C: trim whitespace</h3>
+<pre class="prettyprint">select name, sum(beignets), sum(pictures_taken)
+from cafe_du_monde as cdm, jackson_square as js
+where trim(both from cdm.name) = trim(both from js.name)
+group by name;
+</pre>
+
+Selected: a+b, c, d
+<h3>Methods B &amp; C</h3>
+(obvious query omitted)
+
+Selected: a+b+c, d
+<h3>Method D: <a href="http://en.wikipedia.org/wiki/Soundex">soundex</a></h3>
+<pre class="prettyprint">select name, sum(beignets), sum(pictures_taken)
+from cafe_du_monde as cdm, jackson_square as js
+where soundex(cdm.name) = soundex(js.name)
+group by name;
+</pre>
+Soundex value: S300
+
+Selected: a+b+c+d
+
+Soundex works perfectly for this example. When I tried it with more realistic data I wasn't quite as happy.
+
+<a href="http://www.nearinfinity.com/blogs/page/mwizeman">Matt</a> introduced me to the Levenshtein algorithm for counting the number of edits needed to convert one string into another. (ex: cat -> mat = 1, cat -> dot = 2, cat -> dog = 3, cat -> gold = 4)
+<br />
+<h3>Method E: Comparing edit distance</h3>
+<pre class="prettyprint">levenshtein('seth', 'seth') => 0
+levenshtein('seth', 'Seth') => 1
+levenshtein('seth', 'seth ') => 1
+levenshtein('seth', 'seht') => 2
+damerau-levenshtein('seth', 'seht') => 1
+</pre>
+
+The <a href="http://en.wikipedia.org/wiki/Levenshtein_distance">Levenshtein distance</a> algorithm treats the 'ht' in 'seht' as two substitions. The <a href="http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance">Damerau-Levenshtein</a> algorithm treats it as one swap. Otherwise it's the same, so Damerau-Levenshtein seems like the better method.
+
+Unhappily the initial edit distance results seem weaker than the case normalizing and whitespace trimming. Since the algorithms stumble over case and whitespace, so why not take care of those first?
+<h3>Method F: normalizing case, trimming whitespace, &amp; comparing edit distance</h3>
+<pre class="prettyprint">damerau-levenshtein(lower(trim('seth', 'seth'))) => 0
+damerau-levenshtein(lower(trim('seth', 'Seth'))) => 0
+damerau-levenshtein(lower(trim('seth', 'seth '))) => 0
+damerau-levenshtein(lower(trim('seth', 'seht'))) => 1
+</pre>
+
+I think this is better. An edit distance of 25% seems a little high, but the string is so short in this example. At this point I've got enough to start experimenting.
+
+The Levenshtein implementation on Wikipedia has to be seen to be believed. Here's a quick and dirty Ruby version. (ObFun: Since Ruby supports jagged arrays I decided to emulate two dimensional arrays with a set of [row,col] keys. A little strange looking but kinda neat).
+<code class="prettyprint">
+def levenshtein(s1, s2)
+  d = {}
+  (0..s1.size).each do |row|
+    d[[row, 0]] = row
+  end
+  (0..s2.size).each do |col|
+    d[[0, col]] = col
+    end
+  (1..s1.size).each do |i|
+    (1..s2.size).each do |j|
+      cost = 0
+      if (s1[i-1] != s2[j-1])
+        cost = 1
+      end
+      d[[i, j]] = [d[[i - 1, j]] + 1,
+                   d[[i, j - 1]] + 1,
+                   d[[i - 1, j - 1]] + cost
+                  ].min
+      next unless @@damerau
+      if (i > 1 and j > 1 and s1[i-1] == s2[j-2] and s1[i-2] == s2[j-1])
+        d[[i, j]] = [d[[i,j]],
+                     d[[i-2, j-2]] + cost
+                    ].min
+      end
+    end
+  end
+  return d[[s1.size, s2.size]]
+end
+</code> 

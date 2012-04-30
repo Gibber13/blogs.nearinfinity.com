@@ -1,0 +1,71 @@
+--- 
+permalink: /blogs/c_3_0_the_sweet.html
+layout: blogs
+title: "C# 3.0: The Sweet and Sour of Syntactic Sugar"
+date: 2007-04-25 13:51:53 -04:00
+tags: .NET
+---
+<p>I've just started reading the blog of <a href="http://weblogs.asp.net/scottgu/">Scott Guthrie</a> who is a general manager at Microsoft and is currently writing about the new C# 3.0 (code named Orcas). The post I felt strongly about describes <a href="http://weblogs.asp.net/scottgu/archive/2007/03/08/new-c-orcas-language-features-automatic-properties-object-initializers-and-collection-initializers.aspx">three new language features</a> including: </p>
+<p>
+<ul>
+<li>Automatic Properties</li>
+<li>Object Initializers, and </li>
+<li>Collection Initializers</li></ul>
+<p></p>
+<style type="text/css"><!--.LeeCodeSimple {overflow: auto; white-space: nowrap; background: #ffffcc; color: #000000; border: 1px solid #999999; width: 100%; padding-bottom: 16px; }--></style>
+
+<div style="FLOAT: right; MARGIN-LEFT: 10px">
+<script type="text/javascript">
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2007/04/c-30-sweet-and-sour-of-syntactic-sugar.html';
+
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        
+        /* Reddit */
+        var redditIframe = document.createElement('iframe');
+        redditIframe.setAttribute('src', 'http://reddit.com/button?t=2&url=' + currentPageUrl);
+        redditIframe.setAttribute('height', '80');
+        redditIframe.setAttribute('width', '52');
+        redditIframe.setAttribute('frameborder', '0');
+        redditIframe.setAttribute('scrolling', 'no');
+
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+
+        var div = document.createElement('div');
+        div.appendChild(diggIframe);
+        div.appendChild(redditIframe);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(document.createElement('br'));
+        div.appendChild(dotnetkicksLink);
+
+        document.write(div.innerHTML);
+    </script>
+</div>
+<p>All three features are purely syntactic sugar: they add nothing of real value to the language (unlike generics in C# 2.0 for example). One features is wonderful, while two are terrible.</p>
+<p><b>The Sweetest Syntactic Sugar Ever</b></p>
+<p>Automatic properties are fabulous. I've always grumbled about the number of lines required to create simple properties. Anything that can turn: </p>
+<div class="LeeCodeSimple"><font color="blue">public class</font> Person {<br />&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">private string</font> _firstName;<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">public string</font> FirstName {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">get</font> { <font color="blue">return</font> _firstName; }<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">set</font> { _firstName = <font color="blue">value</font>; }<br />&nbsp;&nbsp;&nbsp;&nbsp;}<br />}</div>
+<p>Into:</p>
+<div class="LeeCodeSimple"><font color="blue">public class</font> Person {<br />&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">public string</font> FirstName { <font color="blue">get</font>; <font color="blue">set</font>; }<br />}<br /></div>
+<p>Gets my vote.</p>
+<p><b>Sickeningly Sweet</b></p>
+<p>Perhaps I'm a purest, but with more language conveniences comes: a steeper learning curve because of a larger language, and decreased readability because of the numerous ways of doing the same thing. Picture reading this in someone else's code:</p>
+<div class="LeeCodeSimple">Person p = <font color="blue">new</font> Person(<font color="gray">"Lee"</font>, <font color="gray">"Richardson"</font>) { <br />&nbsp;&nbsp;&nbsp;&nbsp;Phone = <font color="gray">"111-111-1111"</font>,<br />&nbsp;&nbsp;&nbsp;&nbsp;Age = <font color="maroon">29</font>,<br />&nbsp;&nbsp;&nbsp;&nbsp;Company = <font color="blue">new</font> Company(<font color="gray">"Near Infinity"</font>) {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Phone = <font color="gray">"222-222-2222"</font><br />&nbsp;&nbsp;&nbsp;&nbsp;}<br />} </div>
+<p>Who would write this crap? <i>Everyone else</i>, now that Microsoft lets them. I vote for the verbose, the readable, the single approach:</p>
+<div class="LeeCodeSimple">Company company = <font color="blue">new</font> Company(<font color="gray">"Near Infinity"</font>);<br />company.Phone = <font color="gray">"222-222-2222"</font>;<br /><br />Person person = <font color="blue">new</font> Person(<font color="gray">"Lee"</font>, <font color="gray">"Richardson"</font>);<br />person.Phone = <font color="gray">"111-111-1111"</font>;<br />person.Age = <font color="maroon">29</font>;<br />person.Company = company;<br /></div>
+<p>Hmmm, and by the way did you count the number of lines?</p>
+<p><b>Conclusion</b></p>
+<p>So do the differences between my thoughts on automatic properties contradict with my thoughts on object initializers and collection initializers? They don't. Basically a little sugar is good, but too much ruins the dish.</p> 

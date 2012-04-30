@@ -1,0 +1,76 @@
+--- 
+permalink: /blogs/changing_the_toolbar_on_a_shar.html
+layout: blogs
+title: Changing the toolbar on a SharePoint ListViewWebPart
+date: 2009-07-12 19:58:27 -04:00
+tags: .NET
+---
+<p>I know what you are thinking, another article on how to change the toolbar on a SharePoint ListViewWebPart. Well I have to say, I have tried every method documented on the web and none of them work consistantly for me. I thought I was doing something wrong until I read all the comments and I was but one of many having similar results. Most of the articles go down the path of grabbing the view XML from the ListViewWebPart and modifing the toolbar type attribute which I have found to only exist about 25% of the time. </p>
+<p>My method takes a different approach. I started my journey by looking at the ListViewWebPart code directly in <a href="http://www.red-gate.com/products/reflector/">Reflector</a>, because it obviously needs to know how to do this because that's where the user changes it from the web site. From there I looked at "ListViewWebPart.GetToolParts" method which is the method SharePoint calls to get additional web part setting controls from the web part. In the case of the ListViewWebPart it returned a ListViewToolPart. The ListViewToolPart had a method called "ApplyChanges", this looks promising. Damn, obfuscated. No worry I can decipher IL for the most part. Bingo, there was the call I was looking for "ApplyViewToListWebPart". It took all the parameters I would expect, a reference to the ListViewWebPart and a toolbar type. </p>
+<p>Here is the resulting code to wrap all the reflection nasty bits... </p><pre style="WIDTH: 500px; OVERFLOW: scroll" class="prettyprint">public static class ListViewWebPartHelper {
+  public static void SetToolbarType(
+    this ListViewWebPart lvwp,
+    SPLimitedWebPartManager limitedWebPartManager,
+    ListViewWebPartToolbarType type) {
+#pragma warning disable 618
+    string storageKey = lvwp.StorageKey.ToString("B").ToUpper();
+    string listId = lvwp.ListName;
+    string viewId = lvwp.ViewGuid;
+    uint toolbarType = (uint)type;
+
+    // get the SPWebPartManager from SPLimitedWebPartManager
+    PropertyInfo webPartManagerProp = typeof(SPLimitedWebPartManager).GetProperty(
+      "WebPartManager",
+      BindingFlags.NonPublic | BindingFlags.Instance);
+    SPWebPartManager webPartManager = (SPWebPartManager)webPartManagerProp.GetValue(limitedWebPartManager, null);
+
+    // get the SPWebPartConnection from SPWebPartManager
+    PropertyInfo spWebPartsProp = typeof(SPWebPartManager).GetProperty(
+      "SPWebParts",
+      BindingFlags.NonPublic | BindingFlags.Instance);
+    SPWebPartCollection webParts = (SPWebPartCollection)spWebPartsProp.GetValue(webPartManager, null);
+
+    // Call the ApplyViewToListWebPart method on the SPWebPartConnection
+    // internal void ApplyViewToListWebPart(
+    //    string storageKey,
+    //    string listID,
+    //    string viewID,
+    //    uint toolbarType,
+    //    out uint flags)
+    MethodInfo applyViewToListWebPart = typeof(SPWebPartCollection).GetMethod(
+      "ApplyViewToListWebPart",
+      BindingFlags.NonPublic | BindingFlags.Instance,
+      null,
+      new[]{
+        typeof(string),
+        typeof(string),
+        typeof(string),
+        typeof(uint),
+        typeof(uint).MakeByRefType()
+      },
+      null);
+    object[] parameters = new object[5];
+    parameters[0] = storageKey;
+    parameters[1] = listId;
+    parameters[2] = viewId;
+    parameters[3] = toolbarType;
+    applyViewToListWebPart.Invoke(webParts, parameters);
+#pragma warning restore 618
+  }
+}
+
+public enum ListViewWebPartToolbarType {
+  Full = 0,
+  Summary = 1,
+  NoToolbar = 2
+}
+</pre>
+<p></p>
+<p>And here is how to use the code... </p><pre style="WIDTH: 500px; OVERFLOW: scroll" class="prettyprint">SPFile homePage = _ctx.Site.Files["default.aspx"];
+SPLimitedWebPartManager limitedWebPartManager = homePage.GetLimitedWebPartManager(PersonalizationScope.Shared);
+ListViewWebPart webPart = (ListViewWebPart)limitedWebPartManager.WebParts[0];
+webPart.SetToolbarType(limitedWebPartManager, ListViewWebPartToolbarType.NoToolbar);
+limitedWebPartManager.SaveChanges(webPart);
+</pre>
+<p></p>
+<p>And here is my rant to Microsoft that each and everyone of these articles about this issue must include... Really, Microsoft did you not think that people would want to do this. You have had 2 service packs come out for SharePoint and you couldn't have fixed this yet. Please fix this in SharePoint 2010. </p> 

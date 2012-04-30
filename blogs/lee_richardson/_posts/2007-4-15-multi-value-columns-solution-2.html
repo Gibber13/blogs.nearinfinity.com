@@ -1,0 +1,91 @@
+--- 
+permalink: /blogs/multi_value_columns_solution_2.html
+layout: blogs
+title: "Multi Value Columns Solution #2 - Custom Activities in SPD"
+date: 2007-04-15 12:26:09 -04:00
+tags: .NET
+---
+<p>In the previous post in this series (<a href="http://www.nearinfinity.com/blogs/page/lrichard?entry=multi_value_columns_in_sharepoint">Multi-Value Columns in SharePoint Designer - Solution #1</a>), I described a problem where SharePoint Designer can't send e-mail to multiple recipients if those recipients exist inside of a multi-value column in a SharePoint list. The simple hacky solution I described was to temporarily turn the column into a single value column just for SharePoint Designer. But this approach has problems, and there is a better way: developing custom activities in Visual Studio for use in SharePoint Designer.</p>
+<style type="text/css"><!--.LeeCode {overflow: auto; white-space: nowrap; background: #ffffcc; color: #000000; border: 1px solid #999999; width: 100%; height: 200px; padding-bottom: 16px; }--></style>
+
+<div style="FLOAT: right; MARGIN-LEFT: 10px">
+<script type="text/javascript">
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2007/04/multi-value-columns-solution-2-custom.html';
+
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        
+        /* Reddit */
+        var redditIframe = document.createElement('iframe');
+        redditIframe.setAttribute('src', 'http://reddit.com/button?t=2&amp;url=' + currentPageUrl);
+        redditIframe.setAttribute('height', '80');
+        redditIframe.setAttribute('width', '52');
+        redditIframe.setAttribute('frameborder', '0');
+        redditIframe.setAttribute('scrolling', 'no');
+
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/&amp;url=' + currentPageUrl);
+        dotnetkicksLink.setAttribute('style', 'text-align: center;');
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+
+        /* combine & write */
+        var div = document.createElement('div');
+        div.appendChild(diggIframe);
+        div.appendChild(redditIframe);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(document.createElement('br'));
+        div.appendChild(dotnetkicksLink);
+
+        document.write(div.innerHTML);
+    </script>
+</div>
+<p>In this post I will describe how to develop a custom activity in Visual Studio that will also solve this problem and I will also describe how to install it on a SharePoint server so that SharePoint Designer clients can automatically download and use it. Before I do let me back up and tell you why, from my perspective, this approach is probably not the best way to go.</p>
+<p>SharePoint Designer is a Microsoft Office product that replaces FrontPage, integrates tightly with SharePoint, and allows non-developers (aka "knowledge workers" in the Microsoft lingo) to create simple workflows without writing any code. </p>
+<p>The problem is that <i>simple</i> workflows and multi-value columns are like oil and water: not so compatible. If you're using multi-value columns then your knowledge workers should admit defeat and let developers create the workflows in Visual Studio using the Windows Workflow Foundation (which, incidentally, will be the topic for third article in this series). </p>
+<p>Still, you may have a good reason for continuing to develop workflows in SharePoint Designer, and I've already gone through the pain of writing and installing custom activities, so hopefully this post will make life easier for someone somewhere.</p>
+<p><b>Creating the Custom Activity in Visual Studio</b></p>
+<p>The code to create the custom activity in Visual Studio is the most interesting part of this solution. Make sure to check out the GetEmailAddressesFromUsernames() method if you have time to review the code. Here is the procedure assuming this is your first time working with Windows Workflow Foundation in Visual Studio.</p>
+<p>1. The first step is to download and install <a href="http://www.microsoft.com/downloads/details.aspx?FamilyID=5d61409e-1fa3-48cf-8023-e8f38e709ba6&amp;DisplayLang=en" target="_blank">Visual Studio 2005 extensions for .NET Framework 3.0 (Windows Workflow Foundation)</a> which will add workflow options to Visual Studio.</p>
+<p>2. If you aren't running on Windows Server 2003, then you probably need to install the Windows Workflow Foundation DLL's. You'll know there's a problem if, after creating the project in Visual Studio, your SharePoint references are invalid. I picked these DLL's up from my Windows Server 2003 machine (actually a VMWare virtual machine) from the following location:</p>
+<p>C:\Program Files\Common Files\Microsoft Shared\web server extensions\12\ISAPI</p>
+<p>You should install these to the Global Assembly Cache (GAC) to make Visual Studio happier, although you may still need to reference them for your project. The easy way to install to the GAC is just to copy them to somewhere on your local (non-W2K3) machine and then drag them all over to C:\Windows\assembly.</p>
+<p>3. After completing step #1 when you open Visual Studio you should get a new tree node under "Visual C#" (or Visual Basic) called "Workflow." Select that, then "Workflow Activity Library" then call the project something like "MultiRecipientMail".</p>
+<p><a href="http://bp0.blogger.com/_gez10dNhuPk/RiACmaZZXyI/AAAAAAAAAGE/3G3Eehuhi9c/s1600-h/01+-+New+Project.jpg"><img id="BLOGGER_PHOTO_ID_5053041640853823266" style="CURSOR: hand" alt="" src="http://bp0.blogger.com/_gez10dNhuPk/RiACmaZZXyI/AAAAAAAAAGE/3G3Eehuhi9c/s400/01+-+New+Project.jpg" border="0" /></a></p>
+<p>4. Visual Studio should automatically create a blank activity called Activity1.cs. If you want a more reasonable name then delete it and "Add" a "New Item" of type "Activity" called something like "MultiRecipientMailActivity." Don't make the same painful mistake as me: name your activity something other than the name of the project or anything in the namespace.</p>
+<p><a href="http://bp1.blogger.com/_gez10dNhuPk/RiACmqZZXzI/AAAAAAAAAGM/XrVlspgOstA/s1600-h/02+-+New+Activity.jpg"><img id="Img1" style="CURSOR: hand" alt="" src="http://bp1.blogger.com/_gez10dNhuPk/RiACmqZZXzI/AAAAAAAAAGM/XrVlspgOstA/s400/02+-+New+Activity.jpg" border="0" /></a></p>
+<p>5. At this point you could drag and drop a "Replicator" activity on the design surface and put a "Send Mail" activity inside, but I'll cover that in my next post. For now I think code is the clearer way to go. Hit F7 or right click and "View Code" and paste the following which I'll try to comment in-line rather than in this article.</p>
+<p>(for the code see the original article <a href="http://rapidapplicationdevelopment.blogspot.com/2007/04/multi-value-columns-solution-2-custom.html">Multi Value Columns Solution #2 - Custom Activities in SPD</a> on BlogSpot)</p>
+<p>You'll need to substitute your own public key token from step 9 in the "Assembly=" statement.</p>
+<p>12. Next you need to tell SharePoint designer clients to trust this new dll. To do so open the Web.Config in the virtual directory for your site (e.g. C:\Inetpub\wwwroot\wss\VirtualDirectories\34089\ web.config). Find the section called&nbsp;"" and add the following new line (substitute your own public token):</p>
+<p><authorizedtype authorized="True" typename="*" namespace="MultiRecipientMail" assembly="MultiRecipientMail, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d73739679587735e"></p>
+<p>(again substitute your own public key token)</p>
+<p>13. Restart IIS by opening a command prompt and typing "iisreset." SharePoint will pick up the new MultiRecipientMail.ACTIONS file, find the dll in the GAC, and provide the new information to any SharePoint Designer clients that access the site.</p>
+<p>14. Open SharePoint Designer and either navigate to the "Workflows\Multi Recipient Email.xoml" project from <a href="http://rapidapplicationdevelopment.blogspot.com/2007/04/multi-value-columns-in-sharepoint.html" target="_blank">my previous article</a> or create a new workflow project based on a list with a multi-value column. You should get a message like the following while SharePoint Designer downloads the new dll:</p>
+<p><a href="http://bp2.blogger.com/_gez10dNhuPk/RiACm6ZZX2I/AAAAAAAAAGk/J54ZfzfWNEs/s1600-h/05+-+Download+Necessary+Info.jpg"><img id="Img4" style="CURSOR: hand" alt="" src="http://bp2.blogger.com/_gez10dNhuPk/RiACm6ZZX2I/AAAAAAAAAGk/J54ZfzfWNEs/s400/05+-+Download+Necessary+Info.jpg" border="0" /></a></p>
+<p>15. If everything worked correctly you should now be able to 1. click Actions; 2. More Actions; 3. Select the "Custom Actions" category from the dropdown (this category came from the .ACTIONS file in Step 11); and 4. Select the "Multi Recipient E-mail" action. If it doesn't show up in the Workflow Designer page after clicking "add", then you probably referenced it incorrectly in the Web.Config.</p>
+<p><a href="http://bp2.blogger.com/_gez10dNhuPk/RiADG6ZZX3I/AAAAAAAAAGs/nciVJ2e82ec/s1600-h/06+-+Add+Custom+Action.jpg"><img id="Img5" style="CURSOR: hand" alt="" src="http://bp2.blogger.com/_gez10dNhuPk/RiADG6ZZX3I/AAAAAAAAAGs/nciVJ2e82ec/s400/06+-+Add+Custom+Action.jpg" border="0" /></a></p>
+<p>16. Now you should be able to 1. click the Fx button next to "To;" 2. Select your multi value column (e.g. Peers To Review from my previous article); 3. Hit Ok; and 4. Fill in the remaining fields with values.</p>
+<p><a href="http://bp3.blogger.com/_gez10dNhuPk/RiADHKZZX4I/AAAAAAAAAG0/Ppbwh5_FOVA/s1600-h/07+-+Map+Multi+Value+Column.jpg"><img id="Img6" style="CURSOR: hand" alt="" src="http://bp3.blogger.com/_gez10dNhuPk/RiADHKZZX4I/AAAAAAAAAG0/Ppbwh5_FOVA/s400/07+-+Map+Multi+Value+Column.jpg" border="0" /></a></p>
+<p>17. Now if you head back to Sharepoint, select the dropdown of a list item in the list associated with your workflow, click "Workflows", select the workflow you created in SharePoint Designer, and click "Start" you should receive an e-mail at each address in your multi-value column. </p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://bp1.blogger.com/_gez10dNhuPk/Rhpl4PjlR7I/AAAAAAAAAFk/xzgr_rETjWs/s1600-h/06+-+Start+Workflow.jpg"><img id="Img7" style="CURSOR: pointer" alt="" src="http://bp1.blogger.com/_gez10dNhuPk/Rhpl4PjlR7I/AAAAAAAAAFk/xzgr_rETjWs/s400/06+-+Start+Workflow.jpg" border="0" /></a></p>
+<p>Well, at least it worked for me. :) I did kitchen test this article, but please leave comments if it doesn't work for you.</p>
+<p><b>Redeploying</b></p>
+<p>If you want to make any changes to the code the steps to redeploy are:</p>
+<p>1. Compile (you don't need to sign again, that's one time only)</p>
+<p>2. Copy the dll to your W2K3 server</p>
+<p>3. Re-install the dll to the GAC. You can just re-copy it over to c:\windows\assembly if you like.</p>
+<p>4. Restart iis with an "iisreset" from the command line (no need to change the .ACTIONS or Web.Config files)</p>
+<p>5. Finally, if you need to make changes to your workflow, you may need to restart SharePoint Designer to download the new dll (I usually have to).</p>
+<p><b>You're Done! Easy huh?</b></p>
+<p>So you should now have a reusable component that non-developers can use in SharePoint Designer to send e-mail to multiple recipients as determined by a multi-value column in a SharePoint list. Of course if you decide that developing the workflow in Visual Studio is better, then the third article in this series may be for you.</p> 

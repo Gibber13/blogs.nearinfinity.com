@@ -1,0 +1,74 @@
+--- 
+permalink: /blogs/ienumerablecount_is_a_code_sme.html
+layout: blogs
+title: IEnumerable.Count() is a Code Smell
+date: 2009-07-23 17:31:20 -04:00
+tags: .NET
+---
+<p>Way too often I come across code like this:</p>
+
+ <p class="MsoNormal">  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:#2B91AF;mso-no-proof:yes">IEnumerable</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">&lt;<span    style="color:#2B91AF">Product</span>&gt; products = GetProducts();<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">if</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">   (products.Count() == 0) {<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>SomePlaceHolder.Visible =  <span style="color:blue">false</span>;<o:p><br />  </o:p>  } <span style="color:blue">else</span> {<o:p><br />  </o:p>  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>SomePlaceHolder.Visible =  <span style="color:blue">true</span>;<o:p><br />  </o:p>  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>SomeRepeater.DataSource = products;<o:p><br />  </o:p>  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>SomeRepeater.DataBind();<o:p><br />  }<br />  </o:p>  </span> </p>
+
+<p>What's wrong with this is that Count() is a LINQ extension method that literally iterates through every item in an enumerable.  In other words it won't short circuit after it finds more than zero items -- it will continue iterating through every single item.  And while that may be a fast operation in dev, it may be a really slow operation in production.</p>
+
+<div style='float:right; margin-left:10px;'>
+<script type='text/javascript'>
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2009/07/ienumerablecount-is-code-smell.html';
+ 
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+ 
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+ 
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+ 
+        document.write(div.innerHTML);
+    </script>
+</div>
+
+<p>But it gets worse.  Because of LINQ's <a href=" http://rapidapplicationdevelopment.blogspot.com/2008/03/how-systemlinqwhere-really-works.html">deferred execution</a> the results of .Count() are not cached.  So when there is at least one product you are guaranteed to enumerate every single product twice: once for .Count() and once for .DataSource = products. </p>
+
+<p><b>Do Any() Solutions Exist?</b></p>
+
+<p>One possibility is to instead use IEnumerable.Any().  So you could rewrite the above code like this:</p>
+
+ <p class="MsoNormal">  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:#2B91AF;mso-no-proof:yes">IEnumerable</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">&lt;Product&gt;   products = GetProducts();<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">bool</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">   anyProducts = products.Any();<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">SomePlaceHolder.Visible =   anyProducts;<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">if</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">   (anyProducts) {<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>SomeRepeater.DataSource = products;<o:p><br />  </o:p>  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>SomeRepeater.DataBind;<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;line-height:115%;font-family:&quot;Courier New&quot;;mso-no-proof:yes">}</span></p>
+
+<p>The results will be better regardless of if your data source is in memory or a database, but for illustration purposes LINQ to SQL outputs the following SQL if you run the code smell version when there is at least one product in the database:</p>
+
+<p class="MsoNormal">  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">SELECT</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">  <span style="color:fuchsia">COUNT</span><span style="color:gray">(*)</span>  <span style="color:blue">AS</span> [value]<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">FROM</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">   [dbo]<span style="color:gray">.</span>[Product] <span style="color:blue">AS</span>   [t0]<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">SELECT</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">   [t0]<span style="color:gray">.</span>[ProductId]<span style="color:gray">,</span>   [t0]<span style="color:gray">.</span>[ProductName]<span style="color:gray">,<o:p>   ...<br />  </o:p>  </span></span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">FROM</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">   [dbo]<span style="color:gray">.</span>[Product] <span style="color:blue">AS</span>   [t0]</span></p>
+
+<p>And it outputs this SQL if you run the better version when there is at least one product:</p>
+
+<p class="MsoNormal">  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">SELECT</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes"> <o:p>  <br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>  <span style="color:gray">(</span><span style="color:blue">CASE</span> <o:p>  <br />  </o:p>  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>  <span style="color:blue">WHEN</span> <span style="color:gray">EXISTS(<br />  </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  </span><span style="color:blue">SELECT</span> <span style="color:gray">NULL</span>  <span style="color:blue">AS</span> [EMPTY]<o:p><br />  </o:p>  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  </span><span style="color:blue">FROM</span> [dbo]<span style="color:gray">.</span>[Product]  <span style="color:blue">AS</span> [t0]<o:p><br />  </o:p>  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  </span><span style="color:gray">)</span> <span style="color:blue">THEN</span> 1<o:p><br />  </o:p>  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>  <span style="color:blue">ELSE</span> 0<o:p><br />  </o:p>  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp; </span>  <span style="color:blue">END</span><span style="color:gray">)</span>  <span style="color:blue">AS</span> [value]<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">SELECT</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">   [t0]<span style="color:gray">.</span>[ProductId]<span style="color:gray">,</span>   [t0]<span style="color:gray">.</span>[ProductName]<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;line-height:115%;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">FROM</span><span style="font-size:10.0pt;line-height:115%;font-family:&quot;Courier New&quot;;mso-no-proof:yes"> [dbo]<span    style="color:gray">.</span>[Product] <span style="color:blue">AS</span>   [t0]<o:p></o:p></span></p>
+
+<p>Looks a little uglier, but if you run the execution plan you've converted two table scans into an index scan and a table scan (well, depending on your schema of course).  Regardless, much better execution-wise.</p>
+
+<p><b>Undeferring deferred execution</b></p>
+
+<p>Now what if your data source is a database and you really want to optimize the heck out of this and only perform one SQL statement?  You could disable deferred execution by doing this:</p>
+
+<p class="MsoNormal">  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:#2B91AF;mso-no-proof:yes">IList</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">&lt;Product&gt;   products = GetProducts()<b>.ToList();</b><o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">bool</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">   anyProducts = products.Any();<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">SomePlaceHolder.Visible =   anyProducts;<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">if</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">   (anyProducts) {<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>SomeRepeater.DataSource = products;<o:p><br />  </o:p>  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>SomeRepeater.DataBind;<o:p><br />  </o:p>  }<o:p></o:p></span></p>
+
+<p>The .ToList() function forces enumeration to happen immediately and cache the results in a list.  This achieves the result of converting two queries into one, but be warned it also destroys one of the nicest benefits of LINQ's deferred execution: the ability to append .Sort() or .Skip().Take() (paging) statements at the very end and have them execute in your original query, in SQL, in the database, where they belong.</p>
+
+<p><b>Summary</b></p>
+
+<p>IEnumerable.Count() seems like a pleasant and friendly convenience function; it feels so similar to the innocuous List.Count -- but don't be fooled.  It's a mistake.  One you (or the person who maintains the system when you leave) may soon regret.</p> 

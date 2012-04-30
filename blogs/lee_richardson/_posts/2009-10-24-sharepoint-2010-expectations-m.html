@@ -1,0 +1,78 @@
+--- 
+permalink: /blogs/sharepoint_2010_expectations_m.html
+layout: blogs
+title: SharePoint 2010 Expectations Meet Reality
+date: 2009-10-24 01:26:55 -04:00
+tags: .NET
+---
+<p>The current version of SharePoint and I have a love hate relationship.  Since I want to be able to look forward to a more joyful and fulfilling relationship with the tool/platform, I made a list of my biggest frustrations before I left for the SharePoint 2010 conference (<a href="http://www.bing.com/twitter/search?q=%23spc09&form=QB ">#spc09</a>).  My objective was to return with most of the items checked off as resolved and to have a bunch of new functionality that I hadn't realized I needed.  SharePoint 2010 easily fulfils the second promise with stuff like Business Data Services (Awesome!) and Visio Data Services (Amazing!).  But I don't want to try to recap the whole conference so here's just how it compares to my initial list:</p>
+
+<div style='float:right; margin-left:10px;'>
+<script type='text/javascript'>
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2009/10/sharepoint-2010-expectations-meet.html';
+ 
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+ 
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+ 
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+ 
+        document.write(div.innerHTML);
+    </script>
+</div>
+
+<p><b>Testability</b></p>
+<p>SharePoint is <a href="http://rapidapplicationdevelopment.blogspot.com/2009/08/sharepoint-wild-west-of-software.html">notoriously hard to unit test</a>.  The good news is Microsoft provided a whole session devoted to software development best practices that included a good chunk on unit testing.  It was wonderful to see!</p>
+<p>The bad news: SharePoint 2010 will not have public constructors and classes will still be sealed (final).  The good news to the bad news: After discussing this issue with Chris Keyser I discovered that Peli de Halleux of Microsoft Research has a free tool called <a href="http://research.microsoft.com/en-us/projects/pex/default.aspx">Pex</a> that solves the whole problem.  It allows what it calls detours, which allow you to mock non-virtual methods.  This stuff is amazing and I'll blog more about it later.</p>
+<p>Summary: Testability is better even for existing SharePoint installs -- so between <a href=" http://sporm.codeplex.com/">Sporm</a> and Pex this is a non-issue -- I'm happy.</p>
+<p><b>No Referential Integrity</b></p>
+<p>It kills me that if you create an employee list item that references a company list item and you delete the company list item then nothing happens.  No cascading delete.  No error message.  Just an orphan record.  SharePoint 2010 now supports both true referential integrity through errors and cascading deletes!</p>
+<p>Summary: Awesome!</p>
+<p><b>Validation is Terrible</b></p>
+<p>Ever tried to validate by pattern in SharePoint (e.g. social security number)?  How about range validate (e.g. date of birth can't be after today)?  Or maybe validate one field against another?  The answer is you can't.  Not easily or consistently.  If you handle validation in an event receiver then the user doesn't get the error until after a postback on a separate page.  And custom field controls are a lot of work and they don't work in datasheet view.</p>
+<p>SharePoint 2010 mostly solves these validation issues by allowing field level and list level validation.  The error messages even show in datasheet view.  The bad news is that pattern matching is not currently supported (e.g. you can't validate social security number).</p>
+<p>Summary: Good stuff, need to see the final version to be extremely happy.</p>
+<p><b>Poor Documentation</b></p>
+<p>Ever noticed that blogs give you better details on SharePoint APIs than MSDN does?  I don't even bother looking on MSDN for SharePoint content anymore.  Since the hands on labs didn't contain any documentation I'll have to refer to what Steve Ballmer said during the Q&A session, which was that better documentation will be a priority.</p>
+<p>Summary: high hopes, but TBD.</p>
+<p><b>Views Don't Allow Precedence</b></p>
+<p>If you've ever needed a view with A and (B or C) and ended up with (A and B) or C, you know where I'm coming from.  As a developer you can implement precedence in CAML, but as an end user you're stuck.  Sadly this issue is still not fixed in SharePoint 2010.</p>
+<p>Summary: Fail.</p>
+<p><b>Re-Deployment is Hard</b></p>
+<p>Currently redeploying lists is hard; redeploying web parts without overwriting user settings is hard; and redeploying workflows is very hard.</p>
+<p>Without documentation and intermittent Internet <a href="http://www.nearinfinity.com/blogs/joe_ferner/">Joe Ferner</a> and I had a hard time manually confirming that this is better.  We also missed a key session on Thursday that talked about it.  There were some tweets that looked promising, but I'll have to wait until Thursday's presentations are posted to be able to comment for sure.</p>
+<p>Summary: Good I think, but still TBD.</p>
+<p><b>Massive Duplication in CAML Instantiated Lists</b></p>
+<p>Using CAML to instantiate a list is currently awful in SharePoint.  It's like 5 pages of CDATA and HTML and XML with massive duplication.  Sadly SharePoint 2010 doesn't solve the root problem: list instantiation looks exactly the same.  The good news is that along with just about every other aspect of SharePoint 2010 development, Visual Studio makes this task mind numbingly easy to do.  If you can just try not to look in that file that was auto-generated for you, then you should be fine.</p>
+<p>Summary: Better.</p>
+<p><b>Poor Usability</b></p>
+<p>Once you get used to the current version of SharePoint the user interface is extremely consistent and many users really like it.  But if you were to compare it to any modern Web 2.0 site it's a complete failure.  SharePoint 2010 does an excellent job of implementing selective refresh/AJAX/Web 2.0.  But to me it feels more complicated.  Maybe this is because it introduces the ribbon, which I have never liked.  Maybe it just is more complicated.  In any event I'm not the best judge of usability, so I'll have to wait and see what others say.</p>
+<p>Summary: Definitely better, but jury's still out.</p>
+<p><b>Can't Reference a List <i>AND</i> Content Type</b></p>
+<p>Suppose you have a Calendar list.  The list supports two content types: Events, and Iterations (sprints).  It's a nice architecture because you want to view iterations and events in the same calendar views.  Now if you have a User Story list, wouldn't it be nice to have a lookup field that points only to Iterations?  Sadly you couldn't do this before and you won't be able to for the foreseeable future.</p>
+<p>Summary: Fail.</p>
+<p><b>CAML for Queries</b></p>
+<p>Technically this wasn't on my list because I use <a href="http://sporm.codeplex.com">Sporm</a>, but on behalf of my non-spormified software development brethren let me say that writing <a href="http://rapidapplicationdevelopment.blogspot.com/2009/09/sporm-out-of-depths-of-sharepoints-xml.html">queries in CAML is awful</a>.</p>
+<p>SharePoint 2010 makes enormous strides in this area.  I won't go into great detail, but you can now use LINQ on the server side <i>and on the client side</i>!</p>
+<p>Summary: Awesome!</p>
+<p><b>Summary</b></p>
+<p>Lots of TBD, lots of awesomeness, still some fail.  Worth upgrading?  Absolutely.  Will it still be a love hate relationship?  Probably, but at the moment it's looking pretty darn good.</p> 
+A list of ten current SharePoint failures (such as bad testability, lack of referential integrity, poor usability, etc), and how SharePoint 2010 resolves or fails to resolve each one.

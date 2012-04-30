@@ -1,0 +1,346 @@
+--- 
+permalink: /blogs/client_side_ajax_applications_1.html
+layout: blogs
+title: Client Side AJAX Applications in SharePoint 2010 - Part 2
+date: 2010-03-21 20:36:54 -04:00
+tags: .NET
+---
+<p>Note: This is one of a multi-part series exploring building client side AJAX applications with ASP.Net AJAX 4 Templating and the WCF Data Services (aka ADO.Net Data Services, aka oData, aka Astoria) in SharePoint 2010.</p>
+
+<div style='float:right; margin-left:10px;'>
+<script type='text/javascript'>
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2010/03/client-side-ajax-applications-in_21.html';
+
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+
+        document.write(div.innerHTML);
+    </script>
+</div>
+
+
+<p>
+<a href="http://www.nearinfinity.com/blogs/lee_richardson/client_side_ajax_applications.html">Part 1 - Exploring WCF Data Services in SharePoint 2010</a><br />
+<a href="http://www.nearinfinity.com/blogs/lee_richardson/client_side_ajax_applications_1.html">Part 2 - Creating a read-only page with ASP.Net AJAX 4.0 Templates</a><br />
+<a href="http://www.nearinfinity.com/blogs/lee_richardson/client_side_ajax_applications_2.html">Part 3 - Writing data back to SharePoint with ASP.Net AJAX 4.0 Templates</a>
+</p>
+
+<p>In <a href="http://rapidapplicationdevelopment.blogspot.com/2010/03/client-side-ajax-applications-in.html">Part 1</a> I described how SharePoint 2010 exposes list data through ListData.svc and WCF Data Services.  So far this is interesting, but the next logical question is how would you actually build a Web 2.0 application with the data?  One answer is with a new technology called ASP.Net AJAX 4.0 Client Side Templating.  I'll give you some background and then provide a walkthrough of how to build a SharePoint application page that reads and writes data to SharePoint through ListData.svc.</p>
+<p><b>What is ASP.Net AJAX 4.0 Client Side Templating?</b></p>
+<p>In Part 1 I talked about some of the problems with the two existing ways of writing Web 2.0 interfaces.  ASP.Net AJAX 4.0 Client Side Templating addresses most of these issues.  Specifically it:</p>
+
+<ul>
+<li>Minimizes plumbing code</li>
+<li>Cleanly separates presentation from data access code</li>
+<li>Simplifies saving data back to the server via Live Data Bindings</li>
+<li>Has no ViewState!</li>
+<li>Uses lightweight JSON rather than HTML</li>
+</ul>
+
+<p>Sounds good?  Ready to see some code?</p>
+<p><b>Show Me The Code</b></p>
+<p>Note: This walkthrough assumes you haven't played with Visual Studio 2010 and SharePoint 2010, so please skip ahead to "No Really, Show Me the AJAX Templating Code" if you've already seen the sweet SharePoint and Visual Studio integration.</p>
+<p>To get started open Visual Studio 2010.  Select New Project and for the template navigate to SharePoint then 2010 select "Empty SharePoint Project" (p.s. see <a href=" http://httpcode.com/blogs/PermaLink,guid,357e4853-9a75-4962-ad68-1e07bcf40bb8.aspx">Visual Web Part</a> in the list?  Make sure you look that up if you haven't heard of it yet).</p>
+
+
+<a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://2.bp.blogspot.com/_gez10dNhuPk/S6akfBI5uSI/AAAAAAAABr8/XZ97uHe4fIY/s1600-h/part2-1-vstemplates.gif"><img style="cursor:pointer; cursor:hand;width: 400px; height: 306px;" src="http://2.bp.blogspot.com/_gez10dNhuPk/S6akfBI5uSI/AAAAAAAABr8/XZ97uHe4fIY/s400/part2-1-vstemplates.gif" border="0" alt=""id="Img2" /></a>
+
+
+<p>If you haven't been keeping up with what's new in SharePoint 2010 you should immediately notice that SharePoint integration is built into Visual Studio 2010 out of the box just based on the listed templates.  But just wait, it gets much better. </p>
+
+<a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://2.bp.blogspot.com/_gez10dNhuPk/S6akfS6krBI/AAAAAAAABsE/0hTDT72N8Gc/s1600-h/part2-2-specifysite.gif"><img style="cursor:pointer; cursor:hand;width: 400px; height: 317px;" src="http://2.bp.blogspot.com/_gez10dNhuPk/S6akfS6krBI/AAAAAAAABsE/0hTDT72N8Gc/s400/part2-2-specifysite.gif" border="0" alt=""id="Img4" /></a>
+
+
+<p>The next screen asks what site you want to use for debugging.  It's asking this because when you hit F5 ("Start Debugging") Visual Studio 2010 packages up your wsp file, deployes it to the URL you enter here, attaches to the w3wp process, and opens a browser into SharePoint, and you're immediately in debug mode!  </p>
+<p>If you aren't deeply impressed then you haven't developed in WSS 3.0.  Now we aren't writing any server side code in this tutorial, but it's still extremely impressive how much work Microsoft has put into making SharePoint a first class citizen.</p>
+<p>Once you have your site select Project -> Add New Item and select Application Page.</p>
+
+
+<a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://4.bp.blogspot.com/_gez10dNhuPk/S6akfkNRsFI/AAAAAAAABsM/5kPkOSkDPRM/s1600-h/part2-3-addnewitem.gif"><img style="cursor:pointer; cursor:hand;width: 400px; height: 323px;" src="http://4.bp.blogspot.com/_gez10dNhuPk/S6akfkNRsFI/AAAAAAAABsM/5kPkOSkDPRM/s400/part2-3-addnewitem.gif" border="0" alt=""id="BLOGGER_PHOTO_ID_5451225261180825682" /></a>
+
+<p>Visual Studio then plops out a page that's 100% ready to go including the correct Content controls for the SharePoint master page.</p>
+
+<p><span style="font-size: 9.5pt; line-height: 115%; font-family: Consolas; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; background: yellow; mso-highlight: yellow; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA">
+ &lt;%</span><span style="font-size:9.5pt;line-height:115%;font-family:Consolas;mso-fareast-font-family:
+Calibri;mso-fareast-theme-font:minor-latin;color:blue;mso-ansi-language:EN-US;
+mso-fareast-language:EN-US;mso-bidi-language:AR-SA">@</span><span style="font-size:9.5pt;line-height:115%;font-family:Consolas;mso-fareast-font-family:
+Calibri;mso-fareast-theme-font:minor-latin;mso-ansi-language:EN-US;mso-fareast-language:
+EN-US;mso-bidi-language:AR-SA"> <span style="color:maroon">Assembly</span>
+ <span style="color:red">Name</span><span style="color:blue">=&quot;$SharePoint.Project.AssemblyFullName$&quot;</span>
+ <span style="background: yellow; mso-highlight: yellow">%&gt;</span><br />
+ <span style="background: yellow; mso-highlight: yellow">&lt;%</span><span 
+  style="color:blue">@</span> <span style="color:maroon">Import</span>
+ <span style="color:red">Namespace</span><span style="color:blue">=&quot;Microsoft.SharePoint.ApplicationPages&quot;</span>
+ <span style="background: yellow; mso-highlight: yellow">%&gt;</span><br />
+ <span style="background: yellow; mso-highlight: yellow">&lt;%</span><span 
+  style="color:blue">@</span> <span style="color:maroon">Register</span>
+ <span style="color:red">Tagprefix</span><span style="color:blue">=&quot;SharePoint&quot;</span>
+ <span style="color:red">Namespace</span><span style="color:blue">=&quot;Microsoft.SharePoint.WebControls&quot;</span>
+ <span style="color:red">Assembly</span><span style="color:blue">=&quot;Microsoft.SharePoint, 
+ Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c&quot;</span>
+ <span style="background: yellow; mso-highlight: yellow">%&gt;</span><br />
+ <span style="background: yellow; mso-highlight: yellow">&lt;%</span><span 
+  style="color:blue">@</span> <span style="color:maroon">Register</span>
+ <span style="color:red">Tagprefix</span><span style="color:blue">=&quot;Utilities&quot;</span>
+ <span style="color:red">Namespace</span><span style="color:blue">=&quot;Microsoft.SharePoint.Utilities&quot;</span>
+ <span style="color:red">Assembly</span><span style="color:blue">=&quot;Microsoft.SharePoint, 
+ Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c&quot;</span>
+ <span style="background: yellow; mso-highlight: yellow">%&gt;</span><br />
+ <span style="background: yellow; mso-highlight: yellow">&lt;%</span><span 
+  style="color:blue">@</span> <span style="color:maroon">Register</span>
+ <span style="color:red">Tagprefix</span><span style="color:blue">=&quot;asp&quot;</span>
+ <span style="color:red">Namespace</span><span style="color:blue">=&quot;System.Web.UI&quot;</span>
+ <span style="color:red">Assembly</span><span style="color:blue">=&quot;System.Web.Extensions, 
+ Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35&quot;</span>
+ <span style="background: yellow; mso-highlight: yellow">%&gt;</span><br />
+ <span style="background: yellow; mso-highlight: yellow">&lt;%</span><span 
+  style="color:blue">@</span> <span style="color:maroon">Import</span>
+ <span style="color:red">Namespace</span><span style="color:blue">=&quot;Microsoft.SharePoint&quot;</span>
+ <span style="background: yellow; mso-highlight: yellow">%&gt;</span><br />
+ <span style="background: yellow; mso-highlight: yellow">&lt;%</span><span 
+  style="color:blue">@</span> <span style="color:maroon">Assembly</span>
+ <span style="color:red">Name</span><span style="color:blue">=&quot;Microsoft.Web.CommandUI, 
+ Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c&quot;</span>
+ <span style="background: yellow; mso-highlight: yellow">%&gt;</span><br />
+ <span style="background: yellow; mso-highlight: yellow">&lt;%</span><span 
+  style="color:blue">@</span> <span style="color:maroon">Page</span>
+ <span style="color:red">Language</span><span style="color:blue">=&quot;C#&quot;</span>
+ <span style="color:red">AutoEventWireup</span><span style="color:blue">=&quot;true&quot;</span>
+ <span style="color:red">CodeBehind</span><span style="color:blue">=&quot;ApplicationPage1.aspx.cs&quot;</span>
+ <span style="color:red">Inherits</span><span style="color:blue">=&quot;MyAppPage.Layouts.MyAppPage.ApplicationPage1&quot;</span>
+ <span style="color:red">DynamicMasterPageFile</span><span style="color:blue">=&quot;~masterurl/default.master&quot;</span>
+ <span style="background: yellow; mso-highlight: yellow">%&gt;</span><br />
+ <br />
+ <span style="color:blue">&lt;</span><span style="color:maroon">asp</span><span 
+  style="color:blue">:</span><span style="color:maroon">Content</span>
+ <span style="color:red">ID</span><span style="color:blue">=&quot;PageHead&quot;</span>
+ <span style="color:red">ContentPlaceHolderID</span><span style="color:blue">=&quot;PlaceHolderAdditionalPageHead&quot;</span>
+ <span style="color:red">runat</span><span style="color:blue">=&quot;server&quot;&gt;<br />
+ <br />
+ &lt;/</span><span style="color:maroon">asp</span><span style="color:blue">:</span><span 
+  style="color:maroon">Content</span><span style="color:blue">&gt;<br />
+ <br />
+ &lt;</span><span style="color:maroon">asp</span><span style="color:blue">:</span><span 
+  style="color:maroon">Content</span> <span style="color:red">ID</span><span 
+  style="color:blue">=&quot;Main&quot;</span> <span style="color:red">
+ ContentPlaceHolderID</span><span style="color:blue">=&quot;PlaceHolderMain&quot;</span>
+ <span style="color:red">runat</span><span style="color:blue">=&quot;server&quot;&gt;<br />
+ </span>Hello World!<br />
+ <span style="color:blue">&lt;/</span><span style="color:maroon">asp</span><span 
+  style="color:blue">:</span><span style="color:maroon">Content</span><span 
+  style="color:blue">&gt;<br />
+ <br />
+ &lt;</span><span style="color:maroon">asp</span><span style="color:blue">:</span><span 
+  style="color:maroon">Content</span> <span style="color:red">ID</span><span 
+  style="color:blue">=&quot;PageTitle&quot;</span> <span style="color:red">
+ ContentPlaceHolderID</span><span style="color:blue">=&quot;PlaceHolderPageTitle&quot;</span>
+ <span style="color:red">runat</span><span style="color:blue">=&quot;server&quot;&gt;<br />
+ </span>Application Page<br />
+ <span style="color:blue">&lt;/</span><span style="color:maroon">asp</span><span 
+  style="color:blue">:</span><span style="color:maroon">Content</span><span 
+  style="color:blue">&gt;<br />
+ <br />
+ &lt;</span><span style="color:maroon">asp</span><span style="color:blue">:</span><span 
+  style="color:maroon">Content</span> <span style="color:red">ID</span><span 
+  style="color:blue">=&quot;PageTitleInTitleArea&quot;</span> <span style="color:red">
+ ContentPlaceHolderID</span><span style="color:blue">=&quot;PlaceHolderPageTitleInTitleArea&quot;</span>
+ <span style="color:red">runat</span><span style="color:blue">=&quot;server&quot;</span>
+ <span style="color:blue">&gt;<br />
+ </span>My Application Page<br />
+ <span style="color:blue">&lt;/</span><span style="color:maroon">asp</span><span 
+  style="color:blue">:</span><span style="color:maroon">Content</span><span 
+  style="color:blue">&gt;</span></span></p>
+
+<p>(ok, the "Hello World!" is mine).  Now if you hit F5 or click Build -> "Deploy Solution" then as I mentioned SharePoint packages up the application page into a wsp file and deployes it out to SharePoint.  Now if you navigate to your application page (in my case http://localhost/mysite/_layouts/MyAppPage/ApplicationPage1.aspx) then you should see something like this:</p>
+
+<a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://1.bp.blogspot.com/_gez10dNhuPk/S6akgCoo_CI/AAAAAAAABsU/ccLTEAhinWQ/s1600-h/part2-4-helloworld.gif"><img style="cursor:pointer; cursor:hand;width: 400px; height: 286px;" src="http://1.bp.blogspot.com/_gez10dNhuPk/S6akgCoo_CI/AAAAAAAABsU/ccLTEAhinWQ/s400/part2-4-helloworld.gif" border="0" alt=""id="Img3" /></a>
+
+<p>Amazed?  You should be.  We didn't write a line of evil looking CAML, didn't have to write any DOS batch files, didn't have to deploy to the GAC, we probably didn't even notice that a feature.xml file was created behind the scenes.  Yet already we're deployed!  Ok, enough exuberance, back to business.</p>
+
+<p><b>No Really, Show Me the AJAX Templating Code</b></p>
+<p>Before writing code you should probably create some lists to read and write to.  As I mentioned in a previous post I like <a href=" http://rapidapplicationdevelopment.blogspot.com/2010/02/video-how-to-create-burndown-charts-for.html ">tracking user stories in SharePoint</a>.  So for my examples I have an Iterations list and a User Stories list, which is based off of the Tasks content type (automatically giving you a number of columns like Priority).</p>
+<p>After creating some lists you need to ensure you have the latest <a href=" http://ajax.codeplex.com/releases/view/35895 ">ASP.Net Ajax Library</a>.  I suspect an updated copy will be included with the RTM copy of SharePoint 2010, but in my case I downloaded the latest copy and moved the entire Scripts directory into C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\14\TEMPLATE\LAYOUTS\ajax.  Note that out of the box SharePoint 2010 already included some of these files in LAYOUTS, but it was missing others, so this step was necessary.</p>
+<p>So here is the absolute simplest templating example that still works:</p>
+
+<p><span style="font-size:9.5pt;line-height:115%;
+font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;
+mso-bidi-language:AR-SA">&lt;</span><span style="font-size:9.5pt;line-height:
+115%;font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;color:maroon;mso-ansi-language:EN-US;mso-fareast-language:EN-US;
+mso-bidi-language:AR-SA">asp</span><span style="font-size:9.5pt;line-height:
+115%;font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;
+mso-bidi-language:AR-SA">:</span><span style="font-size:9.5pt;line-height:115%;
+font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;color:maroon;mso-ansi-language:EN-US;mso-fareast-language:EN-US;
+mso-bidi-language:AR-SA">Content</span><span style="font-size:9.5pt;line-height:
+115%;font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:
+AR-SA"> <span style="color:red">ID</span><span style="color:blue">=&quot;PageHead&quot;</span>
+ <span style="color:red">ContentPlaceHolderID</span><span style="color:blue">=&quot;PlaceHolderAdditionalPageHead&quot;</span>
+ <span style="color:red">runat</span><span style="color:blue">=&quot;server&quot;&gt;<br />
+ </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:blue">&lt;</span><span 
+  style="color:maroon">script</span> <span style="color:red">type</span><span 
+  style="color:blue">=&quot;text/javascript&quot;</span> <span style="color:red">src</span><span 
+  style="color:blue">=&quot;../ajax/MicrosoftAjax.js&quot;&gt;&lt;/</span><span 
+  style="color:maroon">script</span><span style="color:blue">&gt;<br />
+ </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:blue">&lt;</span><span 
+  style="color:maroon">script</span> <span style="color:red">type</span><span 
+  style="color:blue">=&quot;text/javascript&quot;</span> <span style="color:red">src</span><span 
+  style="color:blue">=&quot;../ajax/MicrosoftAjaxDataContext.js&quot;&gt;&lt;/</span><span 
+  style="color:maroon">script</span><span style="color:blue">&gt;<br />
+ </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:blue">&lt;</span><span 
+  style="color:maroon">script</span> <span style="color:red">type</span><span 
+  style="color:blue">=&quot;text/javascript&quot;</span> <span style="color:red">src</span><span 
+  style="color:blue">=&quot;../ajax/MicrosoftAjaxTemplates.js&quot;&gt;&lt;/</span><span 
+  style="color:maroon">script</span><span style="color:blue">&gt;<br />
+ </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:blue">&lt;</span><span 
+  style="color:maroon">script</span> <span style="color:red">type</span><span 
+  style="color:blue">=&quot;text/javascript&quot;</span> <span style="color:red">src</span><span 
+  style="color:blue">=&quot;../ajax/MicrosoftAjaxAdoNet.js&quot;&gt;&lt;/</span><span 
+  style="color:maroon">script</span><span style="color:blue">&gt;<br />
+ &lt;/</span><span style="color:maroon">asp</span><span style="color:blue">:</span><span 
+  style="color:maroon">Content</span><span style="color:blue">&gt;<br />
+ <br />
+ &lt;</span><span style="color:maroon">asp</span><span style="color:blue">:</span><span 
+  style="color:maroon">Content</span> <span style="color:red">ID</span><span 
+  style="color:blue">=&quot;Main&quot;</span> <span style="color:red">
+ ContentPlaceHolderID</span><span style="color:blue">=&quot;PlaceHolderMain&quot;</span>
+ <span style="color:red">runat</span><span style="color:blue">=&quot;server&quot;&gt;<br />
+ </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:blue">&lt;</span><span 
+  style="color:maroon">script</span> <span style="color:red">type</span><span 
+  style="color:blue">=&quot;text/javascript&quot;&gt;<br />
+ </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="color:blue">
+ function</span> pageInit() {<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="color:blue">var</span> 
+ dataContext = $create(Sys.Data.AdoNetDataContext, {
+ <br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>serviceUri:
+ <span style="color:maroon">&quot;/demoprep/_vti_bin/ListData.svc&quot;</span>
+ <br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>});<br />
+ <br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>$create(Sys.UI.DataView,
+ <br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>autoFetch:
+ <span style="color:blue">true</span>,<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>dataProvider: 
+ dataContext,<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fetchOperation:
+ <span style="color:maroon">&quot;UserStories&quot;</span>,<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fetchParameters: { 
+ $top: 20 }<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>},<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:blue">null</span>,<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:blue">null</span>,<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>$get(<span 
+  style="color:maroon">&quot;userStoriesList&quot;</span>)<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>);<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+ Sys.Application.add_init(pageInit);<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:blue">&lt;/</span><span 
+  style="color:maroon">script</span><span style="color:blue">&gt;<br />
+ </span>
+ <br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:blue">&lt;</span><span 
+  style="color:maroon">ul</span> <span style="color:red">id</span><span 
+  style="color:blue">=&quot;userStoriesList&quot;</span> <span style="color:red">class</span><span 
+  style="color:blue">=&quot;sys-template&quot;&gt;<br />
+ </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="color:blue">&lt;</span><span 
+  style="color:maroon">li</span><span style="color:blue">&gt;</span>{{ Title }}<span 
+  style="color:blue">&lt;/</span><span style="color:maroon">li</span><span 
+  style="color:blue">&gt;<br />
+ </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:blue">&lt;/</span><span 
+  style="color:maroon">ul</span><span style="color:blue">&gt;<br />
+ &lt;/</span><span style="color:maroon">asp</span><span style="color:blue">:</span><span 
+  style="color:maroon">Content</span><span style="color:blue">&gt;</span></span></p>
+
+<p>The four script references in the PageHead Content control are necessary to define the required ASP.Net AJAX JavaScript classes you'll need for templating.  But the Main content control is where things get interesting.</p>
+<p>Skip over the JavaScript for now and notice the unordered list named userStoriesList.  Inside of the li elements is a strange notation: {{ Title }}.  This specifies a binding to the name of a SharePoint field.  You could also have put in PriorityValue or any of the other columns specified in the JSON that I showed in Part 1.</p>
+<p>As far as the JavaScript, the dataContext variable is a class of type AdoNetDataContext, which knows how to talk to WCF Data Services like ListData.svc.  It inherits from a JavaScript class called DataContext which is extensible and knows how to talk with other protocols, but us SharePoint developers probably won't care about this most of the time.</p>
+<p>The userStoriesTemplate variable is a class of type DataView.  This is where the magic happens.  DataViews pull data from a DataContext, duplicates the innerHtml of an associated DOM element for each row returned (e.g. userStoriesList), and replace the binding syntax with real data.  Seems simple enough, but it is actually quite sophisticated when you get to some more advanced scenarios that I'll describe later.</p>
+<p>One last thing to notice is the sys-template class.  This is a prespecified CSS class that ASP.Net AJAX sets to display: block when it is finished rendering.  It's a good idea to create a CSS class for sys-template with display: none so that end users don't see your template code while the page is loading.  Obviously you should do this in a separate CSS class in LAYOUTS or if you're lazy you can put it in the PageHead content control like so:</p>
+
+ <p class="MsoNormal">
+  <span style="font-size:
+9.5pt;font-family:Consolas;color:blue">&lt;</span><span style="font-size:9.5pt;
+font-family:Consolas;color:maroon">STYLE</span><span style="font-size:9.5pt;
+font-family:Consolas"> <span style="color:red">type</span><span style="color:blue">=&quot;text/css&quot;&gt;<br />
+  </span><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  <span style="color:maroon">.sys-template</span> { <span style="color:red">
+  display</span>: <span style="color:blue">block</span>; }<br />
+  <span style="color:blue">&lt;/</span><span style="color:maroon">STYLE</span><span 
+   style="color:blue">&gt;<br />
+  <br />
+  &lt;</span><span style="color:maroon">asp</span><span style="color:blue">:</span><span 
+   style="color:maroon">Content</span> <span style="color:red">ID</span><span 
+   style="color:blue">=&quot;PageHead&quot;</span> <span style="color:red">
+  ContentPlaceHolderID</span><span style="color:blue">=&quot;PlaceHolderAdditionalPageHead&quot;</span>
+  <span style="color:red">runat</span><span style="color:blue">=&quot;server&quot;&gt;<br />
+  </span><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  <span style="color:blue">&lt;</span><span style="color:maroon">script</span>
+  <span style="color:red">type</span><span style="color:blue">=&quot;text/javascript&quot;</span>
+  <span style="color:red">src</span><span style="color:blue">=&quot;../ajax/MicrosoftAjax.js&quot;&gt;&lt;/</span><span 
+   style="color:maroon">script</span><span style="color:blue">&gt;<br />
+  </span><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  <span style="color:blue">&lt;</span><span style="color:maroon">script</span>
+  <span style="color:red">type</span><span style="color:blue">=&quot;text/javascript&quot;</span>
+  <span style="color:red">src</span><span style="color:blue">=&quot;../ajax/MicrosoftAjaxDataContext.js&quot;&gt;&lt;/</span><span 
+   style="color:maroon">script</span><span style="color:blue">&gt;<br />
+  </span><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  <span style="color:blue">&lt;</span><span style="color:maroon">script</span>
+  <span style="color:red">type</span><span style="color:blue">=&quot;text/javascript&quot;</span>
+  <span style="color:red">src</span><span style="color:blue">=&quot;../ajax/MicrosoftAjaxTemplates.js&quot;&gt;&lt;/</span><span 
+   style="color:maroon">script</span><span style="color:blue">&gt;<br />
+  </span><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  <span style="color:blue">&lt;</span><span style="color:maroon">script</span>
+  <span style="color:red">type</span><span style="color:blue">=&quot;text/javascript&quot;</span>
+  <span style="color:red">src</span><span style="color:blue">=&quot;../ajax/MicrosoftAjaxAdoNet.js&quot;&gt;&lt;/</span><span 
+   style="color:maroon">script</span><span style="color:blue">&gt;<br />
+  </span><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  <span style="color:blue">&lt;</span><span style="color:maroon">STYLE</span>
+  <span style="color:red">type</span><span style="color:blue">=&quot;text/css&quot;&gt;<br />
+  </span><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span><span style="color:maroon">.sys-template</span> { <span style="color:red">
+  display</span>: <span style="color:blue">block</span>; }<br />
+  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  <span style="color:blue">&lt;/</span><span style="color:maroon">STYLE</span><span 
+   style="color:blue">&gt;<br />
+  &lt;/</span><span style="color:maroon">asp</span><span style="color:blue">:</span><span 
+   style="color:maroon">Content</span><span style="color:blue">&gt;<br 
+   style="mso-special-character:line-break" />
+  <![if !supportLineBreakNewLine]>
+  <br style="mso-special-character:line-break" />
+  <![endif]></span><o:p></o:p></span>
+ </p>
+
+<p>So now if you click If you click Build -> Deploy Solution you should see something like this:</p>
+
+<a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://2.bp.blogspot.com/_gez10dNhuPk/S6akgdn0DlI/AAAAAAAABsc/ePFlii5mG9o/s1600-h/part2-5-endresult.gif"><img style="cursor:pointer; cursor:hand;width: 400px; height: 292px;" src="http://2.bp.blogspot.com/_gez10dNhuPk/S6akgdn0DlI/AAAAAAAABsc/ePFlii5mG9o/s400/part2-5-endresult.gif" border="0" alt=""id="Img1" /></a>
+
+<p><b>Summary</b></p>
+<p>Ok, this isn't super exciting yet.  We certainly could have done this much easier with server side code.  But bear with me, this has a lot of potential.  For instance, how do you write data back to the server?  How do you really make it AJAXy?  I'll explore these questions in <a href="http://www.nearinfinity.com/blogs/lee_richardson/client_side_ajax_applications_2.html">Part 3 - Writing data back to SharePoint with ASP.Net AJAX 4.0 Templates</a> and subsequent posts in the series.</p> 

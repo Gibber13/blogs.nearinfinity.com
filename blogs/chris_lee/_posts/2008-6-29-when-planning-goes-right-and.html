@@ -1,0 +1,32 @@
+--- 
+permalink: /blogs/when_planning_goes_right_and.html
+layout: blogs
+title: When planning goes right and the customer reaps the rewards..
+date: 2008-06-29 21:53:03 -04:00
+tags: General
+---
+<h2>Preface</h2>
+
+<p>As a software engineer, you (hopefully) strive to design things in a such a way that they first and foremost satisfy the customer's requirements. But a close second is designing and implementing an application that can be easily understood and changed by your team or the lucky person who may inherit it down the road, say <b>four</b> years later.</p>
+
+<p>Now, as a software engineer, I have only on one occasion seen how my choices impacted someone down the road, but down the road was the day after I left, and the knowledge transfer was sufficient enough. The inheriting developer of my application was able to get up and running and meet new requirements for the customer with my application as the base with just a few days of downtime (getting to know the language).</p>
+
+<h2>The Problem</h2>
+
+<p>However, it is being on the other end of things that I want to discuss. I recently was asked to help another project migrate their four year old application from WebLogic to the cheaper, faster (shh.. no fighting allowed), cheaper (did I say cheaper?) Tomcat.</p>
+
+<p>When you get asked to do something like this, your mind goes about 200mph to thoughts of, oh no - the application was running in WebLogic, how much WebLogic is welded to the infrastructure of the application, how much EJB is involved, and will a happy hour be involved? Okay, maybe not the last one, but depending on the the answers to the first two, you may quickly start thinking about the third.</p>
+
+<h2>Acceptance</h2>
+
+<p>So I gladly take on this interesting challenge, hoping for the best, but expecting to be elbow deep in the worst possible situation. When I get on site, the developer who inherited the application, four years after its deployment, and who has been asked to migrate from WebLogic to Tomcat is only tangentially familiar with its inner-workings. I breathe a little sigh of relief in that it's good to have two fresh minds ready to tackle this problem. The other developer knows what the application is supposed to do, has some documentation from the original developer, and has a whole bunch of tools, passwords, database schemas et al ready to go for our debugging efforts.</p>
+
+<p>As I start delving into the code to see how much WebLogic was able to dig its claws into the code, I am getting the impression things are so much better than they could have been. Why might you ask? Well, the original developer decided not go the proprietary route (read WEBLOGIC and EJB), and instead when with good ol' JNDI. I was thrilled! I quickly scoured through the code and verified that all the data sources were JNDI provided, and plain ol pojos and jdbc were the flavor of design. I pulled up the documentation on WebLogic JNDI setup, migrated it to Tomcat JDNI providers and that was that.</p>
+
+<h2>Quick Resolution</h2>
+
+<p>From that point forward, after spending a little more time to deal with some 2-way SSL and some customer provided infrastructure problems that I did not anticipate, I had that application deployed to development, test, and production environments in a little over a day. Something that the customer had feared would take weeks was done in less than two days. Beautiful.</p>
+
+<h2>Lesson Learned</h2>
+
+<p>So when you are coding your next application and you are juggling between ideas of how to do things, think twice about who is going to be dealing with your code later on, and the possibility that it might not get to use that super-slick couple (ok 25,000) thousand dollar application server and all of its bells and whistles. Don't throw the biggest weapon you have in your development arsenal at the problem when only a fly-swatter is needed. Explore other routes of getting the job done, cheaper, with deep roots in the open source community and hopefully the next time you or a colleague have to help migrate an old application you or they have never heard of, it'll just be so easy.</p> 

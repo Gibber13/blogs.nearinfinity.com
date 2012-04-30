@@ -1,0 +1,50 @@
+--- 
+permalink: /blogs/multi_value_columns_in_sharepoint.html
+layout: blogs
+title: "Multi-Value Columns in SharePoint Designer - Solution #1"
+date: 2007-04-09 12:58:25 -04:00
+tags: .NET
+---
+<div style="FLOAT: right; MARGIN-LEFT: 10px"></div>
+<p>Recently I've been working with Microsoft Office SharePoint Server (MOSS) 2007. Since this is my first post on the topic I'd love to start at a high level about what it is and how it works, but let's get to the interesting stuff: what doesn't work well and how to get around it.</p>
+<p>Specifically, this will be the first in a series regarding a deficiency in the workflow component of SharePoint that doesn't allow you to send e-mail to multiple recipients from a multi-value column of a list using SharePoint Designer 2007 (SPD).</p>
+<p>This first post will describe the problem, provide lots of screenshots so it can double as a fast introduction to workflows in SharePoint for the uninitiated, and then provide a quick hacky solution.</p>
+<p><b>The Multi-Value Column Problem</b></p>
+<p>Here's how it should work. You create a list (e.g. Performance Review) and add a column (e.g. "Peers To Review") and select a type of "Person or Group" with "Allow multiple selections" set to Yes. </p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://bp1.blogger.com/_gez10dNhuPk/RhpsnPjlR-I/AAAAAAAAAF8/rXIhc4osgvk/s1600-h/01+-+Create+Column.jpg"><img id="BLOGGER_PHOTO_ID_5051469353495906274" style="CURSOR: pointer" alt="" src="http://bp1.blogger.com/_gez10dNhuPk/RhpsnPjlR-I/AAAAAAAAAF8/rXIhc4osgvk/s400/01+-+Create+Column.jpg" border="0" /></a></p>
+<p>(click any image to enlarge)</p>
+<p>Now if you add a blank workflow in SharePoint Designer (from the SharePoint Content tab):</p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://bp0.blogger.com/_gez10dNhuPk/Rhpkl_jlR3I/AAAAAAAAAFE/FHjSx-RaRWA/s1600-h/02+-+CreateWorkflow.jpg"><img id="Img1" style="CURSOR: pointer" alt="" src="http://bp0.blogger.com/_gez10dNhuPk/Rhpkl_jlR3I/AAAAAAAAAFE/FHjSx-RaRWA/s400/02+-+CreateWorkflow.jpg" border="0" /></a></p>
+<p>And you select the list you created (Performance Review):</p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://bp0.blogger.com/_gez10dNhuPk/RhplH_jlR4I/AAAAAAAAAFM/kDZP4wGOIZ8/s1600-h/03+-+Select+List.jpg"><img id="Img6" style="CURSOR: pointer" alt="" src="http://bp0.blogger.com/_gez10dNhuPk/RhplH_jlR4I/AAAAAAAAAFM/kDZP4wGOIZ8/s400/03+-+Select+List.jpg" border="0" /></a></p>
+<p>Then you should be able to</p>
+<p></p>
+<ol>
+<li>Add a "Send an Email" action</li>
+<li>View the message's properties</li>
+<li>Select the recipient</li>
+<li>Add a function by clicking "Workflow Lookup"</li>
+<li>Select the Current Item (aka the current list item, which is like a row in a spreadsheet and in my example this would be the current performance review that the workflow is being run on)</li>
+<li>Then select the new column "Peers to Review"</li></ol>
+<p></p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://bp2.blogger.com/_gez10dNhuPk/RhplYfjlR5I/AAAAAAAAAFU/owi3WxSVE5g/s1600-h/04+-+Add+Action.jpg"><img id="Img5" style="CURSOR: pointer" alt="" src="http://bp2.blogger.com/_gez10dNhuPk/RhplYfjlR5I/AAAAAAAAAFU/owi3WxSVE5g/s400/04+-+Add+Action.jpg" border="0" /></a></p>
+<p>But wait. Where's your column? And here is the problem. The UI of SharePoint Designer filters out all columns that are marked with "Allow multiple selections."</p>
+<p><b>Simple Hacky Solution #1</b></p>
+<p>Believe it or not the Workflow Engine knows how to send e-mail to a column with "Allow multiple selections" but it's the SharePoint Designer UI that doesn't. This means that a simple solution to the problem is this:</p>
+<p></p>
+<ol>
+<li>Turn off "Allow multiple selections" for your column (note the warning "This will remove all person values except the first one")</li>
+<li>Close and reopen the workflow in SharePoint Designer and follow steps above and magically your column will appear in the dropdown <br /><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://bp2.blogger.com/_gez10dNhuPk/RhprffjlR9I/AAAAAAAAAF0/ZvhJlPJTVz0/s1600-h/05+-+Select+Column.jpg"><img id="BLOGGER_PHOTO_ID_5051468120840292306" style="CURSOR: pointer" alt="" src="http://bp2.blogger.com/_gez10dNhuPk/RhprffjlR9I/AAAAAAAAAF0/ZvhJlPJTVz0/s400/05+-+Select+Column.jpg" border="0" /></a><br /></li>
+<li>Finish creating your workflow</li>
+<li>Turn back on "Allow multiple selections"</li>
+<li>Create an item for the list and run the workflow you created in SharePoint Designer</li></ol>
+<p></p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://bp1.blogger.com/_gez10dNhuPk/Rhpl4PjlR7I/AAAAAAAAAFk/xzgr_rETjWs/s1600-h/06+-+Start+Workflow.jpg"><img id="Img3" style="CURSOR: pointer" alt="" src="http://bp1.blogger.com/_gez10dNhuPk/Rhpl4PjlR7I/AAAAAAAAAFk/xzgr_rETjWs/s400/06+-+Start+Workflow.jpg" border="0" /></a></p>
+<p>And voila, it works! Both (or all) recipients have received an e-mail.</p>
+<p>Sadly, this simple technique isn't an acceptable solution for the long term. What happens if you want to change your workflow down the road? You may need to turn "Allow multiple selections" back off, thus deleting your multi-user data. A better solution is to create a custom action in Visual Studio and get it to plug into SharePoint Designer. And that will be the topic of my next post:</p>
+<p>Multi-Value Columns in SharePoint Designer - Solution #2</p>
+<p>---</p>
+<p>Note 1: this series is largely in response to the several users having similar problems at: <a href="http://forums.microsoft.com/MSDN/showpost.aspx?postid=1443799&amp;siteid=1" target="_blank">http://forums.microsoft.com/MSDN/showpost.aspx?postid=1443799&amp;siteid=1</a></p>
+<p>Note 2: If you're interested in the ERD for the topics in this SharePoint post this diagram might be useful to get you up to speed:</p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://bp1.blogger.com/_gez10dNhuPk/RhpmEPjlR8I/AAAAAAAAAFs/jddUXdb0PrI/s1600-h/07+-+Workflow+ERD.jpg"><img id="Img2" style="CURSOR: pointer" alt="" src="http://bp1.blogger.com/_gez10dNhuPk/RhpmEPjlR8I/AAAAAAAAAFs/jddUXdb0PrI/s400/07+-+Workflow+ERD.jpg" border="0" /></a></p>
+<p>Note 3: This is double posted at <a href="http://rapidapplicationdevelopment.blogspot.com/2007/04/multi-value-columns-in-sharepoint.html" target="_blank">http://rapidapplicationdevelopment.blogspot.com/2007/04/multi-value-columns-in-sharepoint.html</a></p> 

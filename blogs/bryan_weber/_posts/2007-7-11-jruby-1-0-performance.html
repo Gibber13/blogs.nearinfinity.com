@@ -1,0 +1,147 @@
+--- 
+permalink: /blogs/jruby_1_0_performance.html
+layout: blogs
+title: JRuby 1.0 Performance
+date: 2007-07-11 22:36:59 -04:00
+tags: Ruby
+---
+We've all heard that JRuby is slow... (if you hadn't heard that before you have now!) just like we used to hear (and sometimes still do) how slow Java is.  Rather than accept that JRuby is slow, let's take a look at some real code and some sample performance metrics.  This is by no means a thorough scientific performance analysis of JRuby, but it should be sufficient to give you an approximate idea of JRuby performance ... and the simplest thing you can do to increase performance.  We'll be attempting to run the same code in Java and JRuby and then compare the results.<p/>
+
+<pre class="code">
+public class Foobar {
+  public static void main(String[] args) {
+    Foobar f = new Foobar();
+    long start = System.currentTimeMillis();
+    int cnt = 1000;
+    long time = 0;
+    for ( int i = 0; i < cnt; i++ ) {
+      time += f.doStuff();
+    }
+    long finish = System.currentTimeMillis();
+    System.out.println("Total time: " + time + " milliseconds");
+    System.out.println("Average time: " + (time/cnt) + " milliseconds");
+    System.out.println("Runtime: " + (finish-start) + " milliseconds");
+
+  }
+
+  public long doStuff() {
+    long before = Calendar.getInstance().getTimeInMillis();
+    long cnt = 0;
+
+    for ( int i = 0; i < 1000000; i++ ) {
+      cnt += i;
+    }
+    long after = Calendar.getInstance().getTimeInMillis();
+    System.out.println("Count is " + cnt);
+    return after-before;
+  }
+}
+</pre>
+
+<p/>
+So what does this yield you might ask...?<p/>
+<pre class="code">
+Total time: 4096 milliseconds
+Average time: 4 milliseconds
+Runtime: 4188 milliseconds
+</pre>
+
+So it takes about 4 seconds in total.  Let's look at similar code in JRuby:
+<pre class="code">
+def doStuff()
+  t = Time.now
+  cnt = 0
+  (0...1000000).each {|y|
+   cnt = cnt + y
+  }
+  t2 = Time.now
+  t2-t
+end
+
+start = Time.now
+sum = 0
+runs = 1000
+(0..runs).each {|i|
+  sum = sum + doStuff()
+}
+finish = Time.now
+puts "Total time: " + sum.to_s
+puts "Average time: " + (sum/runs).to_s
+puts "Runtime: " + (finish-start).to_s
+</pre>
+
+Note how much simpler the code is. :)  The JRuby results:<p/>
+<pre class="code">
+Total time: 628.6390000000011
+Average time: 0.6286390000000012
+Runtime: 628.912
+</pre>
+
+Ok, that was JRuby, but what about the "real" Ruby?  The Ruby (CRuby, Matz Ruby) results:<p/>
+<pre class="code">
+Total time: 632.2010000000014
+Average time: 0.6322010000000013
+Runtime: 632.4490000000001
+</pre>
+
+But, those results are in SECONDS and not MILLISECONDS.  Whoa, that's eye opening.  So they weren't kidding when they said JRuby is SLOW. What took 4 milliseconds in Java is taking 628 milliseconds in JRuby.  That's around 157 times slower! <p/>
+JRuby was actually faster than Ruby for this run!  (Note: this is not always the case.)  That's pretty impressive from that perspective.  Hats off to the JRuby guys for doing a superb job with JRuby by the way.<p/>
+So let's talk about the good news and the bad news.  Then we'll do some analysis to dig deeper and see if these results are really what they appear to be.  First, the good news (and wow do we need some at this point!), we can write Java code for portions of code that need to be performant or are just plain old slow in JRuby.  Let's take a look at what that would do in this case.  First, it appears that the doStuff method is the portion of code that is significantly slower, so let's do just that part in java.<p/>
+
+
+<pre class="code">
+require 'java'
+$CLASSPATH << "/Java/classpath/" # make sure this ends with a slash!
+include_class 'pkg.Foobar'
+
+start = Time.now
+sum = 0
+runs = 1000
+f = Foobar.new
+(0..runs).each {|i|
+  sum = sum + f.doStuff()
+  puts i
+}
+finish = Time.now
+puts "Total time: " + sum.to_s
+puts "Average time: " + (sum/runs).to_s
+puts "Runtime: " + (finish-start).to_s
+
+</pre>
+
+And the results:
+<pre class="code">
+Total time: 4105
+Average time: 4
+Runtime: 4.38
+</pre>
+
+So what does this mean?  It means that we ran the code in 4.38 seconds in JRuby and it took 4.188 seconds in Java.  That is MUCH, MUCH closer to what we would like to see!<p/>
+
+So let's talk about a few things that could be going on here. 
+<ol>
+<li>Java compiler optimization</li>
+<li>JVM primitives versus objects</li>
+<li>Use of JRuby constructs (ie Closures)</li>
+</ol>
+
+1) We have to consider the possibility that the Java compiler or JVM has done something to optimize the following code:
+<pre class="code">
+for ( int i = 0; i < cnt; i++ ) {
+  sum += cnt;
+}
+</pre>
+For example, is the compiler smart enough to just do calculate some formula (similar to factorial, but that does addition instead of multiplication) of cnt?  There are a few things we can do to check for this.  First, we can use the javap utility to look at the byte code that was generated to see if any magic is going on here. We can also add some simple logic to the method (such as a method call to another method) to make sure that the code is in fact looping cnt times instead of performing some magical optimization.<p/>
+
+2) Many astute (and some not so astute readers) will probably notice that in java we used a primitive and in JRuby an object is used.  So to be fair, we should run the java code with Integer and BigInteger and see what happens.  Keep in mind however, that in Java you have the option of using the primitives whereas in JRuby your option is only to call Java code that uses primitives.
+<p/>
+
+3) Maybe there is something inherently slower about using some J/Ruby constructs (such as closures) and that explains why both JRuby and Ruby were significantly slower.  
+<p/>
+
+
+Future performance enhancements/considerations:  
+<ol>
+<li>JRuby will be optimized over time (Just as Java has been)</li>
+<li>Will Sun implement the invokedynamic byte code instruction?</li>
+</ol>

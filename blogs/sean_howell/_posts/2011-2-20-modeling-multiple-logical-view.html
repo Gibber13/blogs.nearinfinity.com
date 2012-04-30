@@ -1,0 +1,153 @@
+--- 
+permalink: /blogs/modeling_multiple_logical_view.html
+layout: blogs
+title: Modeling multiple logical views of a document
+date: 2011-02-20 21:49:24 -05:00
+tags: .NET General
+---
+<p align="LEFT" style="margin-bottom: 0in"><font size="3" style="font-size: 13pt"><font size="3"><b>Problem:</b></font><b>
+</b><font size="3"><span style="font-weight: normal"> The domain model
+contains the idea of a document, and one of the documents in the
+model has multiple purposes. By purpose, I mean that the physical
+document is filled out with different data depending on who the
+document is for. Each purpose may or may not have different logic
+associated with the creation. The document abstractions should be
+easily testable to make document creation as robust as possible.</span></font></font></p>
+<p align="LEFT" style="margin-bottom: 0in"><font size="3" style="font-size: 13pt"><font size="3"><span style="font-weight: normal">	</span></font><font size="3"><b>A
+Solution: </b></font><font size="3"><span style="font-weight: normal">One
+solution that I found was based on the template method from the GoF
+book. The intent of this solution was to simplify the creation of the
+known views of the document. The key idea of the solution is to put
+as much of the logic involved in document creation into to the base
+class. </span></font></font>
+</p>
+<p align="LEFT" style="margin-bottom: 0in"><font size="3" style="font-size: 13pt"><font size="3"><span style="font-weight: normal">	</span></font><font size="3"><b>Implementation:
+</b></font></font>
+</p>
+<pre class="prettyprint">abstract class Document
+{
+	IDictionary<string, string=""> FormTextFields
+	{
+		get
+		{
+			return new Dictionary<string, string="">
+			{
+				{ "NameField", this.NameField },
+				{ "AgeField", this.AgeField }
+			};
+		}
+	}
+	
+	private string NameField
+	{
+		get
+		{
+			if(this.DocumentType == DocumentType.Big)
+			{
+				return "Big name";
+			}
+			else if(this.DocumentType == DocumentType.Small)
+			{
+				return "Small name";
+			}
+			
+			return string.Empty;
+		}
+	}
+	
+	private string AgeField
+	{
+		get
+		{
+			if(this.DocumentType == DocumentType.Big)
+			{
+				return "42";
+			}
+			
+			return string.Empty;
+		}
+	}
+	
+	protected abstract DocumentType DocumentType { get; }
+}
+
+class BigDocument : Document
+{
+	protected override DocumentType DocumentType
+	{
+		get
+		{
+			return DocumentType.Big;
+		}
+	}
+}
+</string,></string,></pre>
+<p align="LEFT" style="margin-bottom: 0in"><font size="3" style="font-size: 13pt"><font size="3"><b>	Benefits:
+</b></font><font size="3"><span style="font-weight: normal">As
+previously stated, the main purpose of the base class is to simplify
+the creation of the subclasses. This solution does just that by
+reducing the amount of work needed to create a new subclass. The
+subclasses have only two main actions required for creation. The
+first action is to define the type of the document which is an
+abstract method in the base class. The second action, not shown in the subclass, is the
+validation of the specific concrete document type. Just doing these
+two actions, as oppose to adding new creation logic, speeds up the
+creation of new subclasses.</span></font></font></p>
+<p align="LEFT" style="margin-bottom: 0in"><font size="3" style="font-size: 13pt"><font size="3"><span style="font-weight: normal">	Two
+other benefits to this solution are centralization of the logic for
+document creation and having reduced unit testing needs for the subclasses.
+When the logic of the document creation is centralized into a single
+base class, reasoning about the document creation becomes easier. Problems arising from document creation are easier to track down. The
+document base class becomes the focal point for the majority of  the
+unit tests written for document creation. The focal point reduces the
+need to test the subclasses since the vast majority of the behavior
+is in the base.</span></font></font></p>
+<p align="LEFT" style="margin-bottom: 0in"><font size="3" style="font-size: 13pt"><font size="3"><span style="font-weight: normal">	</span></font><font size="3"><b>Drawbacks:</b></font><font size="3"><span style="font-weight: normal">
+A large drawback of placing all the logic relating to the document
+creation in the base is that the rules for creation have to be
+completely available. If the rules of the creation of the document
+are not known then the base class will be incomplete. When the base
+class is incomplete, it has to be reopened every time a new rule is
+found. The problem of adding rules leads to the main drawback of the
+solution: extensibility. This solution is in no way extensible since
+all the logic is congregated in the base class. This drawback does
+pose problems, however with a little rejiggering the impact of this
+drawback can be minimized. One possible fix, that will reduce the
+extensibility problem, but will increase the work to create a
+subclass, is to add an abstract method to the base that filters the
+dictionary before it is sent out.&nbsp;</span></font></font>
+</p> 
+<pre class="prettyprint">abstract class Document
+{
+	IDictionary<string, string=""> FormTextFields
+	{
+		get
+		{
+			return new Dictionary<string, string="">
+			{
+				{ "NameField", this.NameField },
+				{ "AgeField", this.AgeField }
+			};
+		}
+	}
+	
+	protected abstract IDictionary<string,string> FilterTextFields(IDictionary<string,string> textFields);
+}
+
+class SmallDocument : Document
+{
+	protected override IDictionare<string, string=""> FilterTextFields(IDictionary<string,string> textFields)
+	{
+		textFields["NameField"] = SmallLogic();
+		return textFields;
+	}
+	
+	protected override DocumentType DocumentType
+	{
+		get
+		{
+			return DocumentType.Small;
+		}
+	}
+}
+</string,string></string,></string,string></string,string></string,></string,></pre> 

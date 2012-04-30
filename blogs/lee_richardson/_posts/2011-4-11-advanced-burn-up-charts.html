@@ -1,0 +1,58 @@
+--- 
+permalink: /blogs/advanced_burn_up_charts.html
+layout: blogs
+title: Advanced Burn Up Charts
+date: 2011-04-11 08:52:53 -04:00
+tags: Agile Development
+---
+<p>If you've read my previous posts on the subject you know that I love agile <a href="http://www.nearinfinity.com/blogs/lee_richardson/forget_burndown_use_burnup_charts.html">burn up charts</a> for managing SCRUM style projects, particularly compared to burn down charts.</p>
+<div style='float:right; margin-left:10px;'> 
+<script type='text/javascript'> 
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2011/04/advanced-burn-down-charts.html';
+ 
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+ 
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+ 
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+ 
+        document.write(div.innerHTML);
+    </script> 
+</div> 
+<blockquote>
+The problem is that burndown charts lack two essential pieces of information. First, how much work was actually accomplished during a given iteration (as opposed to how much work remains to be completed) and second how much total work the project contains (or if you prefer how much scope has increased each iteration). </blockquote>
+<p>What you might not know is how flexible they can be.  In particular the example I gave last time has a problem.  Can you spot it?</p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://4.bp.blogspot.com/_gez10dNhuPk/SQExi1j16lI/AAAAAAAABlM/pqg4SgFBkIs/s1600-h/Burnup.gif"><img style="cursor:pointer; cursor:hand;width: 400px; height: 273px;" src="http://4.bp.blogspot.com/_gez10dNhuPk/SQExi1j16lI/AAAAAAAABlM/pqg4SgFBkIs/s400/Burnup.gif" border="0" alt=""id="BLOGGER_PHOTO_ID_5260540314308176466" /></a></p>
+<p>The problem is that the scope increase of 20 points in iteration six might very well have had zero impact on the actual deployment date.  Those points might have all been low priority tasks that the team will work on after they deploy the initial 100 points.  Wouldn't it be nice if the burn up chart could convey priority information as well?</p>
+<p>So that's exactly what I did on my current project last week, and it appeared to be a big hit.  And with the addition of some Excel trend lines the chart was able to convey a lot of insight into the project:</p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://1.bp.blogspot.com/-nqHRslSmh3I/TaL1f1sZ2CI/AAAAAAAABt4/Z5i4iyXrFh8/s1600/Burnup1.png"><img style="cursor:pointer; cursor:hand;width: 400px; height: 173px;" src="http://1.bp.blogspot.com/-nqHRslSmh3I/TaL1f1sZ2CI/AAAAAAAABt4/Z5i4iyXrFh8/s400/Burnup1.png" border="0" alt=""id="BLOGGER_PHOTO_ID_5594303614485649442" /></a></p>
+<p>Obviously all that data is made up, but the chart still tells an interesting story:</p>
+<ul>
+<li>The customer hasn't been adding high priority tasks, perhaps because there is a hard deadline approaching</li>
+<li>Because of the customer's restraint in adding high priority tasks the team can be fairly confident that they will finish all the high priority tasks by Iteration 3</li>
+<li>While the customer hasn't added high priority tasks they have still been able to be agile by adding normal and low priority tasks</li>
+</ul>
+<p>What's really wonderful about this way of reporting is that it gives the customer the flexibility to add scope to future iterations while maintaining near term deadlines.  In short it supports what agile is supposed to be about.</p>
+<p>But why stop there?  Depending on the story you need to tell or the scenario you need to evaluate perhaps you could incorporate team member contributions.  For example:</p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://3.bp.blogspot.com/-J0lMgjTfmFw/TaL1fwd7rqI/AAAAAAAABuA/p1QyRmW5Byk/s1600/Burnup2.png"><img style="cursor:pointer; cursor:hand;width: 400px; height: 162px;" src="http://3.bp.blogspot.com/-J0lMgjTfmFw/TaL1fwd7rqI/AAAAAAAABuA/p1QyRmW5Byk/s400/Burnup2.png" border="0" alt=""id="BLOGGER_PHOTO_ID_5594303613082775202" /></a></p>
+<p>In this example we can try to show what might happen if we remove a particular team member or if we'd never had a particular team member.  What's unique about this way or reporting is that it's incorporating the backlog's increasing trend into account.  While it's possible that the backlog may increase or decrease at a different rate with a different team makeup, it's a better scenario than ignoring the rate of increase of the backlog all together.</p>
+<p>Perhaps we could incorporate other information.  Maybe bug vs. feature information.  Or planned vs. actual (e.g. task slippage) information.  It seems like there is a lot of potential.  Any other ideas out there?  Feel free to post in the comments or via <a href="http://www.twitter.com/lprichar">twitter</a>.  If there's enough interest I'd be happy to post another screencast similar to the last one I did on <a href=" http://www.nearinfinity.com/blogs/lee_richardson/video_how_to_create_burndown_c.html">how to produce burn up and burn down with SharePoint and Excel</a> except this time with trends and priorities.</p>
+<p>So overall while these charts may be a little more complicated than a traditional burn down chart they would make an excellent talking point during a PowerPoint presentation, or as part of your iteration close out.  And with a little training I bet just about any customer would learn to love the insight they provide.</p> 

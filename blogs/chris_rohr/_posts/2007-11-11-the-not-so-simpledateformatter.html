@@ -1,0 +1,148 @@
+--- 
+permalink: /blogs/the_not_so_simpledateformatter.html
+layout: blogs
+title: The Not-So-SimpleDateFormatter
+date: 2007-11-11 17:30:43 -05:00
+tags: Java
+---
+This posting is Part 1 of 2 related to using Dates in Java webapps.
+<h3>Problem</h3>
+
+<p>
+Your application has a form with a date entry on it.  This entry needs to allow multiple formats and perform some basic date validation on the input.
+Valid formats allowed are:
+</p>
+
+<ul>
+<li>MM/dd/yyyy</li>
+<li>MM/yyyy</li>
+<li>yyyy</li>
+<li>ddMMMyyyy</li>
+<li>MMyyyy</li>
+</ul>
+
+<h3>Solution #1</h3>
+
+<p>
+The first attempt of solving this problem was to write a custom parser that did a whole bunch of checking on string lengths and splits based on certain cases (ie. slashes and spaces).
+</p>
+
+<h4>Example code</h4>
+
+<pre class="prettyprint">
+public boolean isValidDate(String dateStr) {
+	switch(dateStr.length()) {
+		case 4:
+			//Is a year
+			//Check to see if valid year
+		case 7:
+			if (dateStr.indexOf('/') &gt; 0) {
+				//Is MM/yyyy
+				//Check to see if valid month and year
+			} else {
+				//Is MMMyyyy
+				//Check to see if valid month and year
+			}
+		case 9:
+			//Is ddMMMyyyy
+			//Check to see if valid day, month and year
+		case 10:
+			//Is MM/dd/yyyy
+			//Check to see if valid day, month and year
+		default:
+			return false;				
+	}		
+}
+</pre>
+
+<h4>Outcome</h4>
+
+<p>
+This solution proved to be problematic for a number of reasons.  First, it caused a lot of ugly code to be written.  I think the cyclomatic complexity was about 15 and the code made up of at least 60-70 lines of code.  Second, it was very error prone.  There were a couple different iterations where every case was handled and then was found not to be true (sometimes found by real users!).</p>
+
+<h3>Solution #2</h3>
+
+<p>
+After about 5 tries of getting the date validation correct, a new approach was taken.  The date string was parsed using the <tt>java.lang.text.SimpleDateFormatter</tt> and then passed into a <tt>java.util.Calendar</tt> object.  The parts that made up the date were then verified against the original string to make sure they were the same.  The reason for using the <tt>java.util.Calendar</tt> object is because by default the <tt>java.lang.text.SimpleDateFormatter</tt> is very lenient when it comes to parsing.  If the date 13/25/2007 is passed in, it will return a <tt>java.util.Date</tt> object but with the date Jan. 25th, 2008.</p>
+
+<h4>Example code</h4>
+
+<pre class="prettyprint">
+public boolean isValidDate(String dateStr, String...formats) {
+	for (String format : formats) {
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat(format);
+			Date parsedDate = sdf.parse(dateStr);
+			
+			Calendar cal = Calendar.getInstance();
+			cal.clear();
+			cal.setTime(parsedDate);
+			
+			//Get year from dateStr  (requires figuring out the parts of the date based on the format)
+			//Does the year values equal each other?
+			
+			//Get month from dateStr 
+			//Does the month values equal each other?
+			
+			//Get day from dateStr
+			//Does the day values equal each other?
+			
+		} catch (ParseException e) {
+			//Not a valid date based on format
+		}
+	}
+	
+	return false;
+}
+</pre>
+
+<h4>Outcome</h4>
+
+<p>
+This solution handled all of the cases that were problematic in Solution #1.  The code base was slimmed down some but it was still a lot of logic for parsing a simple date including still having to figure out the date parts.  Also, for date validation we didn't want the validator to "fix" the date for us.  
+</p>
+
+<h3>Solution #3</h3>
+
+<p>
+We then needed to find a way to further slim down our code.  A <a href="http://www.nearinfinity.com/blogs/page/clee">coworker</a> then found that the <tt>java.lang.text.SimpleDateFormatter</tt> had a setter for leniency.  By setting this to false, the parser will not accept 13/25/2007 as a valid date.  <strong>Note:</strong> We couldn't just use the <tt>org.apache.commons.lang.DateUtils.parseDate(String str, String[] parsePatterns)</tt> to parse the date.  That method keeps the leniency as true, leaving us in the same state we were before.
+</p>
+
+<h4>Example Code</h4>
+
+<pre class="prettyprint">
+public boolean isValidDate(String dateStr, String...formats) {
+	for (String format : formats) {
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		sdf.setLenient(false);
+		try {
+			sdf.parse(dateStr);
+			return true;
+		} catch (ParseException e) {
+			//Ignore because its not the right format.
+		}
+	}
+	return false;
+}
+</pre>
+
+<h4>Outcome</h4>
+
+<p>This piece of code was a very simple, clean solution to the problem.  However, there was one issue that crept into this example.  If I made the call <tt>isValidDate("25BAD2007", "MM/dd/yyyy", "MM/yyyy", "yyyy", "ddMMMyyyy", "MMMyyyy")</tt> the return value would be true.  The reason for this is because even though the date had more than just a year, the 2007 part passed yyyy.  The only solution to this issue that I have been able to come up with is to add some logic outside of the <tt>isValidDate</tt> method that quickly determines the formats to pass in.  Though this seems like the parsing logic was just moved from inside the method to out, it is actually less logic in the long run.  Here is the example to call the <tt>isValidDate</tt> method:</p>
+
+<pre class="prettyprint">
+boolean validDate = false;
+if (dateStr.length() == 4) {
+	validDate = isValidDate(dateStr, "yyyy");
+} else if (dateStr.indexOf('/') &gt; 0) {
+	validDate = isValidDate(dateStr, "MM/dd/yyyy", "MM/yyyy");
+} else {
+	validDate = isValidDate(dateStr, "ddMMMyyyy", "MMMyyyy");
+}
+</pre>
+
+<h3>Summary</h3>
+
+<p>
+The moral of the story is Date validation is hard when multiple formats are allowed.  Beware of what SimpleDateFormat is actually doing; You may be getting different results than expected because the parsing didn't fail.
+</p> 

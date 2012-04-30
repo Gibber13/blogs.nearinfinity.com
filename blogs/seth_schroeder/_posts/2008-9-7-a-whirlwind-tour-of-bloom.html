@@ -1,0 +1,120 @@
+--- 
+permalink: /blogs/a_whirlwind_tour_of_bloom.html
+layout: blogs
+title: A whirlwind tour of Bloom filters
+date: 2008-09-07 13:53:55 -04:00
+tags: Ruby
+---
+<h2>What's a Bloom filter?</h2>
+<div>A Bloom filter is a memory and cpu efficient way to remember which things have been seen and which haven't. They are more familiar than programmers realize; the key set of a hash map is loosely a simple Bloom filter. I haven't had a need for this level of efficiency, but it's a neat tool to keep in mind.
+
+<p>A hash map works by applying a hash function to data, and associating the output with the input data. Considering a simple hash map which stores only values, and not buckets of values:
+</p><h4>Traits of a hash map key set</h4>
+<ol>
+	<li>After an item has been stored, its existance will be known. It will never go missing. There is no chance of saying an item has not been stored after it has been stored.</li>
+	<li>After an item has been stored, it may be identified as a different item. This happens when the hash function generates the same value for distinct data. So there is a risk of falsely confirming item B has been stored after only storing item A.</li>
+	<li>The space required to hold these keys will be the product of the key size and key count. While key size is probably fixed, key count is variable and will lead to more space needed as more items are added.</li>
+</ol>
+<h4>Introducing Bloom filters</h4>
+A Bloom filter shares traits 1 and 2 of a hash map key set, but not trait 3. The space required by a Bloom filter does not increase as more items are stored. Rather than processing data with one hash function and using the result as a lookup value, a Bloom filter uses multiple hash functions to identify booleans in a fixed size array.
+<h4>Bloom filter traits</h4>
+<ol>
+	<li>Same as hash map key set trait 1</li>
+	<li>Same as hash map key set trait 2</li>
+	<li>Storage space is small, but depends on the desired false positive rate</li>
+	<li>Lookup time depends on number of hash functions; can be run in parallel</li>
+	<li>Items cannot be removed</li>
+</ol>
+These traits are thoroughly discussed by the articles in the reference section. They are required reading for serious implementations of a Bloom filter. That's outside the scope of this blog post -- so onto a trivial implementation:
+</div>
+
+<div>
+<h2>Code</h2>
+This tacky, easily improvable code was released to the public domain and promises nothing.
+<pre class="prettyprint"><a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc0"> 0: </a>class MediocreBloomFilter
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc1"> 1: </a>  M = 16                # number of boolean fields in filter
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc2"> 2: </a>  K = 3                 # number of hash functions to find boolean fields
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc3"> 3: </a>
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc4"> 4: </a>  attr_accessor :v      # the filter, a vector of boolean fields
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc5"> 5: </a>
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc6"> 6: </a>  def initialize()
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc7"> 7: </a>    @v = Array.new(M, 0)
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc8"> 8: </a>  end
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc9"> 9: </a>
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc10">10: </a>  def track_item(item)
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc11">11: </a>    indicies_for?(item).each do |i|
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc12">12: </a>      @v[i] = 1
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc13">13: </a>    end
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc14">14: </a>  end
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc15">15: </a>
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc16">16: </a>  def item_tracked?(item)
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc17">17: </a>    hits = 0
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc18">18: </a>    indicies_for?(item).each do |i|
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc19">19: </a>      hits = hits + @v[i]
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc20">20: </a>    end
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc21">21: </a>    hits == K
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc22">22: </a>  end
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc23">23: </a>
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc24">24: </a>  def indicies_for?(item)
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc25">25: </a>    indicies = []
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc26">26: </a>    md5 = Digest::MD5.new
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc27">27: </a>    hash = ""
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc28">28: </a>
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc29">29: </a>    md5.update(item.to_s)
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc30">30: </a>    hash = md5.hexdigest
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc31">31: </a>
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc32">32: </a>    K.times do |k|
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc33">33: </a>      indicies &lt;&lt; HEX.index(hash[k].chr.to_s.upcase)
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc34">34: </a>    end
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc35">35: </a>
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc36">36: </a>    indicies
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc37">37: </a>  end
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc38">38: </a>
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc39">39: </a>  HEX = [ "0", "1", "2", "3", "4", "5", "6", "7",
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc40">40: </a>          "8", "9", "A", "B", "C", "D", "E", "F" ]
+<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc41">41: </a>end
+      </pre>
+<ul>
+	<li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=a_whirlwind_tour_of_bloom#loc7">Line 7</a> sets the filter storage to 16 integers. It could have been two bytes if I wanted to do bitwise operations.</li>
+	<li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=a_whirlwind_tour_of_bloom#loc24">Line 24</a> runs the hash functions against the target data. Since this is tacky sample code only one hash function is executed (<a href="http://www.nearinfinity.com/blogs/page/seths?entry=a_whirlwind_tour_of_bloom#loc30">line 30</a>), and multiple slices are taken from the value and converted into array indicies (at <a href="http://www.nearinfinity.com/blogs/page/seths?entry=a_whirlwind_tour_of_bloom#loc33">line 33</a>).</li>
+	<li>Using integers rather than booleans has a nice side effect. It permits removal of items by using the integers as reference counts. I haven't tested it, but minor changes should be needed around lines <a href="http://www.nearinfinity.com/blogs/page/seths?entry=a_whirlwind_tour_of_bloom#loc12">12</a> and <a href="http://www.nearinfinity.com/blogs/page/seths?entry=a_whirlwind_tour_of_bloom#loc19">19</a>, and a removal function to decrement the counts.</li>
+</ul>
+So that's all well and good, but let's take a quick look at the filter as it goes through some testing. Here is the filter immediately after creation:
+
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+Now let's add the string "abc" and inspect things:
+<ul>
+	<li>item: "abc"</li>
+	<li>md5: 900150983cd24fb0d6963f7d28e17f72</li>
+	<li>indicies: [9, 0, 0]</li>
+	<li>filter: [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]</li>
+</ul>
+Adding "abd"...
+<ul>
+	<li>item: "abd"</li>
+	<li>md5: 4911e516e5aa21d327512e0c8b197616</li>
+	<li>indicies: [4, 9, 1]</li>
+	<li>filter: [1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]</li>
+</ul>
+Finally, adding my name:
+<ul>
+	<li>item: "seth schroeder"</li>
+	<li>md5: 2c38f5fd13873c139567551ca1b7496e</li>
+	<li>indicies: [2, 12, 3]</li>
+	<li>filter: [1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0]</li>
+</ul>
+This code is obviously weak, but enough to demonstrate the approach. One thing that stands out is how many hash functions should be used? False positives will be high when too few are used, and when too many are used. Fortunately smarter people have thought this out -- that's my final plea to please peruse the references.
+
+</div>
+<div><a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="references"></a>      
+<h2>References</h2>
+<ol>
+	<li><a href="http://www.perl.com/pub/a/2004/04/08/bloom_filters.html">Using Bloom Filters</a></li>
+	<li><a href="http://pages.cs.wisc.edu/%7Ecao/papers/summary-cache/node8.html">Summary Cache: A Scalable Wide-Area Web Cache Sharing Protocol</a></li>
+	<li>Burton Bloom, Space/time trade-offs in hash coding with allowable errors, CACM, 13(7):422-426, July 1970.</li>
+	<li>Paul E. Black, "Bloom filter", in <a href="http://www.nist.gov/dads/"><em>Dictionary of Algorithms and Data Structures</em></a> [online], Paul E. Black, ed., <a href="http://www.nist.gov/">U.S. National Institute of Standards and Technology</a>. 16 May 2008. Available from: <a href="http://www.nist.gov/dads/HTML/bloomFilter.html">http://www.nist.gov/dads/HTML/bloomFilter.html</a></li>
+</ol>
+</div>
+<hr>
+P.S.: If you've read this far <b>THANK YOU</b>.  <a href="http://blogs.foognostic.net/2008/09/a-whirlwind-tour-of-bloom-filters/">This entry</a> has also been posted to my <a href="http://blogs.foognostic.net/">personal blog</a>. 

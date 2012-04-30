@@ -1,0 +1,75 @@
+--- 
+permalink: /blogs/hadoop_for_managers.html
+layout: blogs
+title: Hadoop for Managers
+date: 2011-03-07 13:09:22 -05:00
+tags: Hadoop
+---
+<span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;" id="internal-source-marker_0.32143889308278895">So,
+you have a ton of data and are trying to figure out what to do with it.
+&nbsp;Big data is the newest industry buzzword and there are a myriad of
+solutions out there that claim to solve the big data problem. &nbsp;One of
+the industry leading technologies at the moment is Hadoop. &nbsp;But what is
+Hadoop and how does it make working with big data manageable? &nbsp;Lets see
+if we can take some of the essentials of Hadoop and explain them in
+more business terms. While no analogy is perfect, I think that this one
+is pretty good.</span><br /><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;"></span><br /><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;">Coca
+Cola started in Atlanta Georgia. &nbsp;Coke products were all made in one
+plant and distributed locally in Georgia. &nbsp;As the popularity of Coke
+increased over the years, the Coca Cola Company had to change the
+production and distribution of it's product in order to meet global
+demand. &nbsp;Now there are bottling plants all over the world that use raw
+materials and Coke recipes to produce and distribute billions of
+servings of Coke products a year. &nbsp;As your data grows like the demand
+for Coke, one plant will not be enough to satisfy your data production
+needs. &nbsp;Enter Hadoop.</span><br /><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;"></span><br /><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;">Hadoop
+is a distributed data crunching architecture very much like Coke's
+bottling and distribution network. &nbsp;So, why is it impractical to just
+scale one bottling plant as demand grows? Let's see. &nbsp;Physical
+infrastructure becomes a problem. &nbsp;As production scales up, you need
+more raw material. &nbsp;This means a larger loading dock, more trucks, and
+larger roads to accommodate increased traffic. &nbsp;You also need more
+machinery, more power, and more people to run the plant. &nbsp;Of course all of
+this can scale to a point but could you imagine the infrastructure that
+Coca Cola would need in Atlanta to produce all of the billions of cans of Coke that they sell a
+year?</span><br /><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;"></span><br /><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;">You
+also need a delivery network that delivers product in a timely manner.
+This is more problematic. &nbsp;Delivering Coke to new markets that are
+further away from the plant means more trucks and aged product. &nbsp;For
+all of these reasons Coca Cola made a transformational decision to ship
+raw material all over the country and eventually world and have
+regional plants bottle Coke locally. &nbsp;You can do the same thing with
+data.</span><br /><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;"></span><br /><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;">Instead
+of having one large plant that has a finite production capability,
+Hadoop allows you to have thousands of smaller distributed plants that
+work together in a network of data production. &nbsp;This solves many big
+data problems in the same way that Coke solved their production
+problem. &nbsp;A Hadoop cluster of computers is made up of as many
+production plants as you need to process your data. Your raw material
+is your data. &nbsp;Hadoop automatically distributes this raw material to
+all of your data production plants or nodes. &nbsp;When you run a Hadoop
+job, instead of pulling data to the program, it pushes the program to
+the data just like a recipe would be distributed to all of the bottling
+plants that produce Coke. &nbsp;This approach has many benefits over large
+singular databases or having one huge bottling plant.</span><br /><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;"></span><br /><h5 style="margin-left: 36pt; margin-top: 0pt; margin-bottom: 0pt;"><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: bold; font-style: normal; text-decoration: none; vertical-align: baseline;">Increase capacity without affecting production</span></h5><p style="margin-left: 36pt; margin-top: 0pt; margin-bottom: 0pt;"><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;">Adding
+a new plant has no impact on the other plants in the network. &nbsp;When a
+new plant comes online, the Hadoop system automatically distributes raw
+material to it and sends it data crunching recipes so that it can
+immediately increase capacity.</span></p><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;"></span><br /><h5 style="margin-left: 36pt; margin-top: 0pt; margin-bottom: 0pt;"><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: bold; font-style: normal; text-decoration: none; vertical-align: baseline;">Upgrade individual plants without halting production </span></h5><p style="margin-left: 36pt; margin-top: 0pt; margin-bottom: 0pt;"><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;">If
+there is a new conveyor belt that can increase the capacity of a plant,
+while one plant is being upgraded the rest can increase production
+slightly in order to absorb the temporarily reduced capacity. &nbsp;</span></p><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;"></span><br /><h5 style="margin-left: 36pt; margin-top: 0pt; margin-bottom: 0pt;"><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: bold; font-style: normal; text-decoration: none; vertical-align: baseline;">Absorb plant failures</span></h5><p style="margin-left: 36pt; margin-top: 0pt; margin-bottom: 0pt;"><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;">With
+one large system, if something catastrophic happens, all production
+stops. &nbsp;With a bottling plant network, if a plant in Wisconsin has to
+halt production because of local flooding, the plants in Illinois and
+Ohio can ratchet up capacity temporarily to meet demand while flood
+waters subside.</span></p><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;"></span><br /><h5 style="margin-left: 36pt; margin-top: 0pt; margin-bottom: 0pt;"><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: bold; font-style: normal; text-decoration: none; vertical-align: baseline;">And then there's scalability</span><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;"></span></h5><p style="margin-left: 36pt; margin-top: 0pt; margin-bottom: 0pt;"><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;">If
+I have one big plant that that is at capacity, what do I do? &nbsp;Do I
+build another big plant and double my capacity even though I may
+initially only need to increase production by 5%? &nbsp;Since the plants are
+smaller, Hadoop allows you to add what you need when you need it.</span></p><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;"></span><br /><span style="font-size: 11pt; font-family: Arial; color: rgb(0, 0, 0); background-color: transparent; font-weight: normal; font-style: normal; text-decoration: none; vertical-align: baseline;">There
+is much more to Hadoop than described here, but I think that this gives
+you a good idea as to why you should take a look at it if you have big
+data that you want to exploit in some way. &nbsp;This distribution and
+production technique did wonders for Coca Cola, just think of what it
+could do for you.</span>  

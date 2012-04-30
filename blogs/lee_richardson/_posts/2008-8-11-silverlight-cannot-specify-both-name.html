@@ -1,0 +1,53 @@
+--- 
+permalink: /blogs/silverlight_cannot_specify_both_name.html
+layout: blogs
+title: "Silverlight: Cannot specify both Name and x:Name attributes"
+date: 2008-08-11 23:58:29 -04:00
+tags: .NET
+---
+<p>I received the following error while upgrading from Silverlight beta 1 to beta 2: Cannot specify both Name and x:Name attributes. I'm sure there can be many causes, but since there isn't much written on this, here is one cause. </p>
+<div style="FLOAT: right; MARGIN-LEFT: 10px">
+<script type="text/javascript">
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2008/08/silverlight-cannot-specify-both-name.html';
+
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+
+        /* Reddit */
+        var redditIframe = document.createElement('iframe');
+        redditIframe.setAttribute('src', 'http://reddit.com/button?t=2&url=' + currentPageUrl);
+        redditIframe.setAttribute('height', '80');
+        redditIframe.setAttribute('width', '52');
+        redditIframe.setAttribute('frameborder', '0');
+        redditIframe.setAttribute('scrolling', 'no');
+        redditIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(redditIframe);
+
+        document.write(div.innerHTML);
+    </script>
+</div>
+<p>If you have a custom control you can no longer put an x:Name on the root element if you also have an x:Name on an instance of the control. A crappy work-around is to declare the root node in code and set it to the parent of a child element. For instance:</p>
+<p class="MsoNormal"><span style="FONT-SIZE: 10pt; COLOR: blue; FONT-FAMILY: 'Courier New'; mso-no-proof: yes">&lt;</span><span style="FONT-SIZE: 10pt; COLOR: #a31515; FONT-FAMILY: 'Courier New'; mso-no-proof: yes">Canvas</span><span style="FONT-SIZE: 10pt; COLOR: red; FONT-FAMILY: 'Courier New'; mso-no-proof: yes"> x</span><span style="FONT-SIZE: 10pt; COLOR: blue; FONT-FAMILY: 'Courier New'; mso-no-proof: yes">:</span><span style="FONT-SIZE: 10pt; COLOR: red; FONT-FAMILY: 'Courier New'; mso-no-proof: yes">Class</span><span style="FONT-SIZE: 10pt; COLOR: blue; FONT-FAMILY: 'Courier New'; mso-no-proof: yes">="MyNamespace.MyCustomControl"<br /></span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'; mso-no-proof: yes"><span style="mso-spacerun: yes">&nbsp;&nbsp; </span><span style="COLOR: red"><span style="mso-spacerun: yes">&nbsp;</span>xmlns</span><span style="COLOR: blue">="http://schemas.microsoft.com/client/2007"</span> <br /><span style="mso-spacerun: yes">&nbsp;&nbsp; </span><span style="COLOR: red"><span style="mso-spacerun: yes">&nbsp;</span>xmlns</span><span style="COLOR: blue">:</span><span style="COLOR: red">x</span><span style="COLOR: blue">="http://schemas.microsoft.com/winfx/2006/xaml"</span> <br /><span style="mso-spacerun: yes">&nbsp;&nbsp; </span><span style="COLOR: red"><span style="mso-spacerun: yes">&nbsp;</span><s>x</s></span><s><span style="COLOR: blue">:</span><span style="COLOR: red">Name</span><span style="COLOR: blue">="LayoutRoot"</span> <br /></s><span style="mso-spacerun: yes">&nbsp;&nbsp; </span><span style="COLOR: blue"><span style="mso-spacerun: yes">&nbsp;</span>&gt;<br /></span><span style="COLOR: #a31515"><span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; </span></span><span style="COLOR: blue">&lt;</span><span style="COLOR: #a31515">StackPanel</span><span style="COLOR: red"> x</span><span style="COLOR: blue">:</span><span style="COLOR: red">Name</span><span style="COLOR: blue">="_stackPanel"&gt;<br /><br /></span><span style="COLOR: #2b91af">Canvas</span> LayoutRoot;<br /><br /><span style="COLOR: gray">///</span><span style="COLOR: green"> </span><span style="COLOR: gray">&lt;summary&gt;<br />///</span><span style="COLOR: green"> Constructor<br /></span><span style="COLOR: gray">///</span><span style="COLOR: green"> </span><span style="COLOR: gray">&lt;/summary&gt;<br /></span><span style="COLOR: blue">public</span> ComboBox() {<br /><span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; </span>InitializeComponent();<br /><br /><span style="mso-spacerun: yes">&nbsp;&nbsp; </span><span style="COLOR: green">// set _controlBase after InitializeComponent <br /><span style="mso-spacerun: yes">&nbsp;&nbsp; </span>// <span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp;</span>so _stackPanel is initialized<br /></span><span style="mso-spacerun: yes">&nbsp;&nbsp; </span>LayoutRoot = (<span style="COLOR: #2b91af">Canvas</span>)_stackPanel.Parent;<br />}<o:p></o:p></span></p>
+<p>This is pretty fragile, so I'd love to hear any other solutions. </p> 

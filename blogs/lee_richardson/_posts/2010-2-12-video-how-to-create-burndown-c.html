@@ -1,0 +1,102 @@
+--- 
+permalink: /blogs/video_how_to_create_burndown_c.html
+layout: blogs
+title: "[video] How To Create Burndown Charts For User Stories in SharePoint"
+date: 2010-02-12 16:46:16 -05:00
+tags: Agile Development
+---
+ <p>I love tracking user stories in SharePoint.  It's free (assuming you have access to a Windows Server 2003 or 2008 machine with WSS turned on) and is extremely flexible.  Adding new custom columns is easy.  Adding custom views is easy.  Bulk editing is amazingly simple and powerful (assuming you're willing to use IE).  And building a custom home page "portal" with all the states of your team's workflow (e.g. unassigned, stories I'm working on, my resolved stories, to peer test, etc) is easy and is intuitive to use.</p>
+
+<div style='float:right; margin-left:10px;'>
+<script type='text/javascript'>
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2010/02/video-how-to-create-burndown-charts-for.html';
+
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+
+        document.write(div.innerHTML);
+    </script>
+</div>
+
+<p>This 13 minute screencast shows you how to create a user stories list in SharePoint and build burn up and burn down charts off of the data using Microsoft Excel.  It includes the custom fields you'll need in SharePoint, the formula's you'll have to create in Excel, and shows tips along the way like how to simplify refreshing your reports when data changes.</p>
+
+<object width="580" height="435"><param name="allowfullscreen" value="true" /><param name="allowscriptaccess" value="always" /><param name="movie" value="http://vimeo.com/moogaloop.swf?clip_id=9404991&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=e97000&amp;fullscreen=1" /><embed src="http://vimeo.com/moogaloop.swf?clip_id=9404991&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=e97000&amp;fullscreen=1" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="580" height="435"></embed></object>
+
+<p>Once you've watched the screencast if you want to implement this yourself here is the information you'll need:</p>
+
+<p><b>Custom SharePoint Columns</b></p>
+
+<ul>
+<li>Iteration (Choice column e.g. Iteration00, Iteration01, zBacklog)</li>
+<li>Released (Date - the date the iteration was closed out)</li>
+<li>Points (Number)</li>
+<li>Created Date (for demo only, you should be able to use "Created" on your project)</li>
+</ul>
+
+<p><b>Calculated Columns in Excel</b></p>
+
+<ul>
+<li>Total Points to Date
+  <ul>
+  <li>The total points on a specific date including backlog, current iteration and all completed stories</li>
+  <li>=SUMIF([Created Date],CONCATENATE("<=",Table_owssvr_1[[#This Row],[Released]]),[Points])</li>
+  </ul>
+</li>
+<li>Completed To Date
+  <ul>
+  <li>Total points for stories released prior to current story's release date</li>
+  <li>=SUMIF([Released],CONCATENATE("<=",Table_owssvr_1[[#This Row],[Released]]),[Points])</li>
+  </ul>
+</li>
+<li>Backlog
+  <ul>
+  <li>What remains to be completed at a point in time (e.g. don't include user stories added to the backlog in iteration 4 if this is for a task in iteration 03)</li>
+  <li>=Table_owssvr_1[[#This Row],[Total Points to Date]]-Table_owssvr_1[[#This Row],[Completed to Date]]</li>
+  </ul>
+</li>
+</ul>
+
+<p><b>Burndown Pivot Table Values</b></p>
+
+<ul>
+<li>Row: Released</li>
+<li>Filter: Released After [Some Date]</li>
+<li>Values: Max(Backlog)</li>
+</ul>
+
+<p><b>Burnup Pivot Table Values</b></p>
+
+<ul>
+<li>Row: Released</li>
+<li>Filter: Released After</li>
+<li>Values
+  <ul>
+  <li>Max(Total Points to Date)</li>
+  <li>Max(Completed To Date)</li>
+  </ul>
+</li>
+</ul>
+
+<p><b>Summary</b></p>
+<p>I hope you found the presentation useful and if you are currently using SharePoint for tracking user stories please comment on your experiences.</p> 
