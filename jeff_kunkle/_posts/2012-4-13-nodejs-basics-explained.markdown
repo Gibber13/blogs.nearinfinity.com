@@ -6,7 +6,7 @@ date: 2012-04-13 10:02:42 -04:00
 tags: JavaScript Node
 ---
  <span style="float: left; padding-right: 1em">
-![Node.js Explained](/blogs/jeff_kunkle/assets/nodejs-dark.png "Node.js Logo")
+  ![Node.js Explained](/blogs/jeff_kunkle/assets/nodejs-dark.png "Node.js Logo")
 </span>
 
 Rising from non-existence three short years ago, Node.js is already attracting the accolades and disdain enjoyed and endured by the Ruby and Rails community just a short time ago. It overtook Rails as the most popular Github repository last November (now superseded by Twitter's Bootstrap project) and was selected by InfoWorld for the Technology of the Year Award in 2012.
