@@ -9,16 +9,14 @@ On my current project we've been using [Node.js](http://nodejs.org) for an app t
 
 The module, called [pcap-parser](https://github.com/nearinfinity/node-pcap-parser), can be used to parse any pcap file or readable pcap stream, such as the piped output of [tcpdump](http://www.tcpdump.org/). As packets are parsed, pcap-parser emits relevant events to which your node program can listen. It's a really simple way to process a theoretically infinite stream of pcap data. The code below shows a basic example of it in action. Please check out the [project page](https://github.com/nearinfinity/node-pcap-parser) for more details.
 
-<pre class="prettyprint">
-var pcapp = require('pcap-parser');
+    var pcapp = require('pcap-parser');
 
-var parser = new pcapp.Parser('/path/to/file.pcap');
-// var parser = new pcapp.Parser(process.stdin);
+    var parser = new pcapp.Parser('/path/to/file.pcap');
+    // var parser = new pcapp.Parser(process.stdin);
 
-parser.on('packet', function(packet) {
-  console.log(packet.header);
-  console.log(packet.data);
-});
+    parser.on('packet', function(packet) {
+      console.log(packet.header);
+      console.log(packet.data);
+    });
 
-parser.parse(); // to kick things off
-</pre>  
+    parser.parse(); // to kick things off

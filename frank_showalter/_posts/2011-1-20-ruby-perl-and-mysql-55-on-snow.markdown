@@ -20,25 +20,22 @@ tags: Database Mac OS X Ruby
 <pre>export DYLD_LIBRARY_PATH=/usr/local/mysql/lib/</pre>
 
 <p>That should work for everything! But in case it doesn't, this will fix Rails:</p>
-<pre class="prettyprint">
-sudo install_name_tool -change libmysqlclient.16.dylib \ 
-/usr/local/mysql/lib/libmysqlclient.16.dylib \
-/usr/local/lib/ruby/gems/1.9.1/gems/mysql2-0.2.6/lib/mysql2/mysql2.bundle
-</pre>
+
+    sudo install_name_tool -change libmysqlclient.16.dylib \ 
+    /usr/local/mysql/lib/libmysqlclient.16.dylib \
+    /usr/local/lib/ruby/gems/1.9.1/gems/mysql2-0.2.6/lib/mysql2/mysql2.bundle
 
 <p>And this will fix Ruby's DBI:</p>
-<pre class="prettyprint">
-sudo install_name_tool -change libmysqlclient.16.dylib  \ 
-/usr/local/mysql/lib/libmysqlclient.16.dylib \
-/usr/local/lib/ruby/gems/1.9.1/gems/mysql-2.8.1/lib/mysql_api.bundle
-</pre>
+
+    sudo install_name_tool -change libmysqlclient.16.dylib  \ 
+    /usr/local/mysql/lib/libmysqlclient.16.dylib \
+    /usr/local/lib/ruby/gems/1.9.1/gems/mysql-2.8.1/lib/mysql_api.bundle
 
 <p><strong>Note:</strong> you'll need to substitute both the appropriate path to the gems, and the appropriate version of the MySQL library.</p>
 
 <p>Fixing Perl's DBI is a little trickier. You need to download the MySql DBD source and run the install_name_tool on the bundle before you install. Something like:</p>
 
-<pre class="prettyprint">
-sudo install_name_tool -change libmysqlclient.16.dylib \ 
-/usr/local/mysql/lib/libmysqlclient.16.dylib \
-/path-to-my-sql-dbd-source-folder-with-the-bundle-file/mysql.bundle
-</pre> 
+    sudo install_name_tool -change libmysqlclient.16.dylib \ 
+    /usr/local/mysql/lib/libmysqlclient.16.dylib \
+    /path-to-my-sql-dbd-source-folder-with-the-bundle-file/mysql.bundle
+
