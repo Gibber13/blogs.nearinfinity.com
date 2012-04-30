@@ -6,7 +6,7 @@ date: 2012-04-13 10:02:42 -04:00
 tags: JavaScript Node
 ---
  <span style="float: left; padding-right: 1em">
-![Node.js Explained](./assets/nodejs-dark.png "Node.js Logo")
+![Node.js Explained](/blogs/jeff_kunkle/assets/nodejs-dark.png "Node.js Logo")
 </span>
 
 Rising from non-existence three short years ago, Node.js is already attracting the accolades and disdain enjoyed and endured by the Ruby and Rails community just a short time ago. It overtook Rails as the most popular Github repository last November (now superseded by Twitter's Bootstrap project) and was selected by InfoWorld for the Technology of the Year Award in 2012.
@@ -30,7 +30,7 @@ The core premise behind Node's approach is that I/O operations are slow compared
 	
 From the table you can see that disk and network access times dwarf things like memory access or L1 and L2 cache access. The chart below makes the magnitude differences even more obvious. The L1, L2, and RAM access times are so much smaller than disk and network access that their bars don't even appear on the graph.
 
-![i/o magnitudes](./assets/latency-bar-graph.png "I/O Latency")
+![i/o magnitudes](/blogs/jeff_kunkle/assets/latency-bar-graph.png "I/O Latency")
 
 Waiting
 =======
@@ -45,7 +45,7 @@ Consider the following fictitious web request. The slim green bars represent the
 5. Wait for I/O
 6. Perform some final formatting of the results and return them to the client
 
-![waiting](./assets/waiting.png "Waiting")
+![waiting](/blogs/jeff_kunkle/assets/waiting.png "Waiting")
 
 The vast majority of time spent during the request involved waiting for the I/O operations, and there were only two. Very little time is actually used to perform application-specific processing. Node.js was designed from the start to exploit this imbalance.
 
@@ -57,7 +57,7 @@ Scaling with Threads
 --------------------
 Using a thread based model, you'd scale the above example by creating multiple threads, one for each concurrent connection. The diagram below depicts a threaded model capable of handling four concurrent connections.
 
-![scaling with threads](./assets/scaling-threads.png "Scaling with Threads")
+![scaling with threads](/blogs/jeff_kunkle/assets/scaling-threads.png "Scaling with Threads")
 
 While this approach allows us to scale by adding more threads, each thread still spends most of its time waiting for I/O, not processing your application logic. Unfortunately, continuing to add threads introduces context switching overhead and uses considerable memory to maintain execution stacks.
 
@@ -65,13 +65,13 @@ Scaling with Processes
 ----------------------
 Another popular approach to scaling your application is to run multiple processes. As you can see from the diagram below, the theory behind scaling with multiple processes is basically the same as scaling with threads, although it does use more memory. Like the threading model, each process still spends most of its time waiting on I/O.
 
-![scaling with processes](./assets/scaling-processes.png "Scaling with Processes")
+![scaling with processes](/blogs/jeff_kunkle/assets/scaling-processes.png "Scaling with Processes")
 
 Scaling with Node.js
 --------------------
 Since the code you write for Node.js executes in a single thread within a single process, it takes a different approach to scaling. It extracts the "I/O waiting" by using an internal thread pool or leveraging asynchronous I/O APIs of the host operating system to free your thread for processing other connections. Instead of your code blocking on I/O operations, it's freed to process other connections. When the I/O operation completes, your code is called back to handle the results.
 
-![scaling with event loop](./assets/scaling-event-loop.png "Scaling with Node.js")
+![scaling with event loop](/blogs/jeff_kunkle/assets/scaling-event-loop.png "Scaling with Node.js")
 
 With Node.js your code never blocks for I/O operations, eliminating those long gray bars of waiting time. This non-blocking mode of operation is what allows Node.js to handle large numbers of concurrent connections without overly-straining system resources.
 
