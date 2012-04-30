@@ -5,6 +5,7 @@ title: How to implement row level access control in Lucene
 date: 2008-09-27 21:08:42 -04:00
 tags: Java Lucene Security
 ---
+{% raw %}
 Below I have written some fully functionally code that shows how you could implement row level access control in Lucene (2.3.2).  Basically you have to index enough information to be able to search (in a single query) and find all documents that a given user has access to read.<br /><br />
 
 In the below example there are two fields:<br /><br />
@@ -107,3 +108,4 @@ There are two additional features that this query filter doesn't implements that
 1st - Provide per query locking around the bitset creation code.  This would allow multiple bitset creation calls to occur at once, but the same access control query would block.  Therefore we would only have to build it once, even if multiple user queries with the same access control hit the query filter at once.<br /><br />
 
 2nd - Persist the bitsets.  In the past I have used the same directory as the index, but you may want to use a database, or something else.<br /><br /> 
+{% endraw %}

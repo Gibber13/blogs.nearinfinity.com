@@ -5,6 +5,7 @@ title: Use Caution when Mixing JUnit 3 and 4
 date: 2007-12-31 07:30:00 -05:00
 tags: Java
 ---
+{% raw %}
 <p>Quick quiz, what is the output from the following JUnit test?</p>
 
 <pre class="prettyprint lang-java">package com.nearinfinity.sandbox;
@@ -54,3 +55,4 @@ Teardown has been called.
 <p>So, if your JUnit 4 test classes start acting strange, make sure that base class you're extending doesn't ultimately lead to a <em>junit.framework.TestCase</em>. </p>
 
 <p></p> 
+{% endraw %}

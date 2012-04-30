@@ -5,6 +5,7 @@ title: Performance of Guarding Debug Log Statements
 date: 2007-03-14 20:37:14 -04:00
 tags: Java
 ---
+{% raw %}
 <p>A few days ago, some people in the office were debating the value of our time honored tradition of guarding debug log statements. If you're not sure what I'm talking about, a short code sample should clear things up quickly.</p>
 
 <pre class="prettyprint lang-java">if (log.isDebugEnabled()) {
@@ -49,3 +50,4 @@ tags: Java
 <li>Guarding your log statements is a lot faster (in this case, 50x faster) than not guarding them at all or guarding them using an aspect. Even so, we're still down in the microsecond range here. If you're doing a lot of logging, you may notice a small improvement from guarding your log statements. Otherwise, you may not want to bother.</li>
 <li>Guarding your log statements with an around aspect is really no better than not guarding them at all. I'm not familiar with the internals of AspectJ, but my hunch is that even an around aspect will have to do the log statement string concatenation so that it could potentially be exposed as context for an advice. Hence, it ends up being about the same as not guarding the log statements at all.</li>
 </ol> 
+{% endraw %}

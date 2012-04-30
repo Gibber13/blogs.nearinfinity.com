@@ -5,6 +5,7 @@ title: "Chris's Blog Bytes - Best of both worlds: Hot and orderly deployment"
 date: 2008-05-31 15:56:45 -04:00
 tags: Java
 ---
+{% raw %}
 <h2>The Problem:</h2>
 
 <p>On a project I am currently involved in, the architecture is such that 6 web applications are dependent on the same managing (JNDI populating) application. This means the dependency had to be loaded by the container before it loaded the rest of the dependent applications. <br />If the arbitrary loading sequence of Tomcat failed to load the manager first, then the subsequent deployments of other applications will fail. Keep in mind that the number of dependencies from this point forward will balloon from 6 to over 75 in the near future, so the size of this problem is only going to continue to grow.</p>
@@ -34,3 +35,4 @@ tags: Java
 <p>And what do you know? It worked! Now you can hot deploy like it's going out of style and don't need to worry about your JDNI management providing application being deployed second or third or 75th.</p>
 
 <p>Good luck with your own Tomcat deployments. If worse comes to worst, just do what you want in the context file and it might just work!</p> 
+{% endraw %}

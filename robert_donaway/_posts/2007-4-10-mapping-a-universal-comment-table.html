@@ -5,6 +5,7 @@ title: Mapping a universal comment table using Hibernate 3.0
 date: 2007-04-10 18:00:00 -04:00
 tags: Java
 ---
+{% raw %}
 <p>I have used Hibernate on several projects that required the users be able to enter rich text comments for many of the major domain objects.  In each case there needed to be a one-to-many relationship between each entity and comments, so that different users could comment on an entity over time.  To store these in the database, my DBA's have requested a universal <code>COMMENT</code> table that would hold comments for any entity in a CLOB column.  Among other benefits, this allows for easy searching over the entire set of comments.</p>
 
 <p>Here is the (Oracle) DDL for a situation like this, where two domain objects, <code>Person</code> and <code>Vehicle</code>, stored in the <code>PERSON</code> and <code>VEHICLE</code> tables, store their comments in the <code>COMMENTS</code> table:</p>
@@ -110,3 +111,4 @@ to determine whether the object has a <code>getPerson()</code> or <code>getVehic
 entity the comment is about.</p>
 
 <p>A while back I tried this mapping strategy using Hibernate 2, but it didn't give me predictable results.  With Hibernate 3 it works well.</p> 
+{% endraw %}

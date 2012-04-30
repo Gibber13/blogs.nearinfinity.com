@@ -5,6 +5,7 @@ title: Deferred Execution, the Elegance of LINQ
 date: 2008-02-20 09:45:58 -05:00
 tags: .NET
 ---
+{% raw %}
 <p>One of the things I love about LINQ is its deferred execution model. It's the type of thing that makes sense academically when you first read about it (e.g. in <a href="http://weblogs.asp.net/scottgu/archive/2007/06/29/linq-to-sql-part-3-querying-our-database.aspx">Part Three</a> of Scott Gunthrie's LINQ to SQL series), but for me anyway, it took some time to understand enough to use effectively.</p>
 <div style="FLOAT: right; MARGIN-LEFT: 10px">
 <script type="text/javascript">
@@ -72,3 +73,4 @@ tags: .NET
 <p>Note that we now have a second LINQ statement that runs against the results of the LINQ statement in GetEntries(). But since nothing's been executed yet we're just building out the statement that we will eventually run when the resulting IEnumerable if enumerated. So we've now spread our LINQ statements across an inheriting and a base class, and in process we've made GetEntries() extremely generic.</p>
 <p><b>Conclusion</b></p>
 <p>So what's the big deal? The big deal is that we can spread our data access statements across multple classes and because of deferred execution we don't need to worry about the performance of generic methods that are closer to the data that don't contain a "where" clause. This may not be a huge deal in this example, but it becomes extremely powerful when the user interface tier can tack on "order by" statements or "filters" BEFORE anything is executed against your data store. And that, for me, is at the heart of the beauty of LINQ.</p> 
+{% endraw %}

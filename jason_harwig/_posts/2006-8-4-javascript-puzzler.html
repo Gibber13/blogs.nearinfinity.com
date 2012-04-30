@@ -5,6 +5,7 @@ title: Javascript Puzzler
 date: 2006-08-04 19:38:09 -04:00
 tags: JavaScript
 ---
+{% raw %}
 <p>
 Here's an interesting bug in Internet Explorer I ran across today: </p><blockquote>When using window.location to go to a named anchor inside of an iframe, using a String object versus a string primitive produces different results.</blockquote>  Okay, it's pretty hard to explain, let's look at a demo.  We need two source html files, a main outer page, and a page for the iframe.
 <p> 
@@ -54,4 +55,4 @@ window.location.hash = 'top';
 window.location.hash = new String('top');
 </code>
 
-<p><sup>1</sup><a href="http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Objects:String">Mozilla's page on Strings</a></p>
+<p><sup>1</sup><a href="http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Objects:String">Mozilla's page on Strings</a></p>{% endraw %}

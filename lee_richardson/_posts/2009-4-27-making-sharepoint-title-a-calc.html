@@ -5,6 +5,7 @@ title: Making SharePoint Title a Calculated Column
 date: 2009-04-27 08:55:54 -04:00
 tags: .NET
 ---
+{% raw %}
 <p>All SharePoint lists start with a user editable "Title" column that ECB menu's hang off of and that is the default field to display in associated child tables.  This works well most of the time.  For example if you have a list like Company, you can change the display name of Title to "Company Name," and then Employee records display that field for their parent relationship.</p>
 
 <p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://2.bp.blogspot.com/_gez10dNhuPk/SfUP1O5aPEI/AAAAAAAABpM/GjPbprracyE/s1600-h/employee-sharepoint-list.jpg"><img style="cursor:pointer; cursor:hand;width: 400px; height: 291px;" src="http://2.bp.blogspot.com/_gez10dNhuPk/SfUP1O5aPEI/AAAAAAAABpM/GjPbprracyE/s400/employee-sharepoint-list.jpg" border="0" alt=""id="BLOGGER_PHOTO_ID_5329183141269224514" /></a></p>
@@ -98,3 +99,4 @@ EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes">
         }</span></p>
 
 <p>The tricky part is getting the title field by internal name in ItemUpdating vs. getting it normally in ItemAdding.  It's pretty easy once you work through it, but it took me longer than it should have.  So hopefully this helps someone somewhere. </p> 
+{% endraw %}

@@ -5,6 +5,7 @@ title: "Client vs. server: who does what in an online spreadsheet?"
 date: 2007-05-10 17:29:59 -04:00
 tags: Spreadsheets
 ---
+{% raw %}
 "Data elements" are the focus of Section <a href="http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm#sec_5_2_1">5.2.1</a> of Dr. Fielding's dissertation. I think the focus is who does how much work to render the data. He lists three options: mostly server, mixed client &amp; server, and mostly client:
 
 <code id="bigun" class="prettyprint">                
@@ -48,3 +49,4 @@ This is an important decision for an online spreadsheet. Should the server send 
 </li><li>evaluate functions (=SUM(G3,A1) =&gt; 246.9).
 </li></ul>
 <p>I didn't expect so many neat challenges. Even the prototype implementation needed parsing, recursion, evaluating simple math expressions, tree traversal, base10 &amp; base26 conversion, and more. But all that is meat for another post.</p> 
+{% endraw %}

@@ -5,6 +5,7 @@ title: Filtering JavaScript From HTML Content in Java (Sanitizing user input)
 date: 2007-12-01 15:56:33 -05:00
 tags: Java Security
 ---
+{% raw %}
 <p>I gave a <a href="http://www.nearinfinity.com/blogs/page/jharwig?entry=javascript_security_slides_from_no">JavaScript security</a> talk last month, and one of the topics was HTML filtering.  I gave examples of how MySpace tried to filter executable code, while still allowing HTML tags for formatting.  MySpace, of course, failed to foresee every attack vector, and the <a href="http://namb.la/popular/tech.html">Samy worm</a> was born.</p>
 
 <p>HTML filtering was never recommended because it was so difficult to get right, and with no proven libraries, trying to build a solution would almost certainly contain security holes. Thanks to Arshan Dabirsiaghi we finally have something to use. He has created the <a href="http://www.owasp.org/index.php/Category:OWASP_AntiSamy_Project">OWASP AntiSamy</a> project to easily sanitize HTML input.  AntiSamy is currently implemented as a Java 1.5 compatible library, but there are plans to support other platforms.</p>
@@ -18,3 +19,4 @@ if (!results.getErrorMessages().isEmpty()) {
     log.warn("Input contains errors");
 }
 </code> 
+{% endraw %}

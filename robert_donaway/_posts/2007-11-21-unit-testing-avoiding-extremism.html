@@ -5,6 +5,7 @@ title: "Unit Testing: Avoiding Extremism"
 date: 2007-11-21 13:15:35 -05:00
 tags: Java
 ---
+{% raw %}
 <p>I've recently been working on Java code that calls a couple of web services to update another system when the data in our system changes.  I used a tool to generate the client code that actually calls the web service.  The existing code in the system was not written by me, but I think it's nicely designed and separated into the usual layers of data access, service and view.  So when I began I didn't have a whole lot of freedom in how I was going to implement the new feature -- basically I had to create service layer objects that use other services to get data from our system, insert this into the web service client object model and then invoke the service.</p>
 
 <p>Originally I had intended to use Test Driven Development (TDD) to implement this but quickly found this very difficult.  My first problem was that I had no clue what methods or method signatures would be in these service objects or even what a successful test would be until I played around with the existing API's.  So I decided to abandon TDD and just started implementing things little by little and refactored frequently.  In less than two days I had working code that I was pretty happy with and I was anxious to try it with some test data against the web service.  I spent another day getting some meaningful data loaded into my test database and by the end of the third day I had successfully tested the process in from end to end.</p>
@@ -39,3 +40,4 @@ deleting code that is difficult to test.  I'm not sure about that one, but there
 <p>There are some fairly radical points of view also, such as Wil Shipley's <a href="http://www.wilshipley.com/blog/2005/09/unit-testing-is-teh-suck-urr.html">Unit testing is teh suck, Urr.</a> tempered by bbum's <a href="http://www.friday.com/bbum/2005/09/24/unit-testing/">Unit Testing</a>.</p>
 
 <p>In his <a href="http://mjtsai.com/blog/2005/09/23/unit-testing/">blog post on unit testing</a>, a response to Wil Shipley, Michael Tsai says "My overall point is that time is limited, so you should use it wisely. And this is why extensive unit testing is a big win. Yes, it's not possible for your tests to cover all the pathways through the code, with all the possible inputs. And even if they could, it probably wouldn't be a good idea to spend your time writing tests to do that."</p> 
+{% endraw %}

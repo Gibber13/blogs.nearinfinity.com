@@ -5,6 +5,7 @@ title: Missing the each_line method in FakeFS version 0.2.1? Add it!
 date: 2010-05-06 22:22:38 -04:00
 tags: Ruby Testing
 ---
+{% raw %}
 <p>Recently we have been using the excellent <a href="http://github.com/defunkt/fakefs">FakeFS</a> (fake filesystem) gem in some specs to test code that reads and writes files on the filesystem. We are using the latest <em>release</em> version of this gem which is 0.2.1 as I am writing this. Some of the code under test uses the <code>IO</code> <code>each_line</code> method to iterate lines in relatively largish files. But we found out quickly that is a problem, since in version 0.2.1 the <code>FakeFS::File</code> class does not extend <code>StringIO</code> and so you don't get all its methods such as <code>each_line</code>. (The <a href="http://github.com/defunkt/fakefs/blob/master/lib/fakefs/file.rb">version on master in GitHub</a> as I write this does extend <code>StringIO</code>, but it is not yet released as a formal version.)
 
 As an example suppose we have the following code that prints out the size of each line in a file as stars (asterisks):
@@ -61,3 +62,4 @@ end
 </pre>
 
 <p>Since we're using RSpec, to make this work nicely we added the above code that defines <code>each_line</code> into a file named <code>fakefs.rb</code> in the <code>spec/support</code> directory, since <code>spec_helper</code> requires supporting files in the <code>spec/support</code> directory and its subdirectories. So now all our specs automatically get the <code>each_line</code> behavior when using FakeFS.</p> 
+{% endraw %}

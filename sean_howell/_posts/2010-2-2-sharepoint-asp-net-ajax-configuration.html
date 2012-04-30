@@ -5,6 +5,7 @@ title: Sharepoint ASP .Net Ajax Configuration
 date: 2010-02-02 18:34:17 -05:00
 tags: .NET Web Development
 ---
+{% raw %}
 In the world of web development, there is a little thing called ajax. Ajax is so simple because it is built in to Javascript. I like to use ajax to make web applications that look like they are not stuck in the past. Tools like jQuery make ajax so simple with its commands like:<div><pre class="prettyprint">$.get $.post $.load</pre>ASP .Net has, what they tout as ultra simple, the update panel for ajax post backs to the server. But, this tool is not as simple as it seems. While deceptively simple to stick on a page and wire up to the code behind, it takes much more to make this tool work.<div><br /><div>Like everything else in the Microsoft world, to make ASP .Net have ajax requires a dll and, through reading the documentation, a crap load of changes to the web.config file. Sure, it is easy to get the web.config all nice and set up if you have Visual Studios do it for you. Just create a new Web Site and start debugging the website. Voila, all of the configuration setting needed to use ajax are there.<br /></div><div><br /></div><div>But, for those whose have to do through code for, say, a Sharepoint web site that has to be deployed anywhere, they feel the pain of drudging through the required assembly strings and making SPWebConfigModifications. So, the first step on the path to Sharepoint ajaxiness is to go out to all the dlls and collect all the assembly strings needed:</div><div><br /><pre class="prettyprint">const string scriptResourceHandler = "System.Web.Handlers.ScriptResourceHandler,System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
 const string scripthandlerfactory = "ScriptHandlerFactory";
 const string scripthandlerfactoryappservice = "ScriptHandlerFactoryAppService";
@@ -129,3 +130,4 @@ private static SPWebConfigModification CreateWebServerHandlerSection() {
 		Owner = OWNER
 	};		
 }</safecontrol></add></add></add></remove></add></add></spwebservice></pre><br />So, why on earth does it take that much code to generate the xml required to use ajax in Sharepoint?</div></div></div> 
+{% endraw %}

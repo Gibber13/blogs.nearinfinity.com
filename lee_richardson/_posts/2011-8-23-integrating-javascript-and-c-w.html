@@ -5,6 +5,7 @@ title: Integrating JavaScript and C# with Script#
 date: 2011-08-23 23:09:48 -04:00
 tags: .NET JavaScript
 ---
+{% raw %}
 <p>Have you ever had an enum in your server code that you wanted to access in client side code?  Or wanted the safety of compile time errors when there are discrepancies between your server-side and client-side code?  Or had a C# Data Transfer Object (DTO) that you wanted to enable Intellisense for in JavaScript?  I hadn't found a good solution either ... until now.</p>
 <p><b>Compiling C# to What!?</b></p>
 
@@ -192,3 +193,4 @@ AR-SA">Type.registerNamespace(<span style="color:maroon">&#39;MyScriptSharp&#39;
 
 <p>The main downside to this approach is maintaining the batch file is a bit of a hassle.  But the upsides are that you can include any file from your server-side C# code.  And any changes in that server-side code are automatically reflected in your JavaScript.  And any breaking changes in your server-side code generate compile time errors in your client side code.  And furthermore none of your team members need to install Script#.  For our team it's an easy tradeoff.  What about for yours?  Please share your thoughts in the comments or on <a href="http://twitter.com/#!/lprichar">twitter</a>.</p>
  
+{% endraw %}

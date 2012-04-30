@@ -5,6 +5,7 @@ title: Sorting Collections in Hibernate Using SQL in @OrderBy
 date: 2009-09-15 12:40:00 -04:00
 tags: Java
 ---
+{% raw %}
 <p>When you have collections of associated objects in domain objects, you generally want to specify some kind of default sort order. For example, suppose I have domain objects <code>Timeline</code> and <code>Event</code>:</p>
 
 <pre class="prettyprint">
@@ -76,3 +77,4 @@ class Event {
 </pre>
 
 <p>Which is what you wanted in the first place. So if you need more complex sorting logic than what you can get out of the standard JPA <code>@javax.persistence.OrderBy</code>, try one of the Hibernate sorting options, either <code>@org.hibernate.annotations.Sort</code> or <code>@org.hibernate.annotations.OrderBy</code>. Adding a SQL fragment into your domain class isn't necessarily the most <i>elegant</i> thing in the world, but it might be the most <i>pragmatic</i> thing.</p> 
+{% endraw %}

@@ -5,6 +5,7 @@ title: Referential Integrity - Data Modeling Mistake 1 of 10
 date: 2007-07-18 19:02:03 -04:00
 tags: General SQL
 ---
+{% raw %}
 <p>In my mind data models are like the foundations of a house. Whether you use ORM or a more traditional modeling tool, they form the base of the entire rest of your project. Consequently, every decision you make (or don't make) regarding your data model during the design phase(s) of your project will significantly affect the duration of your project and the maintainability and performance of your application. </p>
 <div style="FLOAT: right; MARGIN-LEFT: 10px">
 <script type="text/javascript">
@@ -60,3 +61,4 @@ tags: General SQL
 <p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://bp1.blogger.com/_gez10dNhuPk/Rp6YOlrrHgI/AAAAAAAAAI0/Nxao5WbYlFM/s1600-h/Mutually+Exclusive+Problem.gif"><img id="BLOGGER_PHOTO_ID_5088672005376122370" style="CURSOR: hand" alt="" src="http://bp1.blogger.com/_gez10dNhuPk/Rp6YOlrrHgI/AAAAAAAAAI0/Nxao5WbYlFM/s400/Mutually+Exclusive+Problem.gif" border="0" /></a></p>
 <p><b>Conclusion</b></p>
 <p>Well, hopefully I've convinced you to avoid the urge to be a lazy data modeler, design for the future, use a data modeling tool, and drop constraints during bulk load operations. In short, always use referential integrity. But if not, hopefully you'll at least understand when people curse your name several years from now. :)</p> 
+{% endraw %}

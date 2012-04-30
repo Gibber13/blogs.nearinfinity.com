@@ -5,6 +5,7 @@ title: You cannot grant a user a permission level that is not attached to a web
 date: 2009-08-04 17:09:31 -04:00
 tags: .NET
 ---
+{% raw %}
 <p>If you receive this error message that looks like this:<p>
 <p>
 Microsoft.SharePoint.SPException: You cannot grant a user a permission level that is not attached to a web.<br/>
@@ -18,3 +19,4 @@ Microsoft.SharePoint.SPException: You cannot grant a user a permission level tha
 <p>It may be because SharePoint doesn't allow you to use the SPRoleDefinition you just created and you have to return the one you just added.  Stupid, but hopefully it will help someone somewhere.</p>
 
 <p>  <span style="font-size:10.0pt;line-height:115%;font-family:&quot;Courier New&quot;;mso-fareast-font-family:Calibri;mso-fareast-theme-font:minor-latin;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA;mso-no-proof:yes"><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>...<br />  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>site.Update();<br />  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:green">// you can&#39;t   just return definition because SharePoint gives you  <br />  </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:green">//<span    style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&quot;You cannot grant a user a permission   level that is not<br />  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>//<span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;  </span>attached to a web&quot; when you attempt to use it, so  <br />  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>//<span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;  </span>you need to return it again<br />  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span></span><span style="color:blue">return</span>   site.RoleDefinitions<br />  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:green">  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;</span></span>.Cast&lt;<span    style="color:#2B91AF">SPRoleDefinition</span>&gt;()<br />  <span style="color:green"><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span></span>  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;</span>.First(def =&gt; def.Name ==   ROLE_DEFINITION_TITLE);<br />  }</span></p> 
+{% endraw %}

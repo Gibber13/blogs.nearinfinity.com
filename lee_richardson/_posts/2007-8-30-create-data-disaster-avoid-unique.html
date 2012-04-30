@@ -5,6 +5,7 @@ title: "Create Data Disaster: Avoid Unique Indexes (Mistake 3 of 10)"
 date: 2007-08-30 19:54:53 -04:00
 tags: General SQL
 ---
+{% raw %}
 <p>I really enjoyed <a href="http://www.nearinfinity.com/blogs/page/seths" dtid="1125899906842629">Seth Schroeder</a>'s <a href="http://www.nearinfinity.com/blogs/page/lrichard?entry=surrogate_keys_data_modeling_mistake#comment1" dtid="1125899906842630">critique</a> of the last post in my ten part data modeling mistake series: <a href="editor-content.html??" dtid="1125899906842631">Surrogate vs Natural Primary Keys</a>. His argument regarding data migration in particular sheds light on a major shortcoming of using surrogate keys: they lead data modelers to a false sense of security regarding the uniqueness of data. Specifically if modelers ignore uniqueness constraints they allow duplicate data. And as Seth points out this has a nasty side effect of disallowing any clear way to compare data between systems. But there are other problems too.</p>
 <div style="FLOAT: right; MARGIN-LEFT: 10px">
 <script type="text/javascript">
@@ -95,3 +96,4 @@ tags: General SQL
 <p dtid="1125899906842852">Don't get me wrong, the benefits you get like mandatory surrogate keys, DBMS neutrality, lazy loading, and minimal data access code are wonderful. Just don't forget that tags like NHibernate's <i dtid="1125899906842853">unique</i> and <i dtid="1125899906842854">unique-key</i> exist. And are very necessary.</p>
 <p dtid="1125899906842855"><b dtid="1125899906842856">Conclusion</b></p>
 <p dtid="1125899906842857">To sum it up don't allow the convenience of surrogate keys to lull you into a false sense of security regarding the importance of keys. It's a trap. And it will be a disastrous one if you aren't careful.</p> 
+{% endraw %}

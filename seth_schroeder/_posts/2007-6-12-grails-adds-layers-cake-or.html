@@ -5,6 +5,7 @@ title: Grails adds layers -- cake or onion?
 date: 2007-06-12 21:43:01 -04:00
 tags: Grails Java
 ---
+{% raw %}
 <a href="http://grails.codehaus.org/">Grails</a> has big hopes. It hopes to find a place for <a href="http://groovy.codehaus.org">Groovy</a> in every tier of a Java-based webapp. It hopes to vanquish configuration files by enforcing implicit requirements / conventions. It hopes to simplify starting a respectable Java webapp by providing and configuring Hibernate, Spring, and multi-environment build files.
 
 <p>I hope the Grails dev team succeeds. JRuby is a well-intentioned, <a href="http://developers.slashdot.org/article.pl?sid=06/09/12/068253">well-heeled</a>, but misbegotten creation (q.v. <a href="http://en.wikipedia.org/wiki/Victor_Frankenstein">V. Frankenstein</a>). Should Groovy succeed, it should be the ultimate Java webapp framework. Ultimate in <a href="http://www.google.com/search?&amp;q=define:ultimate">this</a> sense: "being the last or concluding element of a series." Consider this diagram of a minimal Grails application -- can you find room for more layers?</p>
@@ -24,3 +25,4 @@ So what's the catch? Adding Grails into an existing project doesn't make much se
 <h3>Model / DAO / domain classes</h3>Hibernate mapping files and annotations are well understood ways to control ORM. GORM configuration uses static class variables. Here is a partial list: <code class="prettyprint">optionals, transients, belongsTo, hasMany, mappedBy, embedded, constraints</code>. Grails supports Groovy SQL but has plans to fork it eventually. GORM also injects id and version properties to domain objects at runtime. 
 
 <h3>Conclusion</h3>Grails adds layers, but more cake-like than onion-like. Programmers can look forward to writing Groovy code for a multi-tier webapp with the dependencies already in place. Much existing code can be migrated in by adapting it to the Grails conventions; other parts may be included as .java files. The largest learning curve will probably be GORM. Finally, it's probably a good idea to let Grails mature for 3-6 months before deploying it into production. 
+{% endraw %}

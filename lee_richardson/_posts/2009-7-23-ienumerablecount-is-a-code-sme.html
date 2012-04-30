@@ -5,6 +5,7 @@ title: IEnumerable.Count() is a Code Smell
 date: 2009-07-23 17:31:20 -04:00
 tags: .NET
 ---
+{% raw %}
 <p>Way too often I come across code like this:</p>
 
  <p class="MsoNormal">  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:#2B91AF;mso-no-proof:yes">IEnumerable</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">&lt;<span    style="color:#2B91AF">Product</span>&gt; products = GetProducts();<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;color:blue;mso-no-proof:yes">if</span><span    style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">   (products.Count() == 0) {<o:p><br />  </o:p>  </span>  <span style="font-size:10.0pt;font-family:&quot;Courier New&quot;;mso-no-proof:yes">  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>SomePlaceHolder.Visible =  <span style="color:blue">false</span>;<o:p><br />  </o:p>  } <span style="color:blue">else</span> {<o:p><br />  </o:p>  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>SomePlaceHolder.Visible =  <span style="color:blue">true</span>;<o:p><br />  </o:p>  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>SomeRepeater.DataSource = products;<o:p><br />  </o:p>  <span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>SomeRepeater.DataBind();<o:p><br />  }<br />  </o:p>  </span> </p>
@@ -72,3 +73,4 @@ tags: .NET
 <p><b>Summary</b></p>
 
 <p>IEnumerable.Count() seems like a pleasant and friendly convenience function; it feels so similar to the innocuous List.Count -- but don't be fooled.  It's a mistake.  One you (or the person who maintains the system when you leave) may soon regret.</p> 
+{% endraw %}

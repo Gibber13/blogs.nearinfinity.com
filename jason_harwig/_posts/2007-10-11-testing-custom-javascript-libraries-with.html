@@ -5,6 +5,7 @@ title: Testing JavaScript Objects with Function.prototype.call
 date: 2007-10-11 18:33:31 -04:00
 tags: JavaScript Testing
 ---
+{% raw %}
 <p>This is a short tip that I found useful for testing complex JavaScript objects using <a href="http://www.thefrontside.net/crosscheck">crosscheck</a>. For more information on crosscheck see my article on <a href="/blogs/page/jharwig?entry=javascript_unit_testing">JavaScript Unit Testing with Crosscheck</a>. </p>
 
 <p>Testing instance methods can be a pain if the functions use instance variables and the object is heavyweight. In my case the constructor did a lot with the DOM that I didn't want to mock. Instead of invoking the function through an instance of an object, I called it statically. </p> 
@@ -39,4 +40,4 @@ assertTrim: function() {
 </code>
 </p>
 
-<p>Keep increasing that coverage!</p>
+<p>Keep increasing that coverage!</p>{% endraw %}

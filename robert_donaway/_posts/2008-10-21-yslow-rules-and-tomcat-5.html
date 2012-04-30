@@ -5,6 +5,7 @@ title: YSlow Rules and Tomcat 5.5 SSL
 date: 2008-10-21 08:14:11 -04:00
 tags: Java
 ---
+{% raw %}
 <p>A few weeks ago I attended <a href="http://www.therichwebexperience.com/conference/washing_dc/index.html">The Rich Web Experience</a> where I went to talks by Scott Davis and Nathaniel Schutta and heard about using <a href="http://developer.yahoo.com/yslow/">YSlow</a> to measure how well your web application performs. Of course I rushed right back to the office to check my current project's grade and implement as many of the performance enhancing techniques as I could. My application is running in Tomcat 5.5 over SSL. As it turned out this posed an unexpected challenge and in the end the solution was trickier than I anticipated.  In case anyone else is in the same boat I'll reference the helpful article I found and summarize what I did to improve my grade.</p>
 
 <p>Adding a far-future expires header to static content (rule 3) should have been no problem. I started out creating a simple filter that I applied to CSS, JavaScript and image files. Here's the crux of the code.</p>
@@ -34,3 +35,4 @@ ${pagejs}
 <p>I played around with externalizing the page-specific JS but much of it is generated dynamically. Even when it was completely static there wasn't much of a performance boost by extracting it so we keep it inline. (I think this is because the JavaScript gets loaded serially.) One thing I like about this approach is that I can still put the JavaScript at the top of my JSP's where I'm used to seeing it and let the decorator take care of rendering it at the bottom.</p>
 
 <p>After performing these fairly simple modifications I've noticed a big improvement in performance. The user hits the home page and the browser downloads two extra minified files and a few images.  Then for the rest of the day users are just loading dynamic HTML and taking the rest from cache.  My only remaining task is to make use of a content delivery network or something like it for the static content. That ought to raise my B grade to an A!  Thanks Firebug and YSlow!!!</p> 
+{% endraw %}

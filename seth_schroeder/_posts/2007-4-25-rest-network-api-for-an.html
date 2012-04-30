@@ -5,6 +5,7 @@ title: REST Network API for an online spreadsheet
 date: 2007-04-25 16:36:31 -04:00
 tags: General
 ---
+{% raw %}
 <p>Every spreadsheet application needs to support the creating, reading, updating, and deleting of sheets, columns, rows, and cells. The network protocol for an online spreadsheet could easily treat sheets, columns, etc. as resources and offer CRUD operations for manipulating them.
 </p><p>The requests below were hand generated and sent via telnet. The responses were copy and pasted from the console window. A real frontend might use this API with XmlHttpRequest.
 </p><table border="1" cellpadding="5" cellspacing="3">
@@ -103,3 +104,4 @@ Date: Wed, 25 Apr 2007 19:41:26 GMT
 </tr>
 </tbody></table>
 <p>Note that the back end moved the value of cell A1 into cell B1 when a column was inserted before A. More details on that in a following post!</p> 
+{% endraw %}

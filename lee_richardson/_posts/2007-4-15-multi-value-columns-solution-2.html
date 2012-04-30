@@ -5,6 +5,7 @@ title: "Multi Value Columns Solution #2 - Custom Activities in SPD"
 date: 2007-04-15 12:26:09 -04:00
 tags: .NET
 ---
+{% raw %}
 <p>In the previous post in this series (<a href="http://www.nearinfinity.com/blogs/page/lrichard?entry=multi_value_columns_in_sharepoint">Multi-Value Columns in SharePoint Designer - Solution #1</a>), I described a problem where SharePoint Designer can't send e-mail to multiple recipients if those recipients exist inside of a multi-value column in a SharePoint list. The simple hacky solution I described was to temporarily turn the column into a single value column just for SharePoint Designer. But this approach has problems, and there is a better way: developing custom activities in Visual Studio for use in SharePoint Designer.</p>
 <style type="text/css"><!--.LeeCode {overflow: auto; white-space: nowrap; background: #ffffcc; color: #000000; border: 1px solid #999999; width: 100%; height: 200px; padding-bottom: 16px; }--></style>
 
@@ -89,3 +90,4 @@ tags: .NET
 <p>5. Finally, if you need to make changes to your workflow, you may need to restart SharePoint Designer to download the new dll (I usually have to).</p>
 <p><b>You're Done! Easy huh?</b></p>
 <p>So you should now have a reusable component that non-developers can use in SharePoint Designer to send e-mail to multiple recipients as determined by a multi-value column in a SharePoint list. Of course if you decide that developing the workflow in Visual Studio is better, then the third article in this series may be for you.</p> 
+{% endraw %}

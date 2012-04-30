@@ -5,6 +5,7 @@ title: Testing data -- get everything you want, none of what you don't
 date: 2008-02-05 12:49:15 -05:00
 tags: General
 ---
+{% raw %}
   <p>I believe that most software tests favor code over data. It might be an issue of tools; code testing tools are easy to use, have aggressive ide and framework support, and produce coverage metrics. Maybe better data testing tools would increase data coverage. Here's some code to demonstrate one need when testing lots of data:  catch wrong results and absent results.
   </p><p>One approach to testing data involves these parts:
     </p><ol>
@@ -130,3 +131,4 @@ c: wanted Ahhbject@12823094 C, got Ahhbject@14416801 C
     boolean equals(Object obj) { EqualsBuilder.reflectionEquals(this, obj) }
 </pre>
 <p>Add those two lines and <i>ta-da</i>! Fit for data testing!</p> 
+{% endraw %}

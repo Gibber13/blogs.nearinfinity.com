@@ -5,6 +5,7 @@ title: A little tuning can go a long way...
 date: 2009-04-02 21:50:52 -04:00
 tags: Java Lucene
 ---
+{% raw %}
 The application that I'm current developing uses Lucene for searching
 and data retrieval.&nbsp; We recently had a rather special need to use one
 of the utility classes in Lucene, OpenBitSet.&nbsp; OpenBitSet is not unlike
@@ -30,3 +31,4 @@ the greatest position to the smallest position.&nbsp; Do this 10 times and
 print off the time taken to perform both algorithms. <br /><br />
 <pre class="prettyprint">Pass [0], the slow time took 7.867899136 seconds<br />Pass [0], the fast time took 0.059851008 seconds<br />Pass [1], the slow time took 7.84461184 seconds<br />Pass [1], the fast time took 0.051954944 seconds<br />Pass [2], the slow time took 7.820731904 seconds<br />Pass [2], the fast time took 0.07801088 seconds<br />Pass [3], the slow time took 7.81953408 seconds<br />Pass [3], the fast time took 0.074951168 seconds<br />Pass [4], the slow time took 7.798106112 seconds<br />Pass [4], the fast time took 0.07792384 seconds<br />Pass [5], the slow time took 7.742498048 seconds<br />Pass [5], the fast time took 0.067644928 seconds<br />Pass [6], the slow time took 7.664754944 seconds<br />Pass [6], the fast time took 0.07476992 seconds<br />Pass [7], the slow time took 7.841472768 seconds<br />Pass [7], the fast time took 0.073187072 seconds<br />Pass [8], the slow time took 7.927188992 seconds<br />Pass [8], the fast time took 0.07574912 seconds<br />Pass [9], the slow time took 7.85273088 seconds<br />Pass [9], the fast time took 0.076514048 seconds
 </pre>So as you can see the new method is about 100 times faster than just iterating backwards over the bitset, given this sample data.&nbsp; I would assume that if the sample size of 1 million were to increase, the gap between the 2 methods would narrow.<br /> 
+{% endraw %}

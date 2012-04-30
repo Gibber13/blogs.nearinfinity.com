@@ -5,6 +5,7 @@ title: Project Euler problem 10 meets the sieve of Eratosthenes
 date: 2008-07-22 23:35:49 -04:00
 tags: Ruby
 ---
+{% raw %}
 <p><a href="http://projecteuler.net/index.php?section=problems&amp;id=10">Problem 10</a> of Project Euler is to sum the prime numbers less than two million. Solutions are supposed to take no more than one minute, so a decent prime number detector is mandatory. I'm sure lots of free, high quality solutions are available, but I have this problem with DIY / NIH syndrome. Somehow I found the sieve of Eratosthenes and a quick, tacky swipe at it was good enough.
 
 </p><p>This process is to make a list of numbers from 2 through some limit. Start with the lowest number in the list, and remove all multiples from the list. Next time through, pick the next smallest number that hasn't been crossed off yet and eliminate its multiples. Stop when your current number meets the square root of the limit. After that, the remaining numbers are prime:</p>
@@ -37,3 +38,4 @@ puts sum
 </pre>
 
 <p>I'm sure there's a more Ruby-esque way to write that. I wanted to use Python for xrange goodness, but I'm still not at peace with its quirks. Groovy would have been nice, but the free editor support is still quite young. Ruby fit right in the gap.</p> 
+{% endraw %}

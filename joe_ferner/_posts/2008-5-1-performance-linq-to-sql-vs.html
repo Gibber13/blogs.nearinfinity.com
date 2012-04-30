@@ -5,6 +5,7 @@ title: "Performance: LINQ to XML vs XmlDocument vs XmlReader"
 date: 2008-05-01 11:31:58 -04:00
 tags: .NET
 ---
+{% raw %}
 <!-- code formatted by http://manoli.net/csharpformat/ -->
 <style type="text/css">
 .csharpcode, .csharpcode pre
@@ -142,3 +143,4 @@ The following results are in milliseconds for each run. I took the total time to
 XmlReader beats LINQ to XML in almost every run except for very small XML documents. What's interesting is how the numbers scale between the encodings. XmlReader is over twice as slow when reading UTF-32 documents verse UTF-8 or ASCII encoded XML, yet LINQ to XML and XmlDocument slowed down by a much smaller amount.
 
 If you need speed when reading XML documents stick with XmlReader. If you need readability and maintainability of your code go with LINQ to SQL or XmlDocument. 
+{% endraw %}

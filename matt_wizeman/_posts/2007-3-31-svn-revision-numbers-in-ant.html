@@ -5,6 +5,7 @@ title: SVN Revision Numbers in Ant
 date: 2007-03-31 22:06:08 -04:00
 tags: Ant
 ---
+{% raw %}
 <p>
 Yesterday at work, a coworker called and asked for some ideas on how to read the Subversion revision number of a sandbox from within an Ant build script. Doing this would allow that number to be stamped on files during the build, which can help down the road when you need to figure out exactly which version of the project is running in a dev, test or integration environment.
 </p>
@@ -54,3 +55,4 @@ As luck would have it, there is. In addition to Subversion itself, the folks ove
 <p>
 This is much easier to read and I think solves the clarity problem of the first approach. As for the svn executable needing to be on the path, that may be solved too depending on the version of SvnAnt you are using. While the current stable release (1.0.0) of SvnAnt requires the svn executable or the javahl bindings, the latest development release (1.1.0-RC2) includes integration with <a href="http://www.svnkit.com/">SVNKit</a>, which is a pure Java Subversion library. This means that if the build file runs on a system that is missing the native resources for javahl, the pure Java implementation will be used and everything will still work. Nice!
 </p> 
+{% endraw %}

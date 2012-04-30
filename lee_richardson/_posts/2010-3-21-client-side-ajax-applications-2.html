@@ -5,6 +5,7 @@ title: Client Side AJAX Applications in SharePoint 2010 - Part 3
 date: 2010-03-21 22:17:25 -04:00
 tags: .NET
 ---
+{% raw %}
  <p>Note: This is one of a multi-part series exploring building client side AJAX applications with ASP.Net AJAX 4 Templating and the WCF Data Services (aka ADO.Net Data Services, aka oData, aka Astoria) in SharePoint 2010.</p>
 
 <div style='float:right; margin-left:10px;'>
@@ -352,3 +353,4 @@ maroon">&quot;\/Date(1266624000000)\/&quot;</span>,<br />
 <p>But how did the AdoNetDataContext know which objects were changed?  <a href=" http://lostintangent.com/2009/06/ ">Jonathan Carter</a> explains this better than I could but basically when the data context downloads JSON objects it injects them with the ability to notify itself when they change.  As Jonathan points out it's a neat trick that would not be possible in a statically typed language.</p>
 <p><b>Summary</b></p>
 <p>We've finally gotten to some of the core benefits of using ASP.Net AJAX 4 Templating.  With very little JavaScript we were able to cleanly separate our UI from our data access code and write data back to the server.  And the amount of HTTP traffic and server operations was kept to a bare minimum, keeping things as fast and responsive as possible.  So all we're missing at this point is how to use it to make something real out of these technologies.  And that will be the topic for the <a href="http://www.nearinfinity.com/blogs/lee_richardson/aspajax_4_templates_part_4_-_j.html">next post</a>.</p> 
+{% endraw %}

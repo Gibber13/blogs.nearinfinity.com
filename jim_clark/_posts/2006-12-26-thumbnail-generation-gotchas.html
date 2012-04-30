@@ -5,6 +5,7 @@ title: Thumbnail Generation Gotchas
 date: 2006-12-26 15:21:48 -05:00
 tags: Java
 ---
+{% raw %}
 <p>
     For a recent release of our software we had a requirement to generate and store thumbnail images.
     We have documents that come in to our system with image attachments and we need to generate a
@@ -218,4 +219,4 @@ Since we werenÃ•t planning to upgrade the JDK any time soon we went with this
     formats (e.g. animated gifs)
     and sizes (large image files). Unfortunately you'll have to actually view the images to verify expected output, but now you are 
     hopefully aware of some of the issues surrounding the generation of thumbnails using the ImageIO APIs and the AWT toolkit.
-</p>
+</p>{% endraw %}

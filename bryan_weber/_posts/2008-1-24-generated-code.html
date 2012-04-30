@@ -5,6 +5,7 @@ title: Generated code...
 date: 2008-01-24 22:39:02 -05:00
 tags: Groovy
 ---
+{% raw %}
 So most developers, especially Java developers because of its verbose syntax, have played around with generated code at one point or another.  For those of you who haven't, it is a very, very, very easy concept to understand.
 <br/>
 
@@ -50,4 +51,4 @@ So here is the important question.  Why in the world am I harping on all this hy
 
 <br/>
 So what can be done to prevent modifying generated code?  Well, just like I suggested in my verbose drivel above, modify the inputs!  In grails, for example, this means providing your changes not to the generated content, but in plug-ins that determine how your content is generated.  Now, I don't believe that grails plug-ins are robust enough at the moment (I could be wrong about this) to really make this feasible, but I would like to see g/rails adopt this type of pattern.  Both frameworks have strong runtime environments and very good generators.  But let's change the focus from modifying the generated content to modifying the inputs so we have a repeatable code generation framework.
-<br/>
+<br/>{% endraw %}

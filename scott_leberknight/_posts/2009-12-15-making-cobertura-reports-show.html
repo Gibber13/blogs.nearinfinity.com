@@ -5,6 +5,7 @@ title: Making Cobertura Reports Show Groovy Code with Maven
 date: 2009-12-15 23:33:19 -05:00
 tags: Groovy Java Testing
 ---
+{% raw %}
  <p>A recent project started out life as an all-Java project that used Maven as the build tool. Initially we used <a href="http://www.atlassian.com/software/clover/">Atlassian Clover</a> to measure unit test coverage. Clover is a great product for Java code, but unfortunately it only works with Java code because it works at the Java source level. (This was the case as of Spring 2009, and I haven't checked since then.) As we started migrating existing code from Java to Groovy and writing new code in Groovy, we started to lose data about unit test coverage because Clover does not understand Groovy code. To remedy this problem we switched from Clover to <a href="http://cobertura.sourceforge.net/">Cobertura</a>, which instruments at the bytecode level and thus works with Groovy code. Theoretically it would also work with any JVM-based language but I'm not sure whether or not it could handle something like Clojure or not.</p>
 
 <p>In any case, we only cared about Groovy so Cobertura was a good choice. With the <a href="http://mojo.codehaus.org/cobertura-maven-plugin/">Cobertura Maven</a> plugin we quickly found a problem, which was that even though the code coverage was running, the reports only showed coverage for Java code, not Groovy. This blog shows you how to display coverage on Groovy code  when using Maven and the Cobertura plugin. In other words, I'll show how to get Cobertura reports to link to the real Groovy source code in Maven, so you can navigate Cobertura reports as you normally would.</p>
@@ -33,3 +34,4 @@ tags: Groovy Java Testing
 
 <p>In the above code snippet, we're  using the "build-helper-maven-plugin" to add the src/main/groovy directory. That's pretty much it. Run Cobertura as normal, view the reports, and you should now see coverage on Groovy source code as well as Java.</p>
  
+{% endraw %}

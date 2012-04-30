@@ -5,6 +5,7 @@ title: How to add a custom action to a SharePoint list actions menu for a specif
 date: 2009-05-10 12:35:59 -04:00
 tags: .NET
 ---
+{% raw %}
 <p>
 If you have ever tried adding a SharePoint custom action to the actions menu and tried using "List" or "ContentType" as the "RegistrationType" and then tried to specify a specific list or content type in the "RegistrationId" you know that it doesn't work. SharePoint will silently not render your custom action. If you try and target a generic list using a "RegistrationId" of "100" you will see that SharePoint will gladly render your action on every list in the site. I have found a rather kludgy work around to the problem.
 </p>
@@ -87,3 +88,4 @@ Now that we have the list Guid that our control is being rendered for I will lea
 <p>
 Why SharePoint doesn't provide this kind of functionality out of the box amazes me, but at least they provide a powerful API that you can get in there and work around it in a not so horribly kludgy way. Maybe SharePoint 2010 will include this :)
 </p> 
+{% endraw %}

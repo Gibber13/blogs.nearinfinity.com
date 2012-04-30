@@ -5,6 +5,7 @@ title: Sporm - Out of the Depths of SharePoint's XML Hell
 date: 2009-09-13 21:10:03 -04:00
 tags: .NET
 ---
+{% raw %}
 <p>In my last post I described how a new open source tool called <a href="http://sporm.codeplex.com/">sporm</a> significantly simplifies <a href=" http://rapidapplicationdevelopment.blogspot.com/2009/09/unit-testing-sharepoint-past-present.html">unit testing SharePoint</a>.  Making SharePoint unit testable is my absolute favorite feature of sporm because SharePoint is notoriously hard to unit test.  But sporm provides other benefits as well and its ability to pull us out of the depths of verbose loosely typed XML hell and into LINQ excellence is next on my list of favorite features.  So in this post I'll describe the pre-sporm technique of querying with CAML, how to query data using sporm, and finally how sporm supports SharePoint's unique architecture of allowing multiple content types per list and what that means to you.</p>
 
 <p><b>Caml's Are Ugly</b></p>
@@ -143,3 +144,4 @@ tags: .NET
 <p>While you may only use multiple content types per list occasionally you can feel comfortable knowing that sporm will support you when you need it.  The rest of the time you can arrange your architecture to accommodate your 90% scenario of one content type per list.  I'll discuss the architecture I'm using on my current project in my next post.</p>
 
 <p>For now I hope this has clarified some of the benefits of using sporm, and I hope that you'll consider using it on your next SharePoint project.</p> 
+{% endraw %}

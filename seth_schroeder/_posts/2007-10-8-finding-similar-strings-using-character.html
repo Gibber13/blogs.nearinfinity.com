@@ -5,6 +5,7 @@ title: Finding similar strings using character level bigrams
 date: 2007-10-08 23:49:30 -04:00
 tags: SQL
 ---
+{% raw %}
 <p>Earlier I <a href="http://www.nearinfinity.com/blogs/page/seths?entry=counting_beignets_soundex_levenshtein_or">looked at</a> soundex as a more robust way of comparing strings. Soundex was more robust than case &amp; space normalizing... but it missed somethings I wanted and found some things I didn't want. Here's an example based on a rather limited wine rack:
 </p><pre class="prettyprint">CREATE TABLE winerack (
       wine_type TEXT
@@ -77,3 +78,4 @@ WHERE
         AND
     rhs.term = 'cabernet franc'
 </pre> 
+{% endraw %}

@@ -5,6 +5,7 @@ title: Installing Go on OSX Snow Leopard
 date: 2009-11-11 14:52:23 -05:00
 tags: General
 ---
+{% raw %}
  Go is a new experimental language that has been released by Google that is suppose to have nearly the speed of C while executing, without a lot of the normal headaches of C/C++ coding.&nbsp; For example Go has garbage collection, dynamic types, reflections, etc. see <a href="http://www.infoq.com/news/2009/11/Go-Google-New-Language">Google Experiments With A New Language, Go</a> for a good overview.&nbsp; So after reading a few things about it, I wanted to try it out, and here is how I got it working on my 64-bit OSX machine.<br /><br />It's pretty basic, all I did was follow the instructions <a href="http://golang.org/doc/install.html">here</a>.<br /><br />First I added:<br /><br /><pre class="prettyprint">export GOROOT=$HOME/go<br />export GOOS=darwin<br />export GOARCH=amd64<br />export GOBIN=$HOME/gobin<br />export PATH=$PATH:$GOBIN</pre>
 to ~/.bash_profile<br /><br />Run:<br /><br />
 <pre class="prettyprint">. ~/.bash_profile</pre>
@@ -24,3 +25,4 @@ Run:<br /><br />
 Output:<br /><br />
 <pre class="prettyprint">hello world!</pre>
 I am very excited about Go can't wait to write something real with it!<br /><br /> 
+{% endraw %}

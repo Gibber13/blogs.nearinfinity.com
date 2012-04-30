@@ -5,6 +5,7 @@ title: "Counting beignets: Soundex, Levenshtein, or case &amp; space bashing?"
 date: 2007-09-06 23:13:08 -04:00
 tags: Ruby
 ---
+{% raw %}
 One of the unpleasant tasks on my to-do list is improve the process of searching by name in a database. A parade of errors are just around the bend:  transposed letters, stray punctuation, and even random flecks of whitespace.
 
 Given these silly tables and sample data:
@@ -126,3 +127,4 @@ def levenshtein(s1, s2)
   return d[[s1.size, s2.size]]
 end
 </code> 
+{% endraw %}

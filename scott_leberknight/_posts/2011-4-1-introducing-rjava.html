@@ -5,6 +5,7 @@ title: Introducing RJava
 date: 2011-04-01 00:00:00 -04:00
 tags: Java JRuby Ruby
 ---
+{% raw %}
 <p>You've no doubt heard about JRuby, which lets you run Ruby code on the JVM. This is nice, but wouldn't it be nicer if you could write Java code on a Ruby VM? This would let you take advantage of the power of Ruby 1.9's new YARV (Yet Another Ruby VM) interpreter while letting you write code in a statically-typed language. Without further ado, I'd like to introduce <strong>RJava</strong>, which does just that!</p>
 
 <p>RJava lets you write code in Java and run it on a Ruby VM! And you still get the full benefit of the Java compiler to ensure your code is 100% correct. Of course with Java you also get checked exceptions and proper interfaces and abstract classes to ensure compliance with your design. You no longer need to worry about whether an object responds to a random message, because the Java compiler will enforce that it does.</p>
@@ -31,3 +32,4 @@ for (int i = 1; i &lt;= 10; i++) {
 <p>This example shows the benefits of declaring variables with specific types, how you can use interfaces (e.g. List in the example) when declaring variables, and shows how you also get the benefits of Java generics to ensure your collections are always type-safe. Without any doubt you know that "evens" is a List containing Integers and that "i" is an int, so you can sleep soundly knowing your code is correct. You can also see Java's powerful "for" loop at work here, to easily traverse from 1 to 10, inclusive. Finally, you saw how to effectively use Java's braces to organize code to clearly show blocks, and semi-colons ensure you always know where lines terminate.</p>
 
 <p>I've just released <a href="https://github.com/sleberknight/rjava" onclick="alert('April Fools!'); return false;">RJava</a> on GitHub, so go check it out. Please download RJava today and give it a try and let me know what you think!</p> 
+{% endraw %}

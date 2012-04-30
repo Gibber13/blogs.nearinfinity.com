@@ -5,6 +5,7 @@ title: How System.Linq.Where() Really Works
 date: 2008-03-14 14:53:47 -04:00
 tags: .NET
 ---
+{% raw %}
 <p>After writing my last blog entry on <a href="http://rapidapplicationdevelopment.blogspot.com/2008/02/deferred-execution-elegance-of-linq.html">Deferred Execution in LINQ</a> I had a conversation with <a href="http://www.nearinfinity.com/blogs/page/seths">Seth Schroeder</a> who rightly pointed out among other things that I really didn't show how LINQ's deferred execution works internally. So in this post I wanted to implement my own LINQ <i>Where()</i> extension method based off of the one in the System.Linq namespace. So I'll show you the code, explain interesting parts of how it works including collection initializiers and extension methods, and then explain where the deferred execution behavior comes from (i.e. the yield statement). I will only explain in the context of LINQ to Objects since that's far simpler than other Linq's. I will implement a Where() like LINQ to SQL does in a later blog post (that's where things get really crazy).</p>
 <div style="FLOAT: right; MARGIN-LEFT: 10px">
 <script type="text/javascript">
@@ -71,3 +72,4 @@ tags: .NET
 <p><b>Conclusion</b></p>
 <p>If this made sense then you should have a pretty solid grasp of how most of Linq to Objects works. Understanding extension methods, Func delegates, and yield statements should form the majority of what Linq does. Well, except for expression trees. But that's a topic for another post. Please post if this doesn't make sense or if I got it all wrong, I'd love to hear from you.</p><br />
 <p>P.S. To comment on this article please use <a href="http://rapidapplicationdevelopment.blogspot.com/2008/03/how-systemlinqwhere-really-works.html">my public Blog</a>.</p> 
+{% endraw %}

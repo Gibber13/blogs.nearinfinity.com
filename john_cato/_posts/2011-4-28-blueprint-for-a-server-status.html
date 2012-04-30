@@ -5,6 +5,7 @@ title: Blueprint for a Server Status Capistrano Script
 date: 2011-04-28 18:40:02 -04:00
 tags: General Ruby
 ---
+{% raw %}
 
 <p>
 Capistrano is great to work with. It's simple, powerful and flexible. For the last couple of weeks I've been building a series of Capistrano tasks that check the status and configuration of our web servers. I'm pretty happy with the results, so I though I would share the basic structure of what I've come up with. I'm just going to provide a couple of tasks here, along with all of the support methods, to provide a framework, but the idea would be to expand it with whatever commands would be run to verify the health of a server.
@@ -411,3 +412,4 @@ Then to execute the cap task you would type is:
 And watch as all the beautiful passes and fails scroll by, though hopefully more of the former.
 </p>
  
+{% endraw %}

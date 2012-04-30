@@ -5,6 +5,7 @@ title: Groovy Fun With ObjectRange
 date: 2008-06-25 15:34:02 -04:00
 tags: Groovy JRuby
 ---
+{% raw %}
 <p>I ran into a situation the other day with Groovy that baffled me at first. Let's create a range  from 0.0 to 10.0 and then use it to check if a certain number is contained within that range, like this:</p>
 
 <pre class="prettyprint">groovy:000> r = 0.0..10.0
@@ -112,3 +113,4 @@ TypeError: can't iterate from Float
 <p>Third, documentation and semantics matter. If something doesn't feel intuitively correct based on how similar things act, it is more likely to cause confusion and errors. In this case, since my unit test immediately caught the error, I was able to figure the problem out in a few minutes.</p>
 
 <p>Finally, following on from the last point, unit tests continue to remain valuable. Of course anyone who knows me would roll their eyes over my anal-ness (which Mac's dictionary is telling me is not really a word but I don't care at the moment) expecting me to get something about unit testing in somehow.</p> 
+{% endraw %}

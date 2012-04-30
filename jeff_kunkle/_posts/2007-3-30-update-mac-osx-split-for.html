@@ -5,6 +5,7 @@ title: Update Mac OSX split for Pieces Larger than 2GB and Greater
 date: 2007-03-30 10:26:23 -04:00
 tags: Mac OS X
 ---
+{% raw %}
 <p>Split is a very useful command-line utility for breaking large files into smaller pieces. Unfortunately, the version Apple ships with OSX 10.4 cannot split files into pieces 2GB or larger. Luckily, there is a newer version of split that you can compile and use instead of the Apple-supplied one.</p>
 
 <p>There is a nice <a href="http://www.macosxhints.com/article.php?story=20061118222901111">article/post</a> over at macosxhints.com describing how to upgrade split. It's really not very hard but I thought I'd write a script so people could upgrade with a minimum of effort.</p>
@@ -22,3 +23,4 @@ sudo chmod ugo+rx /usr/bin/split
 sudo chown root:wheel /usr/bin/split
 echo "Upgrade Complete."
 </sys\/cdefs.h></sys\/stat.h></sys\/cdefs.h></pre> 
+{% endraw %}

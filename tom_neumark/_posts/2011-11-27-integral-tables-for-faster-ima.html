@@ -5,6 +5,7 @@ title: Integral Image for Faster Image Processing
 date: 2011-11-27 21:29:12 -05:00
 tags: Java
 ---
+{% raw %}
 Recently, I was looking into computer vision related technologies. &nbsp;One of the interesting techniques is known as the "integral image" which can enable more advanced techniques, most notably the <a href="http://en.wikipedia.org/wiki/Viola%E2%80%93Jones_object_detection_framework">Viola-Jones object detection framework</a>, which&nbsp;uses a series of simple, Haar-like features, which are rectangular areas with dark and light regions, to find areas that match patterns that correspond with the object you are trying to find.<div><br /></div><div>To do this computation, you search an image by sliding an imaginary window with the pattern &nbsp;at multiple scales over the entire image, looking for differences between the dark and light areas of the pattern that meet a threshold that is determined by the training algorithm. &nbsp;Doing this can require many computations, so how can we speed this up? Let's frame the question this way: Starting with a gray scale image in which each pixel has a value from 0-255, how can we quickly compute the average color value in a sub-region of an image?</div><div><br /></div><div>The conventional way would be to write a loop similar the following:
 
 
@@ -71,3 +72,4 @@ After this pass through the image, we can compute the sum of any region in const
 </pre><div><br /></div>
 
 And that's it!  We can now apply this faster computation to a number of interesting problems.  For a nice tutorial on this, you may want to check out <a href="http://computersciencesource.wordpress.com/2010/09/03/computer-vision-the-integral-image/">the following</a>.</div> 
+{% endraw %}

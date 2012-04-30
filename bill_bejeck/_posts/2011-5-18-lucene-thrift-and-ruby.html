@@ -5,6 +5,7 @@ title: Lucene Thrift and Ruby
 date: 2011-05-18 23:38:30 -04:00
 tags: Java Lucene Ruby
 ---
+{% raw %}
  This post is going to demonstrate thrift usage by searching a Lucene index from Ruby.
 <h3>Thrift In a Nutshell</h3>
 Essentially thrift is a serialization and RPC framework that allows you to communicate between programs that are not necessarily written in the same language.  Thrift is used by defining data types and services in a .thrift file.  You then run the .thrift file against the thrift compiler which generates the stub code needed for clients and servers.  Currently thrift will generate code for C++, C#, Erlang, Haskell, Java, Objective C/Cocoa, OCaml, Perl, PHP, Python, Ruby, and Squeak.  For a more detailed description of thrift along with instructions on how to install thrift if needed,  consult the <a href="http://wiki.apache.org/thrift/" target="new">thrift wiki</a>
@@ -293,3 +294,4 @@ Full source for the blog including the generated code can be found <a href="http
 
 
  
+{% endraw %}
