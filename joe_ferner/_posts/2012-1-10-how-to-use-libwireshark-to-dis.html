@@ -1,0 +1,264 @@
+--- 
+permalink: /blogs/joe_ferner/how_to_use_libwireshark_to_dis.html
+layout: blogs
+title: How to use libwireshark to dissect a packet
+date: 2012-01-10 09:28:39 -05:00
+---
+{% raw %}
+<p>
+I've been doing some programming in <a href="http://nodejs.org/">node.js</a> and needed a way to parse network packets. <a href="https://github.com/mranney/node_pcap">node-pcap</a> just wasn't cutting it anymore so I figured why not use the best tool for the job, <a href="http://www.wireshark.org/">Wireshark</a>. Under the covers Wireshark uses libwireshark. In fact libwireshark is also used by tshark and rawshark to dissect network packets. When you download the source for Wireshark you won't find a libwireshark directory, what you will find is an epan directory. This directory contains most of what you need to dissect packets.
+</p>
+
+<p>
+All of the code for this blog can be found in some shape or form in my node project <a href="https://github.com/nearinfinity/node-shark">Nodeshark</a>. This blog does not cover filters or other advanced features but you can always do what I did and study the Wireshark, tshark, or rawshark code. I'm going to try and preset what I believe to be the minimum amount of code to get packet dissection working.
+</p>
+
+<p>
+The first thing you will need to do is initialize epan.
+
+<pre class="prettyprint">
+#include &lt;config.h&gt;
+#include &lt;epan/epan.h&gt;
+
+// setup permissions
+init_process_policies();
+
+// initialize GLib. GLib is used by Wireshark under the covers.
+GLogLevelFlags log_flags = (GLogLevelFlags)(
+  G_LOG_LEVEL_ERROR
+  | G_LOG_LEVEL_CRITICAL
+  | G_LOG_LEVEL_WARNING
+  | G_LOG_LEVEL_MESSAGE
+  | G_LOG_LEVEL_INFO
+  | G_LOG_LEVEL_DEBUG
+  | G_LOG_FLAG_FATAL
+  | G_LOG_FLAG_RECURSION);
+
+g_log_set_handler(NULL, log_flags, tshark_log_handler, NULL);
+g_log_set_handler(
+  LOG_DOMAIN_CAPTURE_CHILD,
+  log_flags,
+  tshark_log_handler,
+  NULL);
+
+// initialize timestamp info
+timestamp_set_type(TS_RELATIVE);
+timestamp_set_precision(TS_PREC_AUTO);
+timestamp_set_seconds_type(TS_SECONDS_DEFAULT);
+
+// initialize epan
+epan_init(
+  register_all_protocols,
+  register_all_protocol_handoffs,
+  NULL,
+  NULL,
+  failureMessage,
+  openFailureMessage,
+  readFailureMessage,
+  writeFailureMessage);
+
+// load all the modules
+prefs_register_modules();
+
+// set the locale
+setlocale(LC_ALL, "");
+
+// Cleanup all data structures used for dissection. I know
+// we haven't done any dissection yet but epan complains
+// if this isn't called.
+cleanup_dissection();
+
+// Initialize all data structures used for dissection.
+// Magical epan function that initializes global variables.
+init_dissection();
+
+// functions to log epan_init errors
+void openFailureMessage(
+  const char *filename,
+  int err,
+  gboolean for_writing) {
+  fprintf(stderr, "filename: %s, err: %d\n", filename, err);
+}
+
+void failureMessage(const char *msg_format, va_list ap) {
+  vfprintf(stderr, msg_format, ap);
+  fprintf(stderr, "\n");
+}
+
+void readFailureMessage(const char *filename, int err) {
+  fprintf(
+    stderr,
+    "An error occurred while reading from the file \"%s\": %s.",
+    filename,
+    g_strerror(err));
+}
+
+void writeFailureMessage(
+  const char *filename,
+  int err) {
+  fprintf(
+    stderr,
+    "An error occurred while writing to the file \"%s\": %s.",
+    filename,
+    g_strerror(err));
+}
+</pre>
+</p>
+
+<p>
+After initialization you probably want to open a scope for your packets. Scoping your packets allows Wireshark to do dissection, such as HTTP, across packets. In Wireshark the scope is called a capture file. Here is how we initialize it.
+
+<pre class="prettyprint">
+capture_file cfile;
+guint32 cum_bytes;
+gint64 data_offset;
+
+cap_file_init(&cfile);
+
+// This will load or not load dissectors based on your
+// wireshark preferences.
+char *gpf_path, *pf_path;
+int gpf_open_errno, gpf_read_errno;
+int pf_open_errno, pf_read_errno;
+e_prefs *prefs = read_prefs(
+  &gpf_open_errno,
+  &gpf_read_errno,
+  &gpf_path,
+  &pf_open_errno,
+  &pf_read_errno,
+  &pf_path);
+
+// Build the column format array. I beleive this holds
+// all the columns that Wireshark may return
+build_column_format_array(&cfile.cinfo, prefs->num_cols, TRUE);
+
+cfile.wth = NULL;
+cfile.f_datalen = 0;
+cfile.filename = g_strdup(""); // don't care about the filename
+cfile.is_tempfile = FALSE;
+cfile.user_saved = FALSE;
+cfile.cd_t = WTAP_FILE_UNKNOWN;
+cfile.count = 0;
+cfile.drops_known = FALSE;
+cfile.drops = 0;
+cfile.has_snap = FALSE;
+cfile.snap = WTAP_MAX_PACKET_SIZE;
+nstime_set_zero(&cfile.elapsed_time);
+
+// set the frame type. This will tell Wireshark
+// what the top level frame type is.
+int encap = wtap_pcap_encap_to_wtap_encap(1 /* ETHERNET */);
+
+// clear the timestamps
+nstime_t first_ts;
+nstime_t prev_dis_ts;
+nstime_t prev_cap_ts;
+nstime_set_unset(&first_ts);
+nstime_set_unset(&prev_dis_ts);
+nstime_set_unset(&prev_cap_ts);
+</pre>
+
+</p>
+
+<p>
+Now we can dissect packets. To do this we initialize a frame, run the packet through epan, and cleanup.
+
+<pre class="prettyprint">
+struct wtap_pkthdr whdr;
+whdr.pkt_encap = encap;
+whdr.ts.secs = 0;
+whdr.ts.nsecs = 0;
+whdr.caplen = packetLength;
+whdr.len = packetLength;
+
+frame_data fdata;
+epan_dissect_t edt;
+
+cfile.count++; // increment the packet count
+
+frame_data_init(
+  &fdata,
+  cfile.count,
+  &whdr,
+  data_offset,
+  cum_bytes);
+epan_dissect_init(
+  &edt,
+  TRUE,
+  TRUE /* dissect the whole tree */);
+frame_data_set_before_dissect(
+  &fdata,
+  &cfile.elapsed_time,
+  &first_ts,
+  &prev_dis_ts,
+  &prev_cap_ts);
+
+// run the dissection on "data"
+epan_dissect_run(
+  &edt,
+  &cfile.pseudo_header,
+  data,
+  &fdata,
+  &cfile.cinfo);
+
+frame_data_set_after_dissect(
+  &fdata,
+  &cum_bytes,
+  &prev_dis_ts);
+data_offset += whdr.caplen;
+
+// process packet information
+
+// clean up
+epan_dissect_cleanup(&edt);
+frame_data_cleanup(&fdata);
+</pre>
+
+</p>
+
+<p>
+This isn't all that useful unless we do something with the packet data. Wireshark returns the data, pretty much just like you see it in the Wireshark GUI, as a tree. Here are some of the things you can do with the data.
+
+<pre class="prettyprint">
+// iterate the current nodes children
+void iteratorFunction(proto_node *node, gpointer data) {
+  // node = child node
+  // data = the data you passed to proto_tree_children_foreach
+  field_info *fi = PNODE_FINFO(node);
+
+  // some nodes don't have field_info. You can still
+  // iterate them if you want though
+  if(fi == NULL) return;
+
+  fi->length; // size of data in packet
+
+  int posInPacket;
+  if (node->parent && node->parent->finfo
+    && (fi->start &lt; node->parent->finfo->start)) {
+    posInPacket = node->parent->finfo->start + fi->start;
+  } else {
+    posInPacket = fi->start;
+  }
+
+  // abbreviation of node. This is the string you'll
+  // see in display filters such as "tcp.srcport"
+  fi->hfinfo->abbrev;
+  
+  // This is the string that you see in the Wireshark GUI,
+  // not including the value
+  fi->rep->representation;
+
+  // This is the value string you see in the GUI
+  char *showString =
+    proto_construct_match_selected_string(fi, &edt);
+}
+
+proto_node *node = edt.tree; // grab the top level tree node
+
+// data can be anything you want it just gets
+// forwarded on to your iterator function.
+proto_tree_children_foreach(node, iteratorFunction, &data);
+</pre>
+
+</p> 
+{% endraw %}

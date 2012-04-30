@@ -1,0 +1,201 @@
+--- 
+permalink: /blogs/steven_farley/gpath_versus_xpath.html
+layout: blogs
+title: GPath versus XPath
+date: 2008-01-07 14:09:12 -05:00
+tags: Java
+---
+{% raw %}
+<h1 id="the_purpose">The Purpose</h1>
+
+<p>I have never been impressed by the XML support supplied by Java.  The DOM and SAX APIs seem overly complex for basic XML parsing.  Even using XPath in Java is a chore.  I have also used XSLT for certain applications, but that technology has its own complexity and readability issues.  When I learned about Groovy's <a href="http://groovy.codehaus.org/GPath">GPath</a>, I knew there were better days ahead.</p>
+
+<p>Naturally, the question of performance comes up when talking about using Groovy.  So I have put together a simple test which pits GPath against XPath.  The results might convince you that Groovy can replace incumbent Java technologies for certain types of applications.  When in doubt, measure it.</p>
+
+<h1 id="the_test">The Test</h1>
+
+<p>This test is not at all a comprehensive measure of all XML-parsing functionality; it doesn't even come close to exercising the full query capabilities of XPath.  The only question that is posed is <strong>How long does it take to search an XML document for matching attributes?</strong>  The three implementations that will answer this question are <strong>Java using XPath</strong>, <strong>Groovy using XPath</strong>, and <strong>Groovy using GPath</strong>.</p>
+
+<p>The XML document searched is four nodes deep (the root element, two descendent element levels, and a text node).  Every element except for the root contains exactly the same attribute name and value.  For example:</p>
+
+<pre class="prettyprint">&lt;root&gt;
+  &lt;node1 aName='aValue'&gt;
+    &lt;node1.1 aName='aValue'&gt;1.1&lt;/node1.1&gt;
+    &lt;node1.2 aName='aValue'&gt;1.2&lt;/node1.2&gt;
+    ...
+    &lt;node1.N aName='aValue'&gt;1.N&lt;/node1.N&gt;
+  &lt;/node1&gt;
+  &lt;node2 aName='aValue'&gt;
+    &lt;node2.1 aName='aValue'&gt;2.1&lt;/node2.1&gt;
+    &lt;node2.2 aName='aValue'&gt;2.2&lt;/node2.2&gt;
+    ...
+    &lt;node2.N aName='aValue'&gt;2.N&lt;/node2.N&gt;
+  &lt;/node2&gt;
+  ...
+  &lt;nodeN aName='aValue'&gt;
+    &lt;nodeN.1 aName='aValue'&gt;N.1&lt;/nodeN.1&gt;
+    &lt;nodeN.2 aName='aValue'&gt;N.2&lt;/nodeN.2&gt;
+    ...
+    &lt;nodeN.N aName='aValue'&gt;N.N&lt;/nodeN.N&gt;
+  &lt;/nodeN&gt;
+&lt;/root&gt;
+</pre>
+
+<p>The total number of elements with the 'aName' attribute is N * N + N.  The test measures performance for increasingly larger values of N, from 1 to 340, so the node total ranges from 2 to 115940 (not counting the root node).  Each search is run 10 times for each of the three implementations.</p>
+
+<p>All Groovy code except for the test script itself was pre-compiled into Java class files before executing the test.  In order to minimize the timing impact of nondeterministic JVM behaviors, the script was run with 512MB of Java heap memory allocated up front by first setting <code>export JAVA_TOOL_OPTIONS="-Xms512m -Xmx512m"</code>, an attempt to garbage collect synchronously was made by calling <code>System.gc()</code> between iterations, and 10 iterations were executed with N=100 to "warm up" HotSpot.  The machine used to test is a 2.16 GHz Intel Core 2 Duo MacBook Pro, running Mac OS X 10.5.1, with Java 1.5.0_13-119 and Groovy 1.5.0.</p>
+
+<h1 id="the_code">The Code</h1>
+
+<p>The code being tested consists of one interface and three different implementations whose performance characteristics will be compared.</p>
+
+<h2 id="selectorgroovy">Selector.groovy</h2>
+
+<p>The <code>Selector</code> interface, through its <code>countNodesForAttribute()</code> method, exposes the purpose of this test: to find all elements that contain a specific attribute name and value.  Since the goal is to measure searching performance, matching elements are merely counted, not gathered and collected.  <code>countNodesForAttribute()</code> is the only method whose execution time is recorded by the test script.</p>
+
+<pre class="prettyprint">interface Selector {
+  void setInputSource(org.xml.sax.InputSource xmlInput)
+  Integer countNodesForAttribute(String attributeName, String attributeValue)
+}
+</pre>
+
+<h2 id="javaxpathselectorjava">JavaXPathSelector.java</h2>
+
+<p>The first contender in this contest is a tried-and-true Java class.  <code>JavaXPathSelector</code> uses the default XPath implementation built into Java 5.   This code follows the recommended way to create its XML classes using factories.  Because XPath expressions need to be compiled once, a cache is used to store compiled expressions.  This has no impact on the test measurements because only one expression is used in this test, and it gets compiled during the initial iterations whose results are discarded.</p>
+
+<p>Note that the XPath expression string is assembled using <code>String.format()</code>.  Also notice that checked exceptions are caught and uncheck exceptions thrown instead.  These are pointed out for contrast with the Groovy implementation that follows.</p>
+
+<pre class="prettyprint">import org.w3c.dom.*;
+import javax.xml.xpath.*;
+import java.util.*;
+
+public class JavaXPathSelector implements Selector {
+
+  private Node document;
+  private XPath xpath;
+  private Map&lt;String, XPathExpression&gt; exprCache;
+
+  public JavaXPathSelector() { }
+
+  public void setInputSource(org.xml.sax.InputSource xmlInput) {
+    try {
+      exprCache = new HashMap&lt;String, XPathExpression&gt;();
+      xpath = XPathFactory.newInstance().newXPath();
+      document = javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlInput);   
+    }
+    catch (javax.xml.parsers.ParserConfigurationException e) { throw new RuntimeException(e); }
+    catch (org.xml.sax.SAXException e) { throw new RuntimeException(e); }
+    catch (java.io.IOException e) { throw new RuntimeException(e); }
+  }
+
+  public Integer countNodesForAttribute(String attributeName, String attributeValue) {
+    try {
+      XPathExpression xpe = getXPathExpression(String.format("//*[@%s='%s']", attributeName, attributeValue));
+      NodeList nodes = (NodeList) xpe.evaluate(document, XPathConstants.NODESET);
+      return new Integer(nodes.getLength());
+    }
+    catch (XPathExpressionException e) { throw new RuntimeException(e); }
+  }
+
+  private XPathExpression getXPathExpression(String expression) {
+    try {
+      XPathExpression xpe = exprCache.get(expression);
+      if (xpe == null) {
+        xpe = xpath.compile(expression);
+        exprCache.put(expression, xpe);
+      }
+      return xpe;
+    }
+    catch (XPathExpressionException e) { throw new RuntimeException(e); }
+  }
+}
+</pre>
+
+<h2 id="groovyxpathselectorgroovy">GroovyXPathSelector.groovy</h2>
+
+<p>This implementation is nearly identical to <code>JavaXPathSelector</code>, but with some Groovy enhancements: the semicolons are gone, the <code>public</code> keyword is dropped, bracket notation is used for the map, and checked exceptions do not need to be handled.  Also, note that the use of Java's <code>String.format()</code> has been replaced with a concise <a href="http://groovy.codehaus.org/Strings">GString</a> for creating the XPath expression string.  I chose not to use the <code>def</code> keyword because I prefer the clarity of declaring the types.</p>
+
+<p>I included this implementation because I was curious to know whether any overhead cost was incurred by using Groovy rather than Java.</p>
+
+<pre class="prettyprint">import org.w3c.dom.*
+import javax.xml.xpath.*
+
+class GroovyXPathSelector implements Selector {
+
+  private Node document
+  private XPath xpath
+  private Map&lt;String, XPathExpression&gt; exprCache
+
+  GroovyXPathSelector() { }
+
+  void setInputSource(org.xml.sax.InputSource xmlInput) {
+    exprCache = new HashMap&lt;String, XPathExpression&gt;()
+    xpath = XPathFactory.newInstance().newXPath()
+    document = javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlInput)    
+  }
+
+  Integer countNodesForAttribute(String attributeName, String attributeValue) {
+    XPathExpression xpe = getXPathExpression("//*[@${attributeName}='${attributeValue}']")
+    NodeList nodes = xpe.evaluate(document, XPathConstants.NODESET)
+    return nodes.length
+  }
+
+  private XPathExpression getXPathExpression(String expression) {
+    XPathExpression xpe = exprCache[expression]
+    if (!xpe) {
+      xpe = xpath.compile(expression)
+      exprCache[expression] = xpe
+    }
+    return xpe
+  }
+}
+</pre>
+
+<h2 id="groovygpathselectorgroovy">GroovyGPathSelector.groovy</h2>
+
+<p>Finally, here is the GPath challenger.  Astute readers will notice that there is no real equivalent to an XPath expression to be compiled and executed.  GPath doesn't work that way.  Rather, GPath expressions are Groovy expressions.  The structure of the XML document is mapped to a graph of objects that provide dynamic access to the XML nodes through properties and special methods that take great advantage of closures.  The way the attributes are searched in this case is by calling <code>findAll()</code> on the iterator returned by <code>document.depthFirst()</code>, with a closure that evaluates a boolean GPath expression looking for an attribute name/value match. </p>
+
+<pre class="prettyprint">class GroovyGPathSelector implements Selector {
+
+  private groovy.util.slurpersupport.GPathResult document
+
+  GroovyGPathSelector() { }
+
+  void setInputSource(org.xml.sax.InputSource xmlInput) {
+    document = new groovy.util.XmlSlurper().parse(xmlInput)
+  }
+
+  Integer countNodesForAttribute(String attributeName, String attributeValue) {
+    return document.depthFirst().findAll { it["@${attributeName}"] == attributeValue }.size
+  }
+}
+</pre>
+
+<h1 id="the_results">The Results</h1>
+
+<p>The performance of each <code>Selector</code> implementation was tested with XML documents containing the following numbers of elements (minus the root element): 2, 12, 20, 30, 110, 420, 930, 2070, 4970, 10100, 22650, 50850, 115940.  The recorded times were converted to elements/milliseconds so the vertical scale of the chart could be kept within a reasonable range.</p>
+
+<p>Without further ado, here are the results:</p>
+<div style="overflow: auto;"><img src="http://www.nearinfinity.com/blogs/resources/sfarley/results-chart.png" alt="GPath vs. XPath Chart" title="" /></div>
+
+<p>The first thing you might notice is that Java XPath and Groovy XPath perform identically.  That makes sense since the majority of the processing is happening in pure Java code via the <code>javax.xml.xpath</code> classes.  Because of the similarity, we can talk simply about XPath versus GPath.</p>
+
+<p>GPath readily beats XPath for documents under 100 elements, and appears to hold up well for documents greater than 50000 elements.  I don't think it's worthwhile to test larger documents since many of us are working with document sizes on the lower end of the scale.</p>
+
+<p>The real surprise for me was the XPath performance curve.  XPath beats GPath for documents sized from approximately 400 to 20000 elements.  But I never expected XPath to perform quite so poorly for smaller documents (considering the compiled expression was cached), nor did I expect such a sharp decline for very large documents.  Perhaps that is due to my ignorance of how XPath really works.</p>
+
+<h1 id="the_conclusions">The Conclusions</h1>
+
+<ul>
+<li><p>GPath performs much better that XPath when searching for attributes in XML documents containing less than 100 elements.  It seems likely that Groovy and GPath is a good choice for applications that must quickly search documents of this size. </p></li>
+<li><p>For XML documents with hundreds to several thousand elements, XPath moderately out-performs GPath.  For applications that must quickly search documents sized within this range, XPath is a good choice (but it may be feasible to implement the wrapping code in Groovy.)</p></li>
+<li><p>When a majority of the processing time is spent inside of Java-compiled classes, overhead introduced by Groovy wrapper/glue code is not discernable.</p></li>
+</ul>
+
+<p>Personally, I feel more comfortable about using Groovy and GPath for searching XML now that I have some conclusive performance numbers.  This test measured a very specific type of search, but it wouldn't be too difficult to write tests to compare GPath vs. DOM vs. SAX for general parsing.</p>
+
+<h1 id="the_download">The Download</h1>
+
+<p>Feel free to <a href="http://www.nearinfinity.com/blogs/resources/sfarley/gpath-vs-xpath.zip">download</a> the code and run the tests on your own.  It includes the <code>RunComparison.groovy</code> test script that I did not delve into.</p>
+ 
+{% endraw %}

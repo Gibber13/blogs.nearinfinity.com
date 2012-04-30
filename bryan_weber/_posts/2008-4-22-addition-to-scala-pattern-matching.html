@@ -1,0 +1,100 @@
+--- 
+permalink: /blogs/bryan_weber/addition_to_scala_pattern_matching.html
+layout: blogs
+title: Addition to scala pattern matching
+date: 2008-04-22 17:51:25 -04:00
+tags: General
+---
+{% raw %}
+I recently posted a blog post about <a href="http://www.nearinfinity.com/blogs/page/bweber?entry=scala_pattern_matching">scala pattern matching</a>.  It is intended to be an introduction to pattern matching concepts using Scala as the implementation.  I have been writing more scala code recently and I have come to the conclusion that pattern matching is missing one thing to really make it developer friendly, useful error messages!
+
+<br />
+<h1>Pattern Matching: What is missing?</h1>
+<p>
+Useful error messages.  Huh?  Why?  What are you proposing?
+</p>
+
+<br />
+<h2>When all goes well</h2>
+<p>
+The code block associated with the case is executed.  All is fine here.
+</p>
+
+<br />
+<h2>When there is no match</h2>
+<p>
+A scala.MatchError exception is thrown.  Herein lies the problem.  As a developer, I get a MatchError exception with a string that says that there was a match error.   If I look at the stack trace I can even figure out where things went wrong in the code.  But why can't I provide the match statement a String with a more developer/user friendly error message?  Why can't I say what there was no match for?  For example, suppose I am matching days of the week.  Wouldn't a message like "Unable to match the day of the week." be more useful then a general error simply stating that a MatchError was thrown?
+</p>
+
+
+
+<br />
+<h2>When there is a type mismatch</h2>
+<p>
+If the data type of the thing being matched cannot be applied to any case in the match that gets executed a scala.MatchError is thrown.  Since this is a different type of error I would contend that it is fine as is.
+</p>
+
+
+
+
+<br />
+<h2>Proposed modification</h2>
+<p>
+What if the match was passed a string with a user/developer friendly error message?  It <b>might</b> look something like this:
+
+</p><pre class="prettyprint">  val user = "harry"
+  user match "Unable to match the name against the list of Weasley boys" {
+    case "fred" =&gt;
+      println("this would not be good")
+    case "george" =&gt;
+      println("this also would not be good")
+    case "ron" =&gt;
+      println("again, not good")
+    case "percy" =&gt;
+      println("still not good")
+  }
+</pre>
+
+So instead of seeing:<br />
+
+<br />
+Caused by: scala.MatchError: harry<br />
+
+<br />
+You could see:<br />
+
+<br />
+Caused by: scala.MatchError: Unable to match the name against the list of Weasley boys<br />
+
+<br />
+Hmmm... it seems that we are still missing the value that wasn't matched, so what about a Function?<br />
+
+<pre class="prettyprint">  val user = "harry"
+  user match (n) =&gt; "Unable to match the name " + n + " against the list of Weasley boys" {
+    case "fred" =&gt;
+      println("this would not be good")
+    case "george" =&gt;
+      println("this also would not be good")
+    case "ron" =&gt;
+      println("again, not good")
+    case "percy" =&gt;
+      println("still not good")
+  }
+</pre>
+
+<br />
+Or the ultimate version:<br />
+
+<br />
+Caused by: scala.MatchError: Unable to match the name harry against the list of Weasley boys<br /> 
+
+<br /><br />
+So to summarize, I would like to see match modified to be 1 of 3 possibilities:
+<ol>
+<li>As is :)</li>
+<li>Match would take a string and use that as the message</li>
+<li>Match would take a callback function and pass it the value not matched</li>
+</ol>
+
+PS If there are more Weasley boys.. fine, that's beside the point! 
+{% endraw %}

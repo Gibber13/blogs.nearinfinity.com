@@ -1,0 +1,75 @@
+--- 
+permalink: /blogs/jason_harwig/mock_nsdate_or_other_class_met.html
+layout: blogs
+title: Mock NSDate (or other) class methods
+date: 2012-02-29 17:49:58 -05:00
+---
+{% raw %}
+<p>Today I ran into an issue unit testing a method that called <code>[NSDate date]</code>. How could I test arbitrary dates without modifying the code under test?</p>
+
+<p>I found a blog post <code>about</code> <a href="http://thom.org.uk/2009/05/09/mocking-class-methods-in-objective-c/">Mocking class methods</a> that uses an objective-c runtime technique called method swizzling.</p>
+
+<pre class="prettyprint">
+- (void)setUp {
+  [super setUp];
+  Method originalDate = class_getClassMethod([NSDate class], @selector(date));
+  Method mockDate = class_getInstanceMethod([self class], @selector(mockDate));
+  method_exchangeImplementations(originalDate, mockDate);
+}
+- (NSDate *)mockDate { 
+  return [NSDate distantPast]; 
+}
+</pre>
+
+<p>Pretty cool. Using <code>method_exchangeImplementations</code> we swapped the class method for the instance method in our test! This example shows always returning the distantPast, but I wanted to be able to change what it would return. 
+
+<p>My first attempt was to return an instance variable from <code>mockDate</code>, but that didn't work because when that method runs it's running inside of <code>NSDate</code> as a class method. It no longer is part of the test instance.
+
+<p>That's when I thought of another runtime feature of objective-c &mdash; <a href="https://developer.apple.com/library/ios/#documentation/Cocoa/Conceptual/ObjectiveC/Chapters/ocAssociativeReferences.html">Associative References</a>. An object can have pieces of metadata attached to it using <code>objc_setAssociatedObject</code> and <code>objc_getAssociatedObject</code>. This allows us to attach a date to the <code>NSDate</code> class object.
+
+<p>Here's what I came up with to finish my <code>NSDate</code> mock.
+
+<pre class="prettyprint">
+
+static char mockDateKey;
+
+- (void)setUp
+{
+  [super setUp];
+
+  // Start by having the mock return the test startup date
+  [self setMockDate:[NSDate date]];
+    
+  // Save these as instance variables so test teardown can swap the implementation back
+  originalDateMethod = class_getClassMethod([NSDate class], @selector(date));
+  mockDateMethod = class_getInstanceMethod([self class], @selector(mockDateSwizzle));
+  method_exchangeImplementations(originalDateMethod, mockDateMethod);	    
+}
+
+- (void)tearDown
+{ 
+  // Revert the swizzle   
+  method_exchangeImplementations(mockDateMethod, originalDateMethod);	
+  [super tearDown];
+}
+
+// Mock Method, replaces [NSDate date]
+- (NSDate *)mockDateSwizzle {    
+    return objc_getAssociatedObject([NSDate class], &mockDateKey);
+}
+
+// Convenience method so tests can set want they want [NSDate date] to return
+- (void)setMockDate:(NSDate *)aMockDate {
+    objc_setAssociatedObject([NSDate class], &mockDateKey, aMockDate, OBJC_ASSOCIATION_RETAIN);    
+}
+
+- (void)testMethodThatUsesDate {
+    NSDate *epoch = [NSDate dateWithTimeIntervalSince1970:0];
+    [self setMockDate:epoch];
+    STAssertEqualObjects([NSDate date], epoch, @"dates should be the same");
+
+    // ... call class that uses [NSDate date]
+}
+</pre> 
+
+{% endraw %}
