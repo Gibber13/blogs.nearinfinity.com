@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/logging_into_mac_os_x.html
+permalink: /blogs/jeff_kunkle/logging_into_mac_os_x.html
 layout: blogs
 title: Logging into Mac OS X Hidden Administrator Accounts
 date: 2007-03-24 12:20:12 -04:00

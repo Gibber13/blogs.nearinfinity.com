@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/why_i_dislike_tfs_-_team_found.html
+permalink: /blogs/joe_ferner/why_i_dislike_tfs_-_team_found.html
 layout: blogs
 title: Why I dislike TFS - Team Foundation Server
 date: 2009-09-09 18:43:05 -04:00

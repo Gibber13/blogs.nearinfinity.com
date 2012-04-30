@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/type-safe_entity_framework_inc.html
+permalink: /blogs/joe_ferner/type-safe_entity_framework_inc.html
 layout: blogs
 title: Type-Safe Entity Framework Include
 date: 2010-11-18 15:27:48 -05:00

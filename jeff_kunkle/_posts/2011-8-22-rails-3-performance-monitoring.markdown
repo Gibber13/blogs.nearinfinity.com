@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/rails_3_performance_monitoring.html
+permalink: /blogs/jeff_kunkle/rails_3_performance_monitoring.html
 layout: blogs
 title: Rails 3 Performance Monitoring with System Metrics
 date: 2011-08-22 09:42:18 -04:00

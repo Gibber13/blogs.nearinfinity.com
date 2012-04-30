@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/are_you_really_done.html
+permalink: /blogs/jeff_kunkle/are_you_really_done.html
 layout: blogs
 title: Are You Really Done?
 date: 2011-05-13 21:19:22 -04:00

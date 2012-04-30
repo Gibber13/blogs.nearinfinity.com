@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/conferences_are_not_for_learni.html
+permalink: /blogs/jeff_kunkle/conferences_are_not_for_learni.html
 layout: blogs
 title: Conferences are Not For Learning
 date: 2010-11-15 09:45:50 -05:00

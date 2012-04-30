@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/is_system_refactoring_possible.html
+permalink: /blogs/jeff_kunkle/is_system_refactoring_possible.html
 layout: blogs
 title: Is system refactoring possible?
 date: 2010-11-01 11:16:50 -04:00

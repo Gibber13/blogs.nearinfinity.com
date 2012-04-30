@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/protect_your_rails_model_objec.html
+permalink: /blogs/jeff_kunkle/protect_your_rails_model_objec.html
 layout: blogs
 title: Protect your Rails Model Objects with Grant
 date: 2009-11-18 14:00:00 -05:00

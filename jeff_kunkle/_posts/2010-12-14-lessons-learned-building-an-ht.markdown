@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/lessons_learned_building_an_ht.html
+permalink: /blogs/jeff_kunkle/lessons_learned_building_an_ht.html
 layout: blogs
 title: Lessons Learned Building an HTTPS Everywhere Safari Extension Clone
 date: 2010-12-14 08:31:55 -05:00

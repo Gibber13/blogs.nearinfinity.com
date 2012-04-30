@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/environment_specific_default_a.html
+permalink: /blogs/jeff_kunkle/environment_specific_default_a.html
 layout: blogs
 title: Environment Specific Default Attachment Options for Paperclip
 date: 2010-12-07 09:09:34 -05:00

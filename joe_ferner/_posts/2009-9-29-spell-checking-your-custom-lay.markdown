@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/spell_checking_your_custom_lay.html
+permalink: /blogs/joe_ferner/spell_checking_your_custom_lay.html
 layout: blogs
 title: Spell checking your SharePoint custom application pages
 date: 2009-09-29 11:05:03 -04:00

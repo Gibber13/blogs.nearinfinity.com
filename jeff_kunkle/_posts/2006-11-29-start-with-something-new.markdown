@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/start_with_something_new.html
+permalink: /blogs/jeff_kunkle/start_with_something_new.html
 layout: blogs
 title: Start with Something New
 date: 2006-11-29 21:25:36 -05:00

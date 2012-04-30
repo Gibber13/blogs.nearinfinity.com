@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/configuring_webrick_to_use_ssl.html
+permalink: /blogs/chris_rohr/configuring_webrick_to_use_ssl.html
 layout: blogs
 title: Configuring WEBrick to use SSL in Rails 3
 date: 2010-09-07 14:26:14 -04:00

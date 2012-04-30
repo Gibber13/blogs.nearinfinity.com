@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/mini_confluence_adds_diffchang.html
+permalink: /blogs/jeff_kunkle/mini_confluence_adds_diffchang.html
 layout: blogs
 title: Mini Confluence Adds Diff/Change Viewing
 date: 2010-12-13 09:00:00 -05:00

@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/inheriting_annotations_on_java.html
+permalink: /blogs/ed_macdonald/inheriting_annotations_on_java.html
 layout: blogs
 title: Inheriting Annotations on Java Methods
 date: 2011-04-13 13:20:25 -04:00

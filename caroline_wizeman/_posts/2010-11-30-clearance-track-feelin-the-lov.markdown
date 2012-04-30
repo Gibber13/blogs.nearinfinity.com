@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/clearance_track_feelin_the_lov.html
+permalink: /blogs/caroline_wizeman/clearance_track_feelin_the_lov.html
 layout: blogs
 title: Clearance Track feelin' the love in San Antonio
 date: 2010-11-30 17:02:33 -05:00

@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/web_performance_v_usability.html
+permalink: /blogs/chris_rohr/web_performance_v_usability.html
 layout: blogs
 title: Web Performance v. Usability
 date: 2011-06-28 13:04:53 -04:00

@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/an_introduction_to_blur.html
+permalink: /blogs/aaron_mccurry/an_introduction_to_blur.html
 layout: blogs
 title: An Introduction to Blur
 date: 2011-11-09 15:00:00 -05:00

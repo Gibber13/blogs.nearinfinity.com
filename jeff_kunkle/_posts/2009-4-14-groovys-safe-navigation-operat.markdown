@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/groovys_safe_navigation_operat.html
+permalink: /blogs/jeff_kunkle/groovys_safe_navigation_operat.html
 layout: blogs
 title: Groovy's Safe Navigation Operator Not as Safe as I Thought
 date: 2009-04-14 06:50:00 -04:00

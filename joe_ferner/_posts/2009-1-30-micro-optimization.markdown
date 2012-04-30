@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/micro-optimization.html
+permalink: /blogs/joe_ferner/micro-optimization.html
 layout: blogs
 title: Micro-optimization
 date: 2009-01-30 09:34:35 -05:00

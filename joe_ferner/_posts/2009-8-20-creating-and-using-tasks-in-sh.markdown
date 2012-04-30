@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/creating_and_using_tasks_in_sh.html
+permalink: /blogs/joe_ferner/creating_and_using_tasks_in_sh.html
 layout: blogs
 title: Creating and Using Tasks in SharePoint State Machine Workflow
 date: 2009-08-20 22:23:49 -04:00

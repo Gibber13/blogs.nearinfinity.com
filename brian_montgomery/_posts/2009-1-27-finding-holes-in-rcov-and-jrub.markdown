@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/finding_holes_in_rcov_and_jrub.html
+permalink: /blogs/brian_montgomery/finding_holes_in_rcov_and_jrub.html
 layout: blogs
 title: Finding Holes in Rcov and JRuby
 date: 2009-01-27 17:40:42 -05:00

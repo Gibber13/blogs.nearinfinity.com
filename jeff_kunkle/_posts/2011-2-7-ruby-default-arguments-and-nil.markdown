@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/ruby_default_arguments_and_nil.html
+permalink: /blogs/jeff_kunkle/ruby_default_arguments_and_nil.html
 layout: blogs
 title: Ruby Default Arguments and nil
 date: 2011-02-07 09:00:00 -05:00

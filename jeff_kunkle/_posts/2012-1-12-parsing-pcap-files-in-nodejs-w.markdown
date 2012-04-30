@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/parsing_pcap_files_in_nodejs_w.html
+permalink: /blogs/jeff_kunkle/parsing_pcap_files_in_nodejs_w.html
 layout: blogs
 title: Parsing pcap Files in Node.js with pcap-parser
 date: 2012-01-12 08:00:00 -05:00

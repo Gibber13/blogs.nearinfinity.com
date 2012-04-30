@@ -1,5 +1,5 @@
 --- 
-permalink: /blogs/automatic_code_coverage_switch.html
+permalink: /blogs/jeff_kunkle/automatic_code_coverage_switch.html
 layout: blogs
 title: Automatic Code Coverage Switching for Vows.js
 date: 2012-01-26 15:22:16 -05:00
