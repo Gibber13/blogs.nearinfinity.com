@@ -8,7 +8,7 @@ date: 2012-02-29 17:49:58 -05:00
 
 <p>I found a blog post <code>about</code> <a href="http://thom.org.uk/2009/05/09/mocking-class-methods-in-objective-c/">Mocking class methods</a> that uses an objective-c runtime technique called method swizzling.</p>
 
-<pre class="prettyprint">
+{% highlight objc %}
 - (void)setUp {
   [super setUp];
   Method originalDate = class_getClassMethod([NSDate class], @selector(date));
@@ -18,7 +18,7 @@ date: 2012-02-29 17:49:58 -05:00
 - (NSDate *)mockDate { 
   return [NSDate distantPast]; 
 }
-</pre>
+{% endhighlight %}
 
 <p>Pretty cool. Using <code>method_exchangeImplementations</code> we swapped the class method for the instance method in our test! This example shows always returning the distantPast, but I wanted to be able to change what it would return. 
 
@@ -28,8 +28,7 @@ date: 2012-02-29 17:49:58 -05:00
 
 <p>Here's what I came up with to finish my <code>NSDate</code> mock.
 
-<pre class="prettyprint">
-
+{% highlight objc %}
 static char mockDateKey;
 
 - (void)setUp
@@ -69,5 +68,5 @@ static char mockDateKey;
 
     // ... call class that uses [NSDate date]
 }
-</pre> 
+{% endhighlight %}
 
