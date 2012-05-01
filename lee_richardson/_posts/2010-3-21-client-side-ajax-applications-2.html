@@ -64,8 +64,7 @@ AR-SA"> <span style="color:red">id</span><span style="color:blue">=&quot;userSto
  </span><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="color:blue">&lt;</span><span 
   style="color:maroon">li</span><span style="color:blue">&gt;&lt;</span><span 
   style="color:maroon">a</span> <span style="color:red">href</span><span 
-  style="color:blue">=&quot;../../Lists/User%20Stories/DispForm.aspx?ID={{ID}}&quot;&gt;</span>{{ 
- Title }}<span style="color:blue">&lt;/</span><span style="color:maroon">a</span><span 
+  style="color:blue">=&quot;../../Lists/User%20Stories/DispForm.aspx?ID=&#123;&#123; ID &#124;&#124;&quot;&gt;</span>&#123;&#123; Title &#124;&#124;<span style="color:blue">&lt;/</span><span style="color:maroon">a</span><span 
   style="color:blue">&gt;&lt;/</span><span style="color:maroon">li</span><span 
   style="color:blue">&gt;<br />
  &lt;/</span><span style="color:maroon">ul</span><span style="color:blue">&gt;</span></span></p>
@@ -87,8 +86,8 @@ mso-fareast-theme-font:minor-latin;color:maroon;mso-ansi-language:EN-US;
 mso-fareast-language:EN-US;mso-bidi-language:AR-SA">a</span><span style="font-size:9.5pt;line-height:115%;font-family:Consolas;mso-fareast-font-family:
 Calibri;mso-fareast-theme-font:minor-latin;mso-ansi-language:EN-US;mso-fareast-language:
 EN-US;mso-bidi-language:AR-SA"> <span style="color:red">href</span><span 
-  style="color:blue">=&quot;{{ &#39;../../Lists/User%20Stories/DispForm.aspx?ID=&#39; + ID 
- }}&quot;&gt;</span>{{ Title }}<span style="color:blue">&lt;/</span><span 
+  style="color:blue">=&quot;&#123;&#123; &#39;../../Lists/User%20Stories/DispForm.aspx?ID=&#39; + ID 
+  &#124;&#124;&quot;&gt;</span>&#123;&#123; Title &#124;&#124;<span style="color:blue">&lt;/</span><span 
   style="color:maroon">a</span><span style="color:blue">&gt;&lt;/</span><span 
   style="color:maroon">li</span><span style="color:blue">&gt;</span></span></p>
 
@@ -112,8 +111,8 @@ AR-SA"> <span style="color:red">xmlns</span><span style="color:blue">:</span><sp
   style="color:maroon">li</span><span style="color:blue">&gt;&lt;</span><span 
   style="color:maroon">a</span> <span style="color:red">sys</span><span 
   style="color:blue">:</span><span style="color:red">href</span><span 
-  style="color:blue">=&quot;{{ &#39;../../Lists/User%20Stories/DispForm.aspx?ID=&#39; + ID 
- }}&quot;&gt;</span>{{ Title }}<span style="color:blue">&lt;/</span><span 
+  style="color:blue">=&quot;&#123;&#123; &#39;../../Lists/User%20Stories/DispForm.aspx?ID=&#39; + ID 
+  &#124;&#124;&quot;&gt;</span>&#123;&#123; Title &#124;&#124;<span style="color:blue">&lt;/</span><span 
   style="color:maroon">a</span><span style="color:blue">&gt;&lt;/</span><span 
   style="color:maroon">li</span><span style="color:blue">&gt;<br />
  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;/</span><span style="color:maroon">ul</span><span 
@@ -123,7 +122,7 @@ AR-SA"> <span style="color:red">xmlns</span><span style="color:blue">:</span><sp
 <p>Great.  Let's move on to updating data.</p>
 
 <p><b>Live Binding Syntax</b></p>
-<p>The {{ }} template syntax we've seen so far is what's known as one time binding.  When you use this syntax the expression is evaluated only once when the template is rendered.  What we want is one way live binding and/or two way live binding.</p>
+<p>The &#123;&#123; &#124;&#124; template syntax we've seen so far is what's known as one time binding.  When you use this syntax the expression is evaluated only once when the template is rendered.  What we want is one way live binding and/or two way live binding.</p>
 
 <p>In order to understand the live bindings you need to understand that behind the scenes the DataView keeps an in memory copy of all of the JSON objects it downloads.  It's possible for the data in these objects to change.  And that's where one way live bindings come in.  When you use the syntax { binding [FieldName] }, the DataView will automatically update the binding when the underlying JSON object changes.</p>
 
@@ -196,8 +195,8 @@ AR-SA"> <span style="color:red">type</span><span style="color:blue">=&quot;text/
   style="color:maroon">li</span><span style="color:blue">&gt;&lt;</span><span 
   style="color:maroon">a</span> <span style="color:red">sys</span><span 
   style="color:blue">:</span><span style="color:red">href</span><span 
-  style="color:blue">=&quot;{{ &#39;../../Lists/User%20Stories/DispForm.aspx?ID=&#39; + ID 
- }}&quot;&gt;</span>{ binding Title }<span style="color:blue">&lt;/</span><span 
+  style="color:blue">=&quot;&#123;&#123; &#39;../../Lists/User%20Stories/DispForm.aspx?ID=&#39; + ID 
+  &#124;&#124;&quot;&gt;</span>{ binding Title }<span style="color:blue">&lt;/</span><span 
   style="color:maroon">a</span><span style="color:blue">&gt;&lt;/</span><span 
   style="color:maroon">li</span><span style="color:blue">&gt;</span><br />
  <span style="mso-spacerun:yes">&nbsp; &nbsp;&nbsp;</span><span style="color:blue">&lt;/</span><span 
