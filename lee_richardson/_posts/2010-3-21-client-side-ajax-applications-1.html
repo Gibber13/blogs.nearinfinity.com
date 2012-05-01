@@ -271,7 +271,7 @@ AR-SA"> <span style="color:red">ID</span><span style="color:blue">=&quot;PageHea
   style="color:blue">=&quot;userStoriesList&quot;</span> <span style="color:red">class</span><span 
   style="color:blue">=&quot;sys-template&quot;&gt;<br />
  </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="color:blue">&lt;</span><span 
- style="color:maroon">li</span><span style="color:blue">&gt;</span>&#123;&#123; Title &#124;&#124;<span 
+ style="color:maroon">li</span><span style="color:blue">&gt;</span>&#123;&#123; Title &#125;&#125;<span 
   style="color:blue">&lt;/</span><span style="color:maroon">li</span><span 
   style="color:blue">&gt;<br />
  </span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span><span style="color:blue">&lt;/</span><span 
@@ -280,7 +280,7 @@ AR-SA"> <span style="color:red">ID</span><span style="color:blue">=&quot;PageHea
   style="color:maroon">Content</span><span style="color:blue">&gt;</span></span></p>
 
 <p>The four script references in the PageHead Content control are necessary to define the required ASP.Net AJAX JavaScript classes you'll need for templating.  But the Main content control is where things get interesting.</p>
-<p>Skip over the JavaScript for now and notice the unordered list named userStoriesList.  Inside of the li elements is a strange notation: &#123;&#123; Title &#124;&#124;.  This specifies a binding to the name of a SharePoint field.  You could also have put in PriorityValue or any of the other columns specified in the JSON that I showed in Part 1.</p>
+<p>Skip over the JavaScript for now and notice the unordered list named userStoriesList.  Inside of the li elements is a strange notation: &#123;&#123; Title &#125;&#125;.  This specifies a binding to the name of a SharePoint field.  You could also have put in PriorityValue or any of the other columns specified in the JSON that I showed in Part 1.</p>
 <p>As far as the JavaScript, the dataContext variable is a class of type AdoNetDataContext, which knows how to talk to WCF Data Services like ListData.svc.  It inherits from a JavaScript class called DataContext which is extensible and knows how to talk with other protocols, but us SharePoint developers probably won't care about this most of the time.</p>
 <p>The userStoriesTemplate variable is a class of type DataView.  This is where the magic happens.  DataViews pull data from a DataContext, duplicates the innerHtml of an associated DOM element for each row returned (e.g. userStoriesList), and replace the binding syntax with real data.  Seems simple enough, but it is actually quite sophisticated when you get to some more advanced scenarios that I'll describe later.</p>
 <p>One last thing to notice is the sys-template class.  This is a prespecified CSS class that ASP.Net AJAX sets to display: block when it is finished rendering.  It's a good idea to create a CSS class for sys-template with display: none so that end users don't see your template code while the page is loading.  Obviously you should do this in a separate CSS class in LAYOUTS or if you're lazy you can put it in the PageHead content control like so:</p>
