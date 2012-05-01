@@ -1,0 +1,103 @@
+--- 
+permalink: /blogs/jason_harwig/javascript_particle_engine.html
+layout: blogs
+title: Javascript Particle Engine
+date: 2006-11-07 23:28:54 -05:00
+tags: JavaScript
+---
+<h1 style="display:none">Javascript particle Engine</h1>
+<div style="padding:15px;background-color:#ffffcc">Updated: <a href="http://www.nearinfinity.com/blogs/jason_harwig/javascript_particle_engine_in_canvas.html">Particle Engine using Canvas</a></div>
+
+<p>I was at the No Fluff Just Stuff Software Symposium in Reston, VA this past weekend and had some time in between sessions to work on something. As most of the people I work with know, I rarely code things that might actually be useful to someone in my spare time.  So, I had no reason to attempt to rationalize the use for a particle engine in Javascript.</p>
+
+<p>I think I've written a particle engine in almost every language I've used for an extended period of time. This includes python, java, objective-c, and c.  What's surprising is that it has taken me this long to write a particle engine in the language I probably spend the most time coding in -- Javascript.</p>
+
+<p>By the way, this is probably the worst particle engine ever created (TM), but it is written in Javascript, so give me a break.  It doesn't support colors yet as I couldn't think of an efficient way to change the color of a png.  I've only tested it in Firefox and Safari because I'm on a Powerbook. It's also pretty slow, in that it can handle only a dozen or so particles.</p> 
+<p>Let me know what you think!
+
+</p><h3>features</h3>
+<ul>
+	<li>Create multiple particle emitters per page</li>
+	<li>Emitters have individual configurations
+	<ul>
+		<li>Velocity Range</li>
+		<li>Life Decrement Range (opacity)</li>
+		<li>Maximum particles to use</li>
+		<li>Particle re-spawn number</li>
+		<li>Event type to trigger particles</li>
+		<li>Individual X, Y forces applied to particles</li>
+		<li>Size of particles</li>
+	</ul>
+	</li>
+</ul>
+
+<h3>demo</h3>
+<div style="padding: 150px 50px 30px 50px;border:1px solid #ccc;width: 400px;">
+<input type="button" value="Click Me" class="emitter" options="y_force:-.28, max_particles: 10, respawn: 20, vel:[-2, 2], life:[.03,.07]" />
+
+<input type="button" value="Mouseover Me" class="emitter" options="vel: [-1,1], max_particles: 3, event_type: 'mouseover'" />
+
+<input type="button" value="Click Me" class="emitter" options="max_particles: 20, size:25, vel:[-6, 6], y_force: .3" />
+
+<input type="button" value="Configure me below" id="configure" />
+<table border="0" cellspacing="0" cellpadding="5" style="margin-top: 20px" id="cfg_tbl">
+	<tbody><tr><th>Attribute</th><th>Setting</th></tr>
+	<tr><td>Velocity Range</td><td><input type="text" value="[-4,4]" name="vel" /></td></tr>
+	<tr><td>Life Decrement Range</td><td><input type="text" value="[.03,.05]" name="life" /></td></tr>
+	<tr><td>Max Particles</td><td><input type="text" value="10" name="max_particles" /></td></tr>
+	<tr><td>Particle Re-spawn</td><td><input type="text" value="1" name="respawn" /></td></tr>
+	<tr><td>Event Type</td><td><input type="text" value="click" name="event_type" /></td></tr>
+	<tr><td>Applied X force</td><td><input type="text" value=".3" name="x_force" /></td></tr>
+	<tr><td>Applied Y force</td><td><input type="text" value="0" name="y_force" /></td></tr>
+	<tr><td>Particle Size</td><td><input type="text" value="25" name="size" /></td></tr>
+	<tr><td align="right" colspan="2"><input type="button" onclick="go()" value="Save" /></td></tr>
+	
+</tbody></table>
+</div>
+
+
+<h3>html configuration</h3>
+<ol>
+	<li>import prototype, scriptaculous, and particle.js</li>
+	<li>add emitter class to element</li>
+	<li>add options to configure emitter</li>
+</ol>
+<code class="prettyprint">
+<script type="text/javascript" src="prototype.js"></script>
+<script type="text/javascript" src="scriptaculous.js"></script>
+<script type="text/javascript" src="particle.js"></script>
+
+<input type="button" value="Click Me" 
+   class="emitter" 
+   options="y_force:-.28, max_particles: 10, respawn: 20,
+            event_type: 'click', vel:[-2, 2], life:[.03,.07]" / />
+</code>
+
+<h3>download</h3>
+Download the <form mt:asset-id="277" class="mt-enclosure mt-enclosure-file" style="display: inline;"><a href="http://www.nearinfinity.com/jason_harwig/assets/particle_engine.zip">particle_engine.zip</a></form> source.
+
+<br />
+
+<!-- scripts -->
+<script type="text/javascript" src="http://www.nearinfinity.com/jason_harwig/assets/prototype.js"></script>
+<script type="text/javascript" src="http://www.nearinfinity.com/jason_harwig/assets/effects.js"></script>
+<script type="text/javascript" src="http://www.nearinfinity.com/jason_harwig/assets/builder.js"></script>
+<script type="text/javascript" src="http://www.nearinfinity.com/jason_harwig/assets/particle.js"></script>
+<script type="text/javascript" charset="utf-8">
+	function go() {
+		var options = '';
+		$$('#cfg_tbl input').each(function(value,index) {
+			if (value.name != '') {
+				options = options + (options == ''?'':',') + value.name + ':' + 
+					(value.name == 'event_type' ? '\'' + value.value + '\'' : value.value); 
+			}
+		});
+		var el = $('configure');
+		var p = el.parentNode;
+		var t = $('cfg_tbl');
+		el.remove();
+		el = Builder.node('input', {type:'button', id:'configure', value: 'Configured!'});
+		p.insertBefore(el, t);
+		new ParticleEngine('configure', eval('({'+(options||'')+'})'));
+	}
+</script>

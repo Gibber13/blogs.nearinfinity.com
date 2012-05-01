@@ -1,0 +1,41 @@
+--- 
+permalink: /blogs/scott_leberknight/several_must_have_firebug-rela.html
+layout: blogs
+title: Several Must Have Firebug-Related Firefox Extensions
+date: 2009-09-28 12:47:51 -04:00
+tags: Web Development
+---
+ <p>Last week while doing the usual (web development stuff) I discovered a few Firefox extensions I didn't even know I was missing until I found them by accident. The "accident" happened while adding Firebug to a Firefox that was running in a VMWare Fusion Windows virtual machine on which I was testing in, gasp, Windows. I went to find add-ons and searched for Firebug. And up came not only <a href="http://getfirebug.com/">Firebug</a> but also results for <a href="http://www.softwareishard.com/blog/firecookie/">Firecookie</a>, <a href="http://robertnyman.com/firefinder/">Firefinder</a>, <a href="http://robertnyman.com/inline-code-finder/">Inline Code Finder for Firebug</a>, and <a href="http://tools.sitepoint.com/codeburner/firefox">CodeBurner for Firebug</a>.</p>
+
+<p>Of course everyone doing web development uses Firebug (or really should anyway) since it rules. But these other extensions provide some <i>really</i> nice functionality and complement Firebug perfectly. Here's a quick run down:</p>
+
+<h3>Firecookie</h3>
+
+<p>Firecookie lets you see all the cookies for a site, add new ones, remove existing cookies, etc. It gives useful information about each cookie like the name, value, raw value (if URI-encoded), domain, size, path, expiration, and security. Very cool.</p>
+
+<style type="text/css">
+img.border {
+   margin-bottom: 10px;
+   border: 1px solid #021a40;
+}
+</style>
+
+<img class="border" src="http://www.sleberknight.com/blog/sleberkn/resource/firecookie.png" alt="Firecookie Firefox Add-On" title="Firecookie Firefox Add-On"/>
+
+<h3>Firefinder</h3> 
+
+<p>Firefinder for Firebug lets you search for elements on a page using either CSS expressions or an XPath query. In the list of matching elements, you can expand each result, inspect the element by clicking the "Inspect" link, or click "FriendlyFire" which will copy the content you're looking at and post it up to <a href="http://jsbin.com/">JS Bin</a>. (Be careful with this one if you have code you'd rather not have going up over the wire to a different web site.) Firefinder also puts a dashed border around each matching element it found. As you hover over search results, it highlights the matching element in the page. This is really useful when you want to find all elements matching a CSS expression or when you'd like to use XPath to find specific elements. Nice.</p>
+
+<img class="border" src="http://www.sleberknight.com/blog/sleberkn/resource/firefinder.png" alt="Firefinder Firefox Add-On" title="Firefinder Firefox Add-On"/>
+
+<h3>Inline Code Finder for Firebug</h3>
+
+<p>The Inline Code Finder does just that. It finds inline CSS styles, JavaScript links, and inline events, and reports the number of each of these in its results pane. Even better, it highlights each of these problems on the page  you are viewing with a thick red border, and as you hover over them it shows you what the problem is in a nicely tooltip. This is really nice to help you become less obtrusive by writing more unobtrusive JavaScript and avoiding inline styles. For older sites or sites that weren't designed with "unobtrusivity" in mind though, be warned that there might be a lot of red on the page!</p>
+
+<img class="border" src="http://www.sleberknight.com/blog/sleberkn/resource/inlinecodefinder.png" alt="Inline Code Finder Firefox Add-On" title="Inline Code Finder Firefox Add-On"/>
+
+<h3>CodeBurner for Firebug</h3>
+
+<p>CodeBurner for Firebug provides an inline HTML and CSS reference within Firebug. It allows you to search for HTML elements or CSS styles and shows a definition and an example. It also provides links to the awesome <a href="http://www.sitepoint.com/">Sitepoint</a> reference and even to the Sitepoint live demos of the feature you are learning about. This is so unbelievably useful to have a HTML and CSS references directly within Firebug it isn't even funny. Thanks Sitepoint.</p>
+
+<img class="border" src="http://www.sleberknight.com/blog/sleberkn/resource/codeburner.png" alt="CodeBurner Firefox Add-On" title="CodeBurner Firefox Add-On"/> 

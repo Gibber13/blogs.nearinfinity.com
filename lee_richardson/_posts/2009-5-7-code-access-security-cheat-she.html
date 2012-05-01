@@ -1,0 +1,58 @@
+--- 
+permalink: /blogs/lee_richardson/code_access_security_cheat_she.html
+layout: blogs
+title: Code Access Security Cheat Sheet
+date: 2009-05-07 09:36:58 -04:00
+tags: .NET
+---
+<p>I did short presentation on <a href="http://en.wikipedia.org/wiki/Code_Access_Security">Code Access Security (CAS)</a> a while ago and put together a cheat sheet to help remember the terms and how they fit together.  It includes screenshots of the .NET Framework 2.0 Configuration tool (in Control Panel\Administrative Tools) and uses <a href="http://rapidapplicationdevelopment.blogspot.com/2007/06/entity-relationship-diagram-example.html">Entity Relationship Diagram (ERD) Notation</a>.  I had to pull it up recently and figured others might also find it helplful.</p>
+
+<div style='float:right; margin-left:10px;'>
+<script type='text/javascript'>
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2009/05/code-access-security-cheat-sheet.html';
+
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+
+        document.write(div.innerHTML);
+    </script>
+</div>
+
+<p>It describes the following terms:</p>
+
+<ul>
+<li>Permission</li>
+<li>PermissionSet</li>
+<li>Code Group</li>
+<li>Policy Level</li>
+<li>Assembly Instance</li>
+<li>Evidence; and</li>
+<li>Evidence Type</li>
+</ul>
+
+<p>It should print to 8.5 x 11.  Click to enlarge:</p>
+
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://2.bp.blogspot.com/_gez10dNhuPk/SgLivNex9qI/AAAAAAAABpU/gnOSJYssXeE/s1600-h/CAS_Cheat_Sheet.gif"><img style="cursor:pointer; cursor:hand;width: 291px; height: 400px;" src="http://2.bp.blogspot.com/_gez10dNhuPk/SgLivNex9qI/AAAAAAAABpU/gnOSJYssXeE/s400/CAS_Cheat_Sheet.gif" border="0" alt=""id="BLOGGER_PHOTO_ID_5333074209460582050" /></a></p>
+
+<p>Hope you find it useful.</p> 

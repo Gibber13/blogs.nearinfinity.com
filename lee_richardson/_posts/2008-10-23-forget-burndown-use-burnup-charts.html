@@ -1,0 +1,62 @@
+--- 
+permalink: /blogs/lee_richardson/forget_burndown_use_burnup_charts.html
+layout: blogs
+title: Forget Burndown Use Burnup Charts
+date: 2008-10-23 22:41:25 -04:00
+tags: Agile Development General
+---
+<p>Agile projects traditionally use burndown charts to visually show work remaining over time. This could be for the current iteration or it could be for the duration of the project. Either way they can help managers (or the Project Owner in Scrum) track velocity, estimate either the project or iteration completion date, or find trends in past performance. But burndown charts have a major shortcoming: they fail to show what makes agile projects agile: new requirements. And that's where burnup charts come in. But first let's examine burndown charts.</p>
+<div style="FLOAT: right; MARGIN-LEFT: 10px">
+<script type="text/javascript">
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2008/10/forget-burndown-use-burnup-charts.html';
+
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+
+        /* Reddit */
+        var redditIframe = document.createElement('iframe');
+        redditIframe.setAttribute('src', 'http://reddit.com/button?t=2&url=' + currentPageUrl);
+        redditIframe.setAttribute('height', '80');
+        redditIframe.setAttribute('width', '52');
+        redditIframe.setAttribute('frameborder', '0');
+        redditIframe.setAttribute('scrolling', 'no');
+        redditIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(redditIframe);
+
+        document.write(div.innerHTML);
+    </script>
+</div>
+<p><b>The Problem with Burndown</b></p>
+<p>A typical burndown for the life of a project might look like this:</p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://3.bp.blogspot.com/_gez10dNhuPk/SQExigphzWI/AAAAAAAABlE/CxANEtBwb2Q/s1600-h/Burndown.gif"><img id="Img1" style="WIDTH: 400px; CURSOR: hand; HEIGHT: 271px" alt="" src="http://3.bp.blogspot.com/_gez10dNhuPk/SQExigphzWI/AAAAAAAABlE/CxANEtBwb2Q/s400/Burndown.gif" border="0" /></a></p>
+<p>It shows the project started with 100 points of work in the backlog; it's completed eight iterations; the team accomplishes about ten points an iteration; and if everything continues at the current velocity the project will complete all work within another two iterations. Great.</p>
+<p>But what happened in iteration six? Very little appears to have been accomplished. Maybe the team all took a vacation. Maybe there was a major problem or the team incorrectly estimated complexity. Or perhaps a large set of new requirements were added to the backlog because the customer decided what they thought they wanted wasn't what they really needed: namely the exact scenario agile was designed for.</p>
+<p><b>Burnup Charts</b></p>
+<p>The problem is that burndown charts lack two essential pieces of information. First, how much work was actually accomplished during a given iteration (as opposed to how much work remains to be completed) and second how much total work the project contains (or if you prefer how much scope has increased each iteration). A burnup chart for the exact project above might look like this:</p>
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://4.bp.blogspot.com/_gez10dNhuPk/SQExi1j16lI/AAAAAAAABlM/pqg4SgFBkIs/s1600-h/Burnup.gif"><img id="BLOGGER_PHOTO_ID_5260540314308176466" style="WIDTH: 400px; CURSOR: hand; HEIGHT: 273px" alt="" src="http://4.bp.blogspot.com/_gez10dNhuPk/SQExi1j16lI/AAAAAAAABlM/pqg4SgFBkIs/s400/Burnup.gif" border="0" /></a></p>
+<p>We can now clearly see that the team did not take a breather in iteration six. They continued to complete about ten points per iteration, but during the sixth iteration the scope increased by about twenty points.</p>
+<p>One could imagine the opposite happening as well. Later in the project the team might delete old user stories that were envisioned during project inception and thus decrease the total scope. The burndown chart would incorrectly show such a scenario as a sudden increase in velocity.</p>
+<p><b>Summary</b></p>
+<p>Either way the burndown chart hides essential information. I propose we throw it away and show the slightly more complicated, but infinitely more useful burnup chart. After all you wouldn't want upper management thinking you were lazy in iteration six would you?</p> 

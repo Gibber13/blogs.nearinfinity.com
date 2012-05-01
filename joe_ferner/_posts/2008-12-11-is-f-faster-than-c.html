@@ -1,0 +1,208 @@
+--- 
+permalink: /blogs/joe_ferner/is_f_faster_than_c.html
+layout: blogs
+title: Is F# faster than C#
+date: 2008-12-11 10:47:49 -05:00
+tags: .NET
+---
+<h3>Description</h3>
+<p>
+	I had a bet with a co-worker that C# would outperform F# for a simple counting exercise. This
+	turned out to be quite a surprise for many reasons. In this blog post I will try to explain why.
+</p>
+
+<style>
+  .codeComment {
+    color: #008000;
+  }
+  .codeKeyword {
+    color: #0000FF;
+  }
+  .codeString {
+    color: #A31515;
+  }
+   .prettyTable {
+   border-collapse:collapse;
+   border: 1px solid black;
+  }
+  .prettyTable td {
+    border: 1px solid black;
+  }
+  .prettyTable th {
+    border: 1px solid black;
+  }
+</style>
+
+
+<h3>Problem</h3>
+<p>
+	Sum the numbers from 1 to n using brute force (can't use the (1 + N)*(N/2) equation). Do this
+	in both C# and F# and compare the speed. Since F# needs to do this recursively I thought this should
+	be a no contest win for C#.
+</p>
+
+<h3>Using F#</h3>
+<p>
+	We initially wrote the code without using tail recursion which immediately ended with a stack
+	overflow. So we went back and wrote it doing it the functional way, with tail recursion.
+	Here is what we came up with.
+	</p><pre class="prettyprint"><span class="codeKeyword">module</span> FSharpLib
+
+	<span class="codeKeyword">let</span> sumNum fromNum toNum =
+		<span class="codeKeyword">let</span> <span class="codeKeyword">rec</span> sumNumTail fromNum toNum result =
+			<span class="codeKeyword">if</span> fromNum &gt; toNum then 
+				result 
+			<span class="codeKeyword">else</span> 
+				sumNumTail (fromNum+1L) toNum (result+fromNum)
+		sumNumTail fromNum toNum 0L</pre>
+
+
+<h3>Using C# - Attempt 1</h3>
+<p>
+	You'll see later why I say attempt 1. But, this is the simplest C# code <b>I</b> could think of.
+	</p><pre class="prettyprint"><span class="codeKeyword">public</span> <span class="codeKeyword">static</span> <span class="codeKeyword">long</span> CSharpForLoop(<span class="codeKeyword">long</span> fromNumber, <span class="codeKeyword">long</span> toNumber) {
+	<span class="codeKeyword">long</span> result = 0;
+	<span class="codeKeyword">for</span> (<span class="codeKeyword">long</span> i = fromNumber; i &lt;= toNumber; i++) {
+		result += i;
+	}
+	<span class="codeKeyword">return</span> result;
+}</pre>
+
+
+<h3>The Results - Attempt 1</h3>
+<p>
+	This is the results of running the above code using a fromNumber of 1 and a toNumber of
+	10000000 and running it 10 times alternating between C# and F# to filter out start-up times, etc.
+	<br /><br />
+	</p><table class="prettyTable" cellpadding="2" cellspacing="0">
+		<tbody><tr><th>F#</th><td>0.8606902s</td><td>11% faster</td></tr>
+		<tr><th>C#</th><td>0.9556198s</td><td></td></tr>
+	</tbody></table>
+	<br />
+	I ran it like 20 times because I couldn't believe it. I looked at the C# code for any possible
+	optimizations I could add. But, being so simple there wasn't a lot I could do.
+
+
+<h3>Reflector is an amazing tool</h3>
+<p>
+	I turned to my good friend <a href="http://www.red-gate.com/products/reflector/">Reflector</a>
+	to see what was going on. Here is what the F# code looked like when viewing it as C# code.
+	</p><pre class="prettyprint"><span class="codeKeyword">public</span> <span class="codeKeyword">static</span> <span class="codeKeyword">long</span> sumNum(<span class="codeKeyword">long</span> fromNum, <span class="codeKeyword">long</span> toNum)
+{
+    FastFunc&lt;<span class="codeKeyword">long</span>, FastFunc&lt;<span class="codeKeyword">long</span>, FastFunc&lt;<span class="codeKeyword">long</span>, <span class="codeKeyword">long</span>&gt;&gt;&gt; sumNumTail = <span class="codeKeyword">new</span> clo@7();
+    <span class="codeKeyword">return</span> FastFunc&lt;<span class="codeKeyword">long</span>, <span class="codeKeyword">long</span>&gt;.InvokeFast3&lt;<span class="codeKeyword">long</span>, <span class="codeKeyword">long</span>&gt;(sumNumTail, fromNum, toNum, 0L);
+}</pre>
+	and clo@7.Invoke looks like
+	<pre class="prettyprint"><span class="codeKeyword">public</span> <span class="codeKeyword">override</span> <span class="codeKeyword">long</span> Invoke(<span class="codeKeyword">long</span> fromNum, <span class="codeKeyword">long</span> toNum, <span class="codeKeyword">long</span> result)
+{
+	<span class="codeKeyword">while</span> (fromNum &lt;= toNum)
+	{
+		result += fromNum;
+		toNum = toNum;
+		fromNum += 1L;
+	}
+	<span class="codeKeyword">return</span> result;
+}</pre>
+	They used a while loop instead of a for loop. OK, I can do that. But, what happened to <a href="http://books.google.com/books?id=50PhgS8vjhwC&amp;pg=PA511&amp;vq=tail&amp;dq=cil+instruction+reference+tail&amp;source=gbs_search_s&amp;cad=0">tail</a>, I thought that tail is why the CLR is so good at functional language implementations.
+
+
+<h3>C# - Attempt 2</h3>
+<p>
+	</p><pre class="prettyprint"><span class="codeKeyword">public</span> <span class="codeKeyword">static</span> <span class="codeKeyword">long</span> CSharpWhileLoop(<span class="codeKeyword">long</span> fromNumber, <span class="codeKeyword">long</span> toNumber) {
+	<span class="codeKeyword">long</span> result = 0;
+	<span class="codeKeyword">while</span> (fromNumber &lt;= toNumber)
+	{
+		result += fromNumber;
+		<span class="codeComment">// I left out the toNum = toNum because it didn't do anything.</span>
+		fromNumber += 1L;
+	}
+	<span class="codeKeyword">return</span> result;
+}</pre>
+
+	and the results (I've got you now F#)...
+	<br /><br />
+	<table class="prettyTable" cellpadding="2" cellspacing="0">
+		<tbody><tr><th>F#</th><td>0.8606902s</td></tr>
+		<tr><th>C# For Loop</th><td>0.9556198s</td></tr>
+		<tr><th>C# While Loop</th><td>0.9105592s</td></tr>
+	</tbody></table>
+	<br />
+	Oh wait... DAMN! What could F# be doing to make it almost 10% faster than C#.
+
+
+<h3>To the IL code Batman</h3>
+<p>
+	This is the IL for the F# code.
+	</p><pre class="prettyprint">	L_0000: nop              <span class="codeComment">// while loop</span>
+	L_0001: nop 
+	L_0002: ldarg.1          <span class="codeComment">// fromNum &lt;= toNum</span>
+	L_0003: ldarg.2 
+	L_0004: ble.s L_0009     
+	L_0006: nop              <span class="codeComment">// return result</span>
+	L_0007: ldarg.3 
+	L_0008: ret              
+	L_0009: nop              <span class="codeComment">// result += fromNum</span>
+	L_000a: ldarg.1 
+	L_000b: ldc.i8 1
+	L_0014: add              
+	L_0015: ldarg.2          <span class="codeComment">// fromNum += 1L</span>
+	L_0016: ldarg.3 
+	L_0017: ldarg.1 
+	L_0018: add              
+	L_0019: starg.s result   <span class="codeComment">// loop</span>
+	L_001b: starg.s toNum
+	L_001d: starg.s fromNum
+	L_001f: br.s L_0000      
+	</pre>
+	This is the IL for the C# while loop.
+	<pre class="prettyprint">	L_0000: nop                   <span class="codeComment">// long result = 0L</span>
+	L_0001: ldc.i4.0
+	L_0002: conv.i8 
+	L_0003: stloc.0               
+	L_0004: br.s L_0012           <span class="codeComment">// while loop</span>
+	L_0006: nop                   <span class="codeComment">// result += fromNumber</span>
+	L_0007: ldloc.0 
+	L_0008: ldarg.0 
+	L_0009: add                   
+	L_000a: stloc.0               <span class="codeComment">// fromNumber += 1L</span>
+	L_000b: ldarg.0 
+	L_000c: ldc.i4.1 
+	L_000d: conv.i8 
+	L_000e: add                   
+	L_000f: starg.s fromNumber    
+	L_0011: nop 
+	L_0012: ldarg.0               <span class="codeComment">// fromNumber &lt;= toNumber</span>
+	L_0013: ldarg.1 
+	L_0014: cgt 
+	L_0016: ldc.i4.0 
+	L_0017: ceq 
+	L_0019: stloc.2 
+	L_001a: ldloc.2 
+	L_001b: brtrue.s L_0006       <span class="codeComment">// loop</span>
+	L_001d: ldloc.0 
+	L_001e: stloc.1 
+	L_001f: br.s L_0021
+	L_0021: ldloc.1 
+	L_0022: ret 
+	</pre>
+
+
+<h3>What just happened.</h3>
+<p>
+  Wow, the C# compiler is quite a bit more verbose. First of all, C# makes the while
+  loop into a do/while loop. Secondly, in the loop condition C# creates a temporary variable
+  to store the comparison and then checks for 'true' ("brtrue.s"). If you look at the F# IL you'll
+  see the use of the "ble.s" instructions (branch if less or equal) instead. Finally we see that
+  C# uses a few	"conv.i8"	instructions (convert to 8 byte/64-bit int) which I can only guess adds to
+  it's defeat.
+</p>
+
+<h3>Conclusion</h3>
+<p>
+	So is F# just a more performant language or is C# just compiling to more robust IL code which
+	as F# matures will end up suffering the same fate? I personally think (hope actually) the later
+	is true. I'm not an expert in compilers but I would have to assume the C# compiler team is using
+	every trick in the book to make highly performant IL code without sacrificing robustness and I can
+	only assume that F# will get to a point where it needs to make the same concessions to handle some
+	obscure cases.
+</p> 

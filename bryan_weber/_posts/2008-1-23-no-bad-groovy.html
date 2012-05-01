@@ -1,0 +1,58 @@
+--- 
+permalink: /blogs/bryan_weber/no_bad_groovy.html
+layout: blogs
+title: No! Bad Groovy!
+date: 2008-01-23 08:39:54 -05:00
+tags: Groovy
+---
+Argh!  Bad groovy!  Bad groovy!
+<br />
+
+Groovy was designed to be tightly integrated with Java.  JRuby was written to be an implementation of Ruby that runs on the JVM.  But groovy has gone one step too far.  It has incorporated one of Java's worst features!  In Java, primitives do not throw exceptions for operations that are not within the range of the data type.  That is to say, if you add 1 to Integer.MAX_VALUE you end up with Integer.MIN_VALUE!  This is of course not only confusing but mathematically incorrect.  This is the type of thing that should be taken care of at the programming language level in my humble opinion.  So let's compare how Groovy and JRuby handle this simple calculation.
+
+<br />
+Program:
+<pre class="code">
+i = Integer.MAX_VALUE
+j = i + 1
+println j
+println j.class
+
+k = 12345678901234567890
+l = k + 1
+println l
+println l.class
+</pre>
+
+Output:
+<pre class="code">
+-2147483648 
+class java.lang.Integer 
+12345678901234567891 
+class java.math.BigInteger
+</pre>
+
+JRuby code:
+<pre class="code">
+require "java"
+
+i = java.lang.Integer::MAX_VALUE
+j = i + 1
+puts j
+puts j.class
+
+k = 12345678901234567890
+l = k + 1
+puts l
+puts l.class
+</pre>
+
+JRuby output:
+<pre class="code">
+2147483648
+Fixnum
+12345678901234567891
+Bignum
+</pre>
+
+I like Groovy a lot because of its tight integration with Java, but this is something that Groovy missed big time.  Breaking away from tight Java integration would have been perfectly fine in this case to provide results that any sane person would expect, ie the one that is mathematically correct.

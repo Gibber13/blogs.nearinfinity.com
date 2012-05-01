@@ -1,0 +1,107 @@
+--- 
+permalink: /blogs/frank_showalter/deploying_rails_307_to_a_sub_d.html
+layout: blogs
+title: Deploying Rails 3.0.7 to a Sub Directory
+date: 2011-06-06 16:41:52 -04:00
+---
+<h3>The Problem</h3>
+<p>You want to deploy your Rails 3.0.7 app (let's call it "myapp") to a subdirectory (let's call it "apps"), rather than the root of your website (let's call it "www.example.com"). So, you want to access your app from this URL:</p>
+
+<pre>http://www.example.com/apps/myapp</pre>
+
+Let's assume you're using Passenger, and have followed the instructions here <a href="http://www.modrails.com/documentation/Users%20guide%20Nginx.html#deploying_rails_to_sub_uri">here for Nginx</a> or <a href="http://www.modrails.com/documentation/Users%20guide%20Apache.html#deploying_rails_to_sub_uri">here for Apache</a>. You deploy your app, either manually or via Capistrano, and hit the site only to see:</p>
+
+<pre>404. Not Found.</pre>
+
+<p>Undaunted (hey, no deployment works the first time) you check your web server logs and find that Passenger is starting just fine. Hmnn... you move on to your Rails production log and find something like this:</p>
+
+<pre>No route matches "/apps/myapp/widgets/index"</pre>
+
+<p>(Where /widgets/index is the resource mapped to your root route.)</p>
+
+<p>This tells us that Rails doesn't realize "/apps/myapp" is the root it should use for the relative URLs it generates. This is an easy enough fix, just wrap our routes in a scope, something like:</p>
+
+<pre class="prettyprint">
+scope "/apps/myapp" do  
+  resources :widgets
+  root :to => "widgets#index"
+end
+</pre>
+
+<p>Restart Passenger, and you can see your site!</p>
+
+<p>(Alternatively, we could wrap the whole rack application in config.ru, but I prefer to do it in the routes.)</p>
+
+<h3>But Wait!</h3>
+
+<p>Something's wrong. You can see your site, but all the content's unstyled and the image links are broken. You check the outputted markup and discover, sure enough, all the asset links are still referencing root as their relative URL. For instance, your stylesheet is pointing to:</p>
+
+<pre>/stylesheets/application.css</pre>
+
+<p>Instead of:</p>
+
+<pre>/apps/myapp/stylesheets/application.css</pre>
+
+<p>Ditto any javascript or image links.</p>
+
+<h3>What?</h3>
+
+<p>Here's where things get rough. A bit of Googling will point you toward setting:</p>
+
+<pre>config.action_controller.relative_url_root = "/apps/myapp"</pre>
+
+<p>And indeed that did work in older versions of Rails, only when you try and set it in 3.0.7, it throws an error:</p>
+
+<pre>/actionpack-3.0.7/lib/action_controller/deprecated/base.rb:11:in 
+  `relative_url_root=': wrong number of arguments (1 for 0) (ArgumentError)</pre>
+
+<p>This is because the method was deprecated, but incorrectly, as the signature looks like this:</p>
+
+<pre class="prettyprint">
+def relative_url_root= 
+  ActiveSupport::Deprecation.warn "ActionController::Base.relative_url_root= is ineffective. " <<
+  "Please stop using it.", caller
+end
+</pre>
+
+<p>This bug has been present since Rails 3.0's initial release, and it's true, setting it is ineffective, unfortunately, the variable is still being used. Take a look in:</p>
+
+<pre>/actionpack/lib/action_view/helpers/asset_tag_helper.rb</pre>
+
+<p>And you'll see that all the javascript_include_tag and stylesheet_link_tag helpers call down to this method:</p>
+
+<pre class="prettyprint">
+def compute_public_path(source, dir, ext = nil, include_host = true)
+  return source if is_uri?(source)
+
+  source += ".#{ext}" if rewrite_extension?(source, dir, ext)
+  source  = "/#{dir}/#{source}" unless source[0] == ?/
+  source = rewrite_asset_path(source, config.asset_path)
+
+  has_request = controller.respond_to?(:request)
+  if has_request && include_host && source !~ %r{^#{controller.config.relative_url_root}/}
+    source = "#{controller.config.relative_url_root}#{source}"
+  end
+  source = rewrite_host_and_protocol(source, has_request) if include_host
+
+  source
+end
+</pre>
+
+<p>Which, of course, uses controller.config.relative_url_root to set the root URL, which will always be blank. Indeed, the variable does seem to be getting set in:</p>
+
+<pre>/actionpack/lib/action_controller/metal/compatibility.rb</pre>
+
+<pre>
+      # ROUTES TODO: This should be handled by a middleware and route generation
+      # should be able to handle SCRIPT_NAME
+      self.config.relative_url_root = ENV['RAILS_RELATIVE_URL_ROOT']
+</pre>
+
+<h3>The Solution</h3>
+
+<p>So, you'd think setting ENV['RAILS_RELATIVE_URL_ROOT'] in your production.rb config would work, but, like the deprecated comment says, setting config.relative_url_root is ineffective. My solution was to monkey patch compute_public_path to read directly from ENV['RAILS_RELATIVE_URL_ROOT'].</p>
+
+<p>While this certainly isn't ideal, it'll do, as this looks fixed in the 3.1 branch (but not 3.0.8).</p>
+
+<p>So how'd this bug make it through Rails regression testing? It looks like they're using a mock controller with a config method in the tests, and use that method to set config.action_controller.relative_url_root on the mock, which isn't deprecated, and thus works.</p> 

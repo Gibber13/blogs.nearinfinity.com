@@ -1,0 +1,79 @@
+--- 
+permalink: /blogs/seth_schroeder/quick_and_dirty_sql_histogram.html
+layout: blogs
+title: Quick and dirty SQL histogram
+date: 2007-05-15 14:57:27 -04:00
+tags: SQL
+---
+<p>Sometimes you really want a quick &amp; dirty histogram while looking through a database:
+</p><ul>
+<li>when you suspect the mean value is misleading
+</li><li>when you want to understand how the values are distributed
+</li><li>... and easily switch between different sources of values
+</li><li>... without exporting data &amp; switching applications
+</li></ul>
+<p>Here are the story scores from a recent front page of reddit.com: 175, 456, 140, 191, 230, 186, 134, 215, 171, 83, 102, 171, 182, 322, 193, 310, 338, 345, 174, 134, 92, 109, 241, 256, 132
+
+</p><p>A basic statistical query returns:
+
+</p><pre class="prettyprint">+-----+-----+-----+--------+
+| max | min | avg | stddev |
++-----+-----+--------------+
+| 456 |  83 | 203 |   90   |
++-----+-----+-----+--------+
+</pre>
+
+<p>The standard deviation seems awfully large. Maybe not many of the scores are close to the mean score of 203? What if another query could show the distribution?
+
+</p><pre id="dual" class="prettyprint">+--------+----------+--------+----------+         +--------+----------+--------+----------+
+| bucket | contents | _floor | _ceiling |         | bucket | contents | _floor | _ceiling |
++--------+----------+--------+----------+         +--------+----------+--------+----------+
+|      1 |        8 |     83 |      157 |         |      1 |        4 |     83 |      119 |
+|      2 |       10 |    158 |      232 |         |      2 |        4 |    120 |      156 |
+|      3 |        2 |    233 |      307 |         |      3 |        8 |    157 |      193 |
+|      4 |        4 |    308 |      382 |         |      4 |        2 |    194 |      230 |
+|      5 |        1 |    383 |      457 |         |      5 |        2 |    231 |      267 |
++--------+----------+--------+----------+         |      6 |        0 |    268 |      304 |
+                                                  |      7 |        3 |    305 |      341 |
+                                                  |      8 |        1 |    342 |      378 |
+                                                  |      9 |        0 |    379 |      415 |
+                                                  |     10 |        1 |    416 |      452 |
+                                                  +--------+----------+--------+----------+
+</pre>
+<p>The histogram on the left has fewer, larger buckets. This is a lot more informative than the mean &amp; stddev. The histogram on the right uses more, smaller buckets. Maybe this is too verbose? What if you wanted seven buckets?
+</p><pre class="prettyprint">        update dhg.bucket_count set num_buckets = 7;
+        select * from dhg.results;
+
+        +--------+----------+--------+----------+
+        | bucket | contents | _floor | _ceiling |
+        +--------+----------+--------+----------+
+        |      1 |        7 |     83 |      135 |
+        |      2 |        7 |    136 |      188 |
+        |      3 |        5 |    189 |      241 |
+        |      4 |        1 |    242 |      294 |
+        |      5 |        4 |    295 |      347 |
+        |      6 |        0 |    348 |      400 |
+        |      7 |        1 |    401 |      453 |
+        +--------+----------+--------+----------+
+</pre>
+
+<p>Instructions:
+</p><ol>
+<li>Insert numbers to be analyzed:</li>
+<pre class="prettyprint">class="prettyprint"INSERT INTO dhg.source SELECT foo FROM bar;</pre>
+<li>Choose how many buckets in the histogram</li>
+<pre class="prettyprint">UPDATE dhg.bucket_count SET num_buckets = 10;</pre>
+<li>Read the results!</li>
+<pre class="prettyprint">SELECT * FROM dhg.results_full;</pre>
+</ol>
+
+<h2>Materials:</h2>
+<p>All views, tables, and functions will live in a dynamic histogram (dhg) schema. The SQL is pretty minimal yet hopefully reasonably structured and commented. The MySQL flavor is larger due to an implementation of width_bucket.
+</p><p><b>WARNING:</b> The implementation suffers from a variety of rounding errors and poor error handling. This is a quick and dirty solution for rough estimates only. 
+</p><p><b>NOTE:</b> Using more than 20 buckets will need a small tweak. Grep the SQL for empty_buckets.
+</p><ul>	
+<li><a href="http://www.nearinfinity.com/blogs/resources/seths/postgres.txt">PostgreSQL DDL</a> (may work with Oracle 9+)
+</li><li><a href="http://www.nearinfinity.com/blogs/resources/seths/mysql.txt">MySQL DDL</a>
+</li><li><a href="http://www.nearinfinity.com/blogs/resources/seths/starter_data.txt">starter data</a>: scores from reddit, digg, and comment counts from slashdot
+</li></ul>
+<p>I'd love to hear criticisms, comments, &amp; suggestions!</p> 

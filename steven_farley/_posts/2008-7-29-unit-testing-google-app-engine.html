@@ -1,0 +1,164 @@
+--- 
+permalink: /blogs/steven_farley/unit_testing_google_app_engine.html
+layout: blogs
+title: Unit Testing Google App Engine Applications
+date: 2008-07-29 23:50:56 -04:00
+tags: General Testing
+---
+<p>I have been working on an application to be hosted by <a href="http://code.google.com/appengine/">Google App Engine</a> (GAE).  Initially it was just an experiment, so I didn't think about automated testing.  As it morphed into a real application, I suddenly had the urge to write tests.  A quick look at the GAE documentation did not reveal a built-in testing framework.  I know about the Python unittest and doctest modules, and writing unit tests for self-contained classes is easy enough.  But I really needed integration tests, too, where I can test all of the application code as if it were deployed to GAE.  For those to work, I would have to somehow set up the testing environment to either simulate GAE or bootstrap it just enough for my entity and handler classes to operate within the GAE sandbox enforced by the <a href="http://code.google.com/appengine/docs/gettingstarted/devenvironment.html">SDK</a> and the production environment.</p>
+
+<p>I figured that somebody must have solved this problem already, so a Google search resulted in two interesting solutions.  The <a href="http://blog.appenginefan.com/2008/06/unit-tests-for-google-app-engine-apps.html">first approach</a> involves mocking most GAE objects using a record-and-playback-style library called <a href="http://labix.org/mocker">Mocker</a> (similar to <a href="http://www.easymock.org/">EasyMock</a> for Java).  The <a href="http://appengineguy.com/2008/06/proper-unit-testing-of-app-enginedjango.html">second approach</a> bootstraps the entire GAE SDK so the tests can be run from the command-line.</p>
+
+<p>After examining these approaches, I was still unsatisfied.  The first approach, mocking, is a sensible ways of testing in other platforms like Java, where we strive to avoid direct dependencies on the application server or database by introducing layers of abstraction that need to be mocked in tests.  The second approach, bootstrapping, is a viable solution for some platforms (Rails, Grails).  But for GAE, these approaches seem cumbersome to me.  I want to run my tests in the real environment and not have to maintain many lines of mocking code, or bootstrap code that depends on Google's internal SDK implementation.  Call me lazy, but I want writing tests for my GAE application to be as painless as possible so I can focus on writing the application and testing real functionality.</p>
+
+<p>Then it occurred to me: how about testing from within the GAE environment instead of trying to drive the tests externally?  There is no reason to make the job harder when the GAE platform is so well-defined.  The SDK exactly simulates the production environment, and it recompiles code changes immediately without needing a server restart.  Testing for GAE becomes a no-brainer because the tests can simply be invoked by an HTTP request just like any other function of the GAE application.</p>
+
+<p>First a URL must be mapped to a handler script in the <a href="http://code.google.com/appengine/docs/configuringanapp.html"><code>app.yml</code></a> configuration file, where all of the application's handler are defined:</p>
+
+<pre class="prettyprint"># This should only work for testing through the SDK.
+- url: /test/?
+  script: gaetest/handler.py
+</pre>
+
+<p>Adding this mapping should make many developers justifiably squeamish.  After all, this will also be mapped in the production environment where users could invoke the tests, which could be very nasty.  The test script will have to self-destruct in production - more on that later.</p>
+
+<p>When I launch the GAE SDK server and visit <code>http://localhost:8080/test</code> in my browser, I want all of my tests to run, with the results displayed in the browser window (nothing fancy, text will do).  Here's the <code>handler.py</code> script, which is located in the <code>gaetest</code> directory under the application root:</p>
+
+<pre class="prettyprint">import google.appengine.tools # causes an exception in production, as desired
+import unittest
+import sys
+import wsgiref.handlers
+from google.appengine.ext import webapp
+from tests import * # this requires a tests/__init__.py to define the test modules
+
+class TestSuiteHandler(webapp.RequestHandler):
+
+  def get(self):
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write("=======\n Tests \n=======\n\n")
+    modules = [sys.modules['tests.%s' % m] for m in dir(sys.modules['tests']) if m.endswith('_test')]
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    for module in modules:
+      suite.addTest(loader.loadTestsFromModule(module))
+    runner = unittest.TextTestRunner(self.response.out)
+    runner.run(suite)
+
+def main():
+  application = webapp.WSGIApplication([('/test/?', TestSuiteHandler)], debug=True)
+  wsgiref.handlers.CGIHandler().run(application)
+
+if __name__ == '__main__':
+  main()
+</pre>
+
+<p>The handler looks for all modules in the <code>tests</code> package, which is a subdirectory under the application root.  Modules must be explicitly defined in <code>tests/__init__.py</code> as such:</p>
+
+<pre class="prettyprint"># List all modules here.
+__all__ = ['model_test', 'another_test', 'no_tests_just_helpers']
+</pre>
+
+<p>Then the handler loads all test classes (subclasses of <code>unittest.TestCase</code>) from modules that end in <code>_test</code>, and adds them to the test suite.  The tests are executed using the standard text-based test runner, and the output is rendered in the browser.</p>
+
+<p>Notice that the first line of <code>handler.py</code> attempts to import <code>google.appengine.tools</code>.  I chose this package because I'm fairly certain that it will not be available in production, and will therefore raise an exception if the handler is executed in that environment.</p>
+
+<p>At this point, tests will run just fine in the environment provided by the GAE SDK server.  Here's an example test class:</p>
+
+<pre class="prettyprint">import unittest
+from google.appengine.ext import db
+
+class MyEntity(db.Model):
+  name = db.StringProperty()
+
+class MyEntityTest(unittest.TestCase):
+
+  def test_new_entity(self):
+    entity = MyEntity(name='Foo')
+    self.assertEqual('Foo', entity.name)
+
+  def test_saved_enitity(self):
+    entity = MyEntity(name='Foo')
+    key = entity.put()
+    self.assertEqual('Foo', db.get(key).name)
+</pre>
+
+<p>Can you spot the trouble with this test?  If it I run the test over and over again as I actively develop and manually test the application, without restarting the server, then many <code>MyEntity</code> instances will pile up in my local datastore, which is a file-based stub used by the GAE SDK to simulate the production datastore.  For this trivial example, that would simply be annoying.  But in a complex suite of tests, it is undesirable to leave persistent objects in the datastore between runs.  It is also nice to have a separate test datastore so development data doesn't get in the way of asserting on objects stored by the tests.  In other platforms, such as Ruby on Rails, not only do the tests get their own datastore, but the data is rolled back after each test by running them in a transaction.</p>
+
+<p>The GAE datastore supports very limited transactions.  Unfortunately the <a href="http://code.google.com/appengine/docs/datastore/transactions.html#What_Can_Be_Done_In_a_Transaction">restrictions</a> prevent them from being used to roll back all entities created by a test.</p>
+
+<p>Let's revisit the <a href="http://appengineguy.com/2008/06/proper-unit-testing-of-app-enginedjango.html">second approach</a> that I had found to testing in GAE.  It turns out that this example, which I had previously dismissed, contains the solution to the above problem.  The SDK contains a number of "stub" service classes for API modules such as the datastore, users, urlfetch, and mail.  The example recreates the SDK environment by registering these stubs through an API proxy class, which is used by the rest of the SDK code to lookup these services when needed.  The datastore stub can be re-instantiated cleanly using the internal API, and the original datastore can be recovered so development entities are not lost.  Since I run the tests from within the SDK server, the rest of the service stubs do not need to be replaced.  Despite my misgivings about depending on the internal SDK implementation, the ability to reset the datastore state between tests is just too important to ignore.  </p>
+
+<p>In order to achieve this, I need to create a special base <code>TestCase</code> that installs the test datastore in <code>setUp()</code> and recovers the development datastore in <code>tearDown()</code>.  All test classes that create entities, or that test code that creates entities, will need to inherit from the <code>AppEngineTestCase</code>, located in <code>gaetest\base.py</code>:</p>
+
+<pre class="prettyprint">import unittest
+from google.appengine.api import apiproxy_stub_map  
+from google.appengine.api import datastore_file_stub
+
+class AppEngineTestCase(unittest.TestCase):
+
+  def setUp(self):
+    # Preserve the current apiproxy for tearDown().
+    self.original_apiproxy = apiproxy_stub_map.apiproxy
+
+    # Create a new apiproxy and temporary datastore that will be used for this test.
+    apiproxy_stub_map.apiproxy = apiproxy_stub_map.APIProxyStubMap() 
+    temp_stub = datastore_file_stub.DatastoreFileStub('AppEngineTestCaseDataStore', None, None)  
+    apiproxy_stub_map.apiproxy.RegisterStub('datastore_v3', temp_stub)
+
+    # For convenience, the subclass can implement 'set_up' rather than overriding setUp()
+    # and calling this base method.
+    if hasattr(self, 'set_up'):
+      self.set_up()
+
+  def tearDown(self):
+    # The subclass can optionally choose to implement 'tear_down'.
+    if hasattr(self, 'tear_down'):
+      self.tear_down()
+
+    # Restore stubs for development.
+    apiproxy_stub_map.apiproxy = self.original_apiproxy
+</pre>
+
+<p>The sample unit test class now extends the new base:</p>
+
+<pre class="prettyprint">  import unittest
+  from google.appengine.ext import db
+  import gaetest.base
+
+  from google.appengine.ext import db
+
+  class MyEntity(db.Model):
+    name = db.StringProperty()
+
+  class MyEntityTest(gaetest.base.AppEngineTestCase):
+
+    def set_up(self):
+      # Populate test entities here along with other setup.
+      entity = MyEntity(name='Bar')
+      self.setup_key = entity.put()
+
+    def tear_down(self):
+      # Tear down here, but there is no need to delete test entities.
+      pass
+
+    def test_new_entity(self):
+      entity = MyEntity(name='Foo')
+      self.assertEqual('Foo', entity.name)
+
+    def test_saved_enitity(self):
+      entity = MyEntity(name='Foo')
+      key = entity.put()
+      self.assertEqual('Foo', db.get(key).name)
+
+    def test_setup_entity(self):
+      entity = db.get(self.setup_key)
+      self.assertEqual('Bar', entity.name)
+</pre>
+
+<p>When the above test is run, two entities are created (with names 'Foo' from <code>test_saved_enitity()</code> and 'Bar' from <code>test_setup_entity()</code>), but will not be present in the development datastore.</p>
+
+<p>That's all for now.  Feel free to <a href="http://www.nearinfinity.com/blogs/resources/sfarley/gae-testing.zip">download</a> the example, packaged as a GAE application.  Enjoy writing tests for Google App Engine!</p>
+
+<p><em>Note: In the midst of writing this blog, I discovered that a very similar library, called <a href="http://code.google.com/p/gaeunit/">GAEUnit</a>, was recently added to Google Code.  Check it out.</em></p>
+
+<p><em><strong>UPDATE:</strong> My above efforts will soon be incorporated into <a href="http://code.google.com/p/gaeunit/">GAEUnit</a>.  The original GAEUnit author, George Lei, and I are now partnering to make it the testing framework of choice for Google App Engine developers.</em></p> 

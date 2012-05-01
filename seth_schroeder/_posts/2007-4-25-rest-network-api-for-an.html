@@ -1,0 +1,105 @@
+--- 
+permalink: /blogs/seth_schroeder/rest_network_api_for_an.html
+layout: blogs
+title: REST Network API for an online spreadsheet
+date: 2007-04-25 16:36:31 -04:00
+tags: General
+---
+<p>Every spreadsheet application needs to support the creating, reading, updating, and deleting of sheets, columns, rows, and cells. The network protocol for an online spreadsheet could easily treat sheets, columns, etc. as resources and offer CRUD operations for manipulating them.
+</p><p>The requests below were hand generated and sent via telnet. The responses were copy and pasted from the console window. A real frontend might use this API with XmlHttpRequest.
+</p><table border="1" cellpadding="5" cellspacing="3">
+<tbody><tr>
+  <th bgcolor="#D3EDFF">operation</th>
+  <th bgcolor="#FFE8D3">request</th>
+  <th bgcolor="#F5FFD3">response</th>
+</tr>
+<tr>
+  <td bgcolor="#D3EDFF">Create a sheet</td>
+
+  <td bgcolor="#FFE8D3">
+<pre>POST /fauxcel/finances HTTP/1.1
+Host: 192.168.113.115:8080
+</pre>
+</td>
+  <td bgcolor="#F5FFD3">
+    <pre>HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Content-Length: 0
+Date: Wed, 25 Apr 2007 19:26:39 GMT
+    </pre>
+  </td>
+</tr>
+<tr>
+  <td bgcolor="#D3EDFF">Populate a cell</td>
+
+  <td bgcolor="#FFE8D3">
+<pre>POST /fauxcel/finances/A/1 HTTP/1.1
+Host: 192.168.113.115:8080
+Content-Type: text/text;charset=utf-8
+Content-Length: 34
+
+{"value":"123.45", "type":"value"}
+</pre>
+</td>
+  <td bgcolor="#F5FFD3">
+<pre>HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Content-Length: 0
+Date: Wed, 25 Apr 2007 19:36:37 GMT
+</pre>
+  </td>
+</tr>
+<tr>
+  <td bgcolor="#D3EDFF">Insert a column</td>
+
+  <td bgcolor="#FFE8D3">
+<pre>POST /fauxcel/finances/A HTTP/1.1
+Host: 192.186.113.115:8080
+</pre>
+</td>
+  <td bgcolor="#F5FFD3">
+<pre>HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Content-Length: 0
+Date: Wed, 25 Apr 2007 19:36:37 GMT
+</pre>
+  </td>
+</tr>
+<tr>
+  <td bgcolor="#D3EDFF">Read a column</td>
+
+  <td bgcolor="#FFE8D3">
+<pre>GET /fauxcel/finances/B HTTP/1.1
+Host: 192.168.113.115:8080
+</pre>
+</td>
+  <td bgcolor="#F5FFD3">
+<pre>HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Transfer-Encoding: chunked
+Date: Wed, 25 Apr 2007 19:39:38 GMT
+
+53
+{"name":"finances","cells":[{"col":"B","row":"1","type":"value","value":"123.45"}]}
+0
+</pre>
+  </td>
+</tr>
+<tr>
+  <td bgcolor="#D3EDFF">Delete a row</td>
+
+  <td bgcolor="#FFE8D3">
+<pre><pre>DELETE /fauxcel/finances/1 HTTP/1.1
+Host: 192.168.113.115:8080
+</pre>
+</pre></td>
+  <td bgcolor="#F5FFD3">
+<pre>HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Content-Length: 0
+Date: Wed, 25 Apr 2007 19:41:26 GMT
+</pre>
+  </td>
+</tr>
+</tbody></table>
+<p>Note that the back end moved the value of cell A1 into cell B1 when a column was inserted before A. More details on that in a following post!</p> 

@@ -1,0 +1,83 @@
+--- 
+permalink: /blogs/lee_richardson/business_process_modeling_for.html
+layout: blogs
+title: Business Process Modeling for Software Developers
+date: 2009-12-23 09:01:57 -05:00
+tags: Agile Development
+---
+<p>As a software developer I never thought I'd be saying this (I suppose eight years of working for the company that invented this technique might bias me), but you can not underestimate the value of business process modeling when starting a new project.  This is especially true if it's a small project and you don't have the benefit of a dedicated requirements analyst.</p>
+
+<div style='float:right; margin-left:10px;'>
+<script type='text/javascript'>
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2009/12/business-process-modeling-for-software.html';
+ 
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+ 
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+ 
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+ 
+        document.write(div.innerHTML);
+    </script>
+</div>
+
+<p>As a consultant (or as a person who is learning someone else's business) your job is to understand your customers existing business <i>better than they do themselves</i>.  And you need to be on the same page with others regarding how you are going to change their day to day functions.  And that's what business process modeling is for.</p>
+
+<p>You may ignore this document after the first week on the project, in fact I would encourage you to. But even if you throw it away immediately after creating it, the process of developing the document will still:</p>
+
+<ul>
+<li>Flush out important questions</li>
+<li>Show your customer you understand their world</li>
+<li>Help document the project to other developers</li>
+<li>Facilitate communication (especially with the people who pay the bills)</li>
+<li>Generate user stories (requirements) </li>
+<li>Identify the entities that can feed into an <a href="http://rapidapplicationdevelopment.blogspot.com/2007/06/entity-relationship-diagram-example.html">Entity Relationship Diagram</a> (or database I suppose)</li>
+<li>Aid making good choices for the decisions it be hard to undo later (like whether to manually code workflows or use <a href="http://en.wikipedia.org/wiki/Windows_Workflow_Foundation">Windows Workflow Foundation</a>)</li>
+<li>More clearly identify pain points and areas where your software can help end users; and</li>
+<li>Identify metrics that can help determine project success from an ROI and product owner's perspective</li>
+</ul>
+
+<p>Convinced this is a tool you need in your toolbelt yet?  As long as the answer isn't "I only write code leave me alone" then check out this quick how-to:</p>
+
+<p><b>Start with the AS-IS diagram</b></p>
+
+<p>As soon as possible on a new project you should plan to interview your future end users.  This shouldn't be an unstructured Q&amp;A session.  You should start with a rough draft of what you think their business process is and ask questions that identify the places where you were wrong.<p>
+
+<p>In order to start the diagram you need to identify both the end users and existing systems and put those in "swimlanes" down the left side of a diagram.  Swimlanes are important because they help you be explicit about who is performing what activities.  Then flush out activities in the happy path in appropriate swimlanes like so:</p>
+ 
+<p><a href="http://3.bp.blogspot.com/_gez10dNhuPk/SzISYvjEwvI/AAAAAAAABrg/8X9h_xxiDvw/s1600-h/AS-IS.gif"><img style="cursor:pointer; cursor:hand;width: 400px; height: 344px;" src="http://3.bp.blogspot.com/_gez10dNhuPk/SzISYvjEwvI/AAAAAAAABrg/8X9h_xxiDvw/s400/AS-IS.gif" border="0" alt=""id="BLOGGER_PHOTO_ID_5418413517969867506" /></a></p>
+ 
+<p>As soon as you talk to end users (like the clerk in the example above) you will discover unhappy paths.  What if the warehouse is out of a product?  What if the payment was declined?  What happens if a customer needs to return something?</p>
+
+<p>Obviously you document these using standard activity diagram notation:</p>
+
+<p><a href="http://2.bp.blogspot.com/_gez10dNhuPk/SzISZP5NmgI/AAAAAAAABro/Q6AeYSTx7eo/s1600-h/Choice.gif"><img style="cursor:pointer; cursor:hand;width: 389px; height: 400px;" src="http://2.bp.blogspot.com/_gez10dNhuPk/SzISZP5NmgI/AAAAAAAABro/Q6AeYSTx7eo/s400/Choice.gif" border="0" alt=""id="BLOGGER_PHOTO_ID_5418413526652656130" /></a></p>
+
+<p><b>Identifying Pain Points/Opportunities</b></p>
+<p>The interesting part about unhappy paths is how often they occur, how they affect the customers of your customer, and ultimately how they affect your customer's bottom line.  For instance, how often is payment declined in the example above?  Fairly frequently?  Can you get an actual percentage?  If it turns out it's because the original application failed to validate credit cards, then a small amount of programming effort can provide a large benefit to length of time until order fulfillment.  Sometimes you can make the process more efficient without writing a line of code.</p>
+
+<p>And at the end of your project if you can show that you've decreased the average length of time it takes to go through the process, ideally by showing less time was spent in unhappy paths, you will likely have made yourself one happy customer.  This can be especially effective if your new system can show statistics (like percent of orders that are declined) and compare those to the old process.</p>
+<p><b>Developing the TO-BE diagram</b></p>
+<p>AS-IS process diagrams are completely useless unless you can effectively describe what the process will look like after you implement your new system.  The process of developing these documents is pretty similar to the AS-IS diagram except of course you're trying to fix the pain points.</p>
+
+<p>One technique I like for generating a backlog of user stories (tasks) is to put unique numbers with each step in the TO-BE process, then ensure there is at least one user story per step in the process.  You may be surprised at how easily activities in your new project's swimlane map to user stories.</p>
+<p><b>Summary</b></p>
+<p>I'm a fan of writing code as soon as possible on a project, but if you fail to understand an end user's business process you may be writing the wrong code.  Business process modeling can ensure you're writing the right code to solve the most important problems first.  And that may be the difference between project success and project failure.</p> 

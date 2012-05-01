@@ -1,0 +1,106 @@
+--- 
+permalink: /blogs/lee_richardson/parameter_passing_in_c.html
+layout: blogs
+title: Parameter passing in C#
+date: 2007-04-23 17:34:18 -04:00
+tags: .NET
+---
+<p>The topic of parameter passing in C# keeps coming up, and so I thought this post might be useful. It's been my most popular post on my <a href="http://rapidapplicationdevelopment.blogspot.com/2007/01/parameter-passing-in-c.html">rapid application development blog</a>, so I thought I'd repost here. Please kick the post if you like it.</p>
+<div style="FLOAT: right; MARGIN-LEFT: 10px">
+<script type="text/javascript">
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2007/01/parameter-passing-in-c.html';
+
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        
+        /* Reddit */
+        var redditIframe = document.createElement('iframe');
+        redditIframe.setAttribute('src', 'http://reddit.com/button?t=2&url=' + currentPageUrl);
+        redditIframe.setAttribute('height', '80');
+        redditIframe.setAttribute('width', '52');
+        redditIframe.setAttribute('frameborder', '0');
+        redditIframe.setAttribute('scrolling', 'no');
+
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+
+        var div = document.createElement('div');
+        div.appendChild(diggIframe);
+        div.appendChild(redditIframe);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(document.createElement('br'));
+        div.appendChild(dotnetkicksLink);
+
+        document.write(div.innerHTML);
+    </script>
+</div>
+<p>So there I was, merrily browsing the Internet when I came across this fantastic site on topics such as:</p>
+<ul>
+<li>Implementing a singleton pattern in C#, </li>
+<li>Type initializers, </li>
+<li>Static constructors, </li>
+<li>Delegates and events, </li>
+<li>And as my title suggests: Parameter passing in C#. </li></ul>
+<p>In short, all those things you rarely need to know to get your job done, but that separate mediocre developers from good ones. The site is by Jon Skeet and the articles are informative, well researched, well explained, well written. Here's the C# part of his site:</p>
+<p><a href="http://www.yoda.arachsys.com/csharp/">http://www.yoda.arachsys.com/csharp/</a></p>
+<p>The article that caught my attention made sense to me, but being a very visual person I couldn't help but think that some pictures could really help illustrate the points. So without further ado, I illustrated the article. You probably don't need to read the article to understand this post - but you should:</p>
+<p><a href="http://www.yoda.arachsys.com/csharp/parameters.html">http://www.yoda.arachsys.com/csharp/parameters.html</a>.</p>
+<p>Note: you can click the images to get a clearer view. </p>
+<p><strong>1. Value Types</strong></p>
+<p>Notice that the values live inside the box which will not be the case for reference types. Also, the assignment operation copies the value inside of the box, this is important to compare with reference types.</p>
+<p><a href="http://bp1.blogger.com/_gez10dNhuPk/RbzGkOmHxNI/AAAAAAAAACE/7pfJ9OEqJh8/s1600-h/1+Value+Types.gif"><img id="BLOGGER_PHOTO_ID_5025109609934210258" style="CURSOR: hand" alt="" src="http://bp1.blogger.com/_gez10dNhuPk/RbzGkOmHxNI/AAAAAAAAACE/7pfJ9OEqJh8/s400/1+Value+Types.gif" border="0" /></a></p>
+<p>Quiz: What is the result of the WriteLine statement?</p>
+<p></p>
+<p>Answer: 5</p>
+<p></p>
+<p><strong>2. Reference Types</strong></p>
+<p>Variables that hold reference types actually hold a reference to a location in memory (on the heap). So assignment operations copy <em>the address</em>. Notice this is still consistent with diagram #1, the copy operation copies the value inside of the box.</p>
+<p><a href="http://bp3.blogger.com/_gez10dNhuPk/RbzGwumHxOI/AAAAAAAAACM/ZaqW-Krmo-U/s1600-h/2+Reference+Types.gif"><img id="BLOGGER_PHOTO_ID_5025109824682575074" style="CURSOR: hand" alt="" src="http://bp3.blogger.com/_gez10dNhuPk/RbzGwumHxOI/AAAAAAAAACM/ZaqW-Krmo-U/s400/2+Reference+Types.gif" border="0" /></a></p>
+<p>Quiz: What is the result of the WriteLine statement? </p>
+<p>Answer: hello world </p>
+<p><strong>3. Immutable Reference Types</strong></p>
+<p>Immutable reference types like strings behave just like regular reference types except they don't provide a way to change their value.</p>
+<p><a href="http://bp2.blogger.com/_gez10dNhuPk/Rb4IV-mHxVI/AAAAAAAAADk/viWcrNAGkCA/s1600-h/3+Immutable+Reference+Types.gif"><img id="BLOGGER_PHOTO_ID_5025463407865218386" style="CURSOR: hand" alt="" src="http://bp2.blogger.com/_gez10dNhuPk/Rb4IV-mHxVI/AAAAAAAAADk/viWcrNAGkCA/s400/3+Immutable+Reference+Types.gif" border="0" /></a></p><a href="http://bp0.blogger.com/_gez10dNhuPk/Rbzmr-mHxUI/AAAAAAAAADY/uwDUi1OgX8Q/s1600-h/3+Immutable+Reference+Types.gif"></a>
+<p></p>
+<p>Quiz: What is the result of the WriteLine statement? </p>
+<p>Answer: hello </p>
+<p><strong>4. Value Types Passed by Value</strong></p>
+<p>Passing a variable to a function by value is equivilant to instantiating a new variable and assigning it to the first (well, ignoring scope issues and such). Notice that the diagram below is nearly identical to diagram #1. </p>
+<p><a href="http://bp2.blogger.com/_gez10dNhuPk/Rbv93umHxJI/AAAAAAAAABE/4RPheK-Zzuc/s1600-h/4+Value+Types+Passed+by+Value.gif"></a><a href="http://bp1.blogger.com/_gez10dNhuPk/RbzHxOmHxQI/AAAAAAAAACc/mfGQFJOWdeo/s1600-h/4+Value+Types+Passed+by+Value.gif"><img id="BLOGGER_PHOTO_ID_5025110932784137474" style="CURSOR: hand" alt="" src="http://bp1.blogger.com/_gez10dNhuPk/RbzHxOmHxQI/AAAAAAAAACc/mfGQFJOWdeo/s400/4+Value+Types+Passed+by+Value.gif" border="0" /></a></p>
+<p>Quiz: What is the result of the WriteLine statement? </p>
+<p>Answer: 5, same as #1 </p>
+<p><strong>5. Reference Types Passed by Value</strong></p>
+<p>In #4 I said passing a variable to a function by value is equivilant to instantiating a new variable and assigning it to the first. Is that still true of reference types? Yup. And did you notice there's an implicit assignment statement when passing by value? As you'll see shortly there won't be when passing by reference.</p>
+<p><a href="http://bp0.blogger.com/_gez10dNhuPk/Rbv-BOmHxKI/AAAAAAAAABM/xNHmcXmfgSo/s1600-h/5+Reference+Types+Passed+by+Value.gif"></a><a href="http://bp1.blogger.com/_gez10dNhuPk/RbzIGOmHxRI/AAAAAAAAACk/3yW5hyQgwfI/s1600-h/5+Reference+Types+Passed+by+Value.gif"><img id="BLOGGER_PHOTO_ID_5025111293561390354" style="CURSOR: hand" alt="" src="http://bp1.blogger.com/_gez10dNhuPk/RbzIGOmHxRI/AAAAAAAAACk/3yW5hyQgwfI/s400/5+Reference+Types+Passed+by+Value.gif" border="0" /></a></p>
+<p>Quiz: What is the result of the WriteLine statement? </p>
+<p>Answer: hello world</p>
+<p></p>
+<p><strong>6. Value Types Passed by Reference</strong></p>
+<p>Passing by reference doesn't involve an implicity copy, instead it instantiates the inner variable to the address in memory of the outer variable. Then all references to the inner variable are implicitly dereferenced for you and voila, magically you're changing the value of the outer variable.</p>
+<p><a href="http://bp2.blogger.com/_gez10dNhuPk/Rbv-LumHxLI/AAAAAAAAABU/WjyqIMFJHE4/s1600-h/6+Value+Types+Passed+by+Reference.gif"></a><a href="http://bp3.blogger.com/_gez10dNhuPk/RbzIWumHxSI/AAAAAAAAACs/1KCNwRMmquk/s1600-h/6+Value+Types+Passed+by+Reference.gif"><img id="BLOGGER_PHOTO_ID_5025111577029231906" style="CURSOR: hand" alt="" src="http://bp3.blogger.com/_gez10dNhuPk/RbzIWumHxSI/AAAAAAAAACs/1KCNwRMmquk/s400/6+Value+Types+Passed+by+Reference.gif" border="0" /></a></p>
+<p>Quiz: What is the result of the WriteLine statement? </p>
+<p>Answer: 10, and notice how different the diagram and results are than #1 and #4. </p>
+<p><strong>7. Reference Types Passed by Reference</strong> </p>
+<p>Really this is no different than value types passed by reference (#6), except calling sb.Append() from an inner variable is dereferenced once to get to the outer variable and again because the outer variable is itself a pointer. </p>
+<p><a href="http://bp2.blogger.com/_gez10dNhuPk/Rbv-aumHxMI/AAAAAAAAABc/twQ3_G6QQRE/s1600-h/7+Reference+Types+Passed+by+Reference.gif"></a><a href="http://bp0.blogger.com/_gez10dNhuPk/RbzIj-mHxTI/AAAAAAAAAC0/gs1v9ClKQVY/s1600-h/7+Reference+Types+Passed+by+Reference.gif"><img id="BLOGGER_PHOTO_ID_5025111804662498610" style="CURSOR: hand" alt="" src="http://bp0.blogger.com/_gez10dNhuPk/RbzIj-mHxTI/AAAAAAAAAC0/gs1v9ClKQVY/s400/7+Reference+Types+Passed+by+Reference.gif" border="0" /></a></p>
+<p>By the way, when you get to the section in Jon's article called:</p>
+<p>"Sidenote: what is the difference between passing a value object by reference and a reference object by value?"</p>
+<p>Please read it carefully, it's an extremely good point. It can be sumed up by comparing the final assignment statement above (Reference Types Passed by Reference) to the final assignment statement in in diagram #5 (Reference Types Passed by Value). It's a subtle, but important difference.</p>
+<p>Oh and the quiz, what is the value of the Console.WriteLine in #7?</p>
+<p></p>
+<p>Answer: NullReferenceExceptinon&nbsp;- Object reference not set to an instance of an object</p>
+<p></p>
+<p>Still confused? Then I didn't do my job right, since this is the point in the article when I thought pictures would help. So please post your thoughts whether it makes sense or not. </p>
+<p>- Lee</p> 

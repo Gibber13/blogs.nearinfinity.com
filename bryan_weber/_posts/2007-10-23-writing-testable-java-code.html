@@ -1,0 +1,71 @@
+--- 
+permalink: /blogs/bryan_weber/writing_testable_java_code.html
+layout: blogs
+title: Writing testable Java code with stateless collaborators
+date: 2007-10-23 00:03:38 -04:00
+tags: Java
+---
+Writing testable Java code is an often discussed topic that has been covered ad nauseam.  So what could another blog post possibly contribute?  Well, I've been following a simple pattern recently and it makes for some very simple, clean (imho) and testable code.  I never call a method that resides within the calling class.  Ok, so maybe never is too strong, but every time you call a method within the same class you violate the principle of isolation, which is key to unit testing.  Why does calling a method from within the same class violate the principle of isolation?  Because the methods are tightly coupled and it is no longer possible to test the calling method without also testing the called method.  So what is the answer?  Well, one way is to use collaborators.  The objects can be used, stubbed or mocked for unit tests and the calling and called objects can be tested separately.  
+
+<br /><br />
+So what are some arguments against this type of pattern?  Well, many people complain about the following points: (1) the code is no longer as readable, (2) the visibility of the code is changed, (3) the potential explosion of classes, and (4) the logic of an "Object" is no longer contained within the class.  Let's discuss these points one at a time.  Code samples are included below for a side-by-side comparison so read the code and think about it as you go through the four points.
+
+<br /><br />
+1) The code is no longer as readable.  This may be the point with the most merit.  Instead of reading the code and simple scrolling up or down to continue reading the reader must now find another class.  Having a method name on the called class that is descriptive often makes the code just as readable, it simply requires the reader to go to another place to read the details of the implementation.  IDE's alleviate this by allowing users to jump to other classes/methods.
+
+<br /><br />
+2) The visibility of the code is changed.  Instead of having a private or protected method inside of the class there is now an often times public method on another interface/class.  However, the scope of the collaborator can be controlled inside the class so in my opinion the benefit of testability outweighs the changing of scope from method to field.
+
+<br /><br />
+3) The potential explosion of classes.  Methods can still be grouped together on collaborators by related functionality, but having a few extra classes is an acceptable trade-off for more testable code.  Classes often tend to be simpler with this methodology.  This can become an argument of preference between fewer, more complex classes or more classes that are simpler.
+
+<br /><br />
+4) The logic of an object is no longer contained with the class.  But it can be contained within a small number of classes in the same package and the classes tend to be simpler and classes tend to be even more well defined in terms of what they do.
+
+<br /><br />
+There probably is no right or wrong answer here, to a degree it is a matter of preference, however, I feel pretty strongly that having more testable code without any major drawbacks is worth adopting this pattern. This pattern works particularly well when the called code is a stateless service that can be injected by an IOC container, such as Spring.
+
+<br /><br />
+Let's look at samples side by side.
+
+<br /><br />
+# All the logic in one class (NOT easily testable because bar must be tested with foo)
+
+<pre class="prettyprint">
+public class Foobar {
+  public void foo() {
+    for ( int i = 0; i &lt; 10; i++ ) {
+      bar();
+    }
+  }
+
+  public void bar() {
+    // do bar
+  }
+}
+</pre>
+
+# Using collaborator (foo and bar can be tested completely independent of each other)
+
+
+<pre class="prettyprint">
+public class Foo {
+  private Bar bar;
+
+  public void setBar(Bar bar) {
+    this.bar = bar;
+  }
+
+  public void foo() {
+    for ( int i = 0; i &lt; 10; i++ ) {
+      bar.bar();
+    }
+  }
+}
+
+public class Bar {
+  public void bar() {
+    // do bar
+  }
+}
+</pre> 

@@ -1,0 +1,82 @@
+--- 
+permalink: /blogs/lee_richardson/a_major_silverlight_pita_and.html
+layout: blogs
+title: A Major Silverlight PITA and Two Annoying 3.0 Limitations
+date: 2008-05-27 08:52:54 -04:00
+tags: .NET
+---
+<p>Pardon my rant, but the thing I currently hate most about Silverlight (besides copious XML) is the Visibility property. Any sane framework would implement Visibility as a Boolean. Not Silverlight though. It's creators in undoubted infinite wisdom implemented it as an enumeration. The values of the enumeration? There are two: Visible and Collapsed. Hmmm.</p>
+<div style="FLOAT: right; MARGIN-LEFT: 10px">
+<script type="text/javascript">
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2008/05/two-annoying-30-limitations-major.html';
+
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+
+        /* Reddit */
+        var redditIframe = document.createElement('iframe');
+        redditIframe.setAttribute('src', 'http://reddit.com/button?t=2&url=' + currentPageUrl);
+        redditIframe.setAttribute('height', '80');
+        redditIframe.setAttribute('width', '52');
+        redditIframe.setAttribute('frameborder', '0');
+        redditIframe.setAttribute('scrolling', 'no');
+        redditIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(redditIframe);
+
+        document.write(div.innerHTML);
+    </script>
+</div>
+<p>Of course this causes superfluous verbosity in common everyday code:</p>
+<p><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">button1.Visibility = makeVisible ? <span style="COLOR: #2b91af">Visibility</span>.Visible : <span style="COLOR: #2b91af">Visibility</span>.Collapsed;</span></p>
+<p>Or worse when things get a little more complex:</p>
+<p><span style="FONT-SIZE: 10pt; COLOR: green; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">// don't display the panel if its button's aren't visible<br /></span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">panel1.Visibility = !(button1.Visibility == <span style="COLOR: #2b91af">Visibility</span>.Visible &amp;&amp; button2.Visibility == <span style="COLOR: #2b91af">Visibility</span>.Visible) ? <span style="COLOR: #2b91af">Visibility</span>.Visible : <span style="COLOR: #2b91af">Visibility</span>.Collapsed;</span></p>
+<p>Clearly this was done to keep Silverlight compatible with the <a href="http://en.wikipedia.org/wiki/Windows_Presentation_Foundation">Windows Presentation Foundation</a> (WPF) which has three values in its enumeration property (Visible, Hidden, and Collapsed). But that's just as ridiculous. Why WPF couldn't use two properties, Visible (Boolean) and NotVisibleBehavior (enumeration) is beyond me.</p>
+<p>It's ok though, because .Net 3.0 gave me a cure to any Framework shortcomings: Extension Methods. A syntactic sugar cure for all my bitterness:</p>
+<p><span style="FONT-SIZE: 10pt; COLOR: blue; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">public</span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes"> <span style="COLOR: blue">static</span> <span style="COLOR: blue">void</span> SetVisible(<span style="COLOR: blue">this</span> <span style="COLOR: #2b91af">FrameworkElement</span> element, <span style="COLOR: blue">bool</span> visible) {<br /><span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; </span>element.Visibility = visible ? <span style="COLOR: #2b91af">Visibility</span>.Visible : <span style="COLOR: #2b91af">Visibility</span>.Collapsed;<br />}<br /><br /><span style="COLOR: blue">public</span> <span style="COLOR: blue">static</span> <span style="COLOR: blue">bool</span> IsVisible(<span style="COLOR: blue">this</span> <span style="COLOR: #2b91af">Visibility</span> visibility) {<br /><span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; </span><span style="COLOR: blue">return</span> visibility == <span style="COLOR: #2b91af">Visibility</span>.Visible;<br />}</span></p>
+<p>Fantastic, now my "complex" example becomes:</p>
+<p><span style="FONT-SIZE: 10pt; COLOR: green; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">// don't display the panel if its button's aren't visible<br /></span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">panel1.SetVisible(!(button1.IsVisible() &amp;&amp; button2.IsVisible()));</span></p>
+<p>Still not quite as nice as a Boolean visible property, but certainly doable. </p>
+<p><b>3.0 Limitation #1, By Ref Extension Methods</b></p>
+<p>But wait. Isn't it best practice in Silverlight to use binding for these types of things? Separation of logic from presentation and all. So I should do:</p>
+<p><span style="FONT-SIZE: 10pt; COLOR: blue; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">&lt;</span><span style="FONT-SIZE: 10pt; COLOR: #a31515; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">StackPanel</span><span style="FONT-SIZE: 10pt; COLOR: red; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes"> Visibility</span><span style="FONT-SIZE: 10pt; COLOR: blue; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">="{</span><span style="FONT-SIZE: 10pt; COLOR: #a31515; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">Binding</span><span style="FONT-SIZE: 10pt; COLOR: red; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes"> IsPanelVisible</span><span style="FONT-SIZE: 10pt; COLOR: blue; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">}"&gt;</span></p>
+<p>And then:</p>
+<p><span style="FONT-SIZE: 10pt; COLOR: blue; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">public</span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes"> <span style="COLOR: blue">class</span> <span style="COLOR: #2b91af">DisplayStuff</span> : <span style="COLOR: #2b91af">INotifyPropertyChanged</span> {<span style="COLOR: blue"> <br /><span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; </span>public</span> <span style="COLOR: #2b91af">Visibility</span> IsPanelVisible { <span style="COLOR: blue">get</span>; <span style="COLOR: blue">private</span> <span style="COLOR: blue">set</span>; }<br /><br /><span style="COLOR: blue"><span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; </span>public</span> <span style="COLOR: blue">void</span> UpdateStatus(<span style="COLOR: blue">bool</span> makeVisible) {<br /><span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</span>IsPanelVisible = makeVisible ? <span style="COLOR: #2b91af">Visibility</span>.Visible : <span style="COLOR: #2b91af">Visibility</span>.Collapsed;<br /><span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: green">// make sure to notify the control that the property has changed<br /></span><span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</span>PropertyChanged(<span style="COLOR: blue">this</span>, <span style="COLOR: blue">new</span> <span style="COLOR: #2b91af">PropertyChangedEventArgs</span>(<span style="COLOR: #a31515">"IsPanelVisible"</span>));<br /><span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; </span>}<br />}</span></p>
+<p>And we can set the DataContext of some parent element to an instance of DisplayStuff and all the children including our panel magically databind. That's cool, but the ugliness is back (well, not as bad since I removed the buttons to simply the example, but you can pretend). This is because we extended FrameworkElement not Visibility. No problem, just extend Visibility right?</p>
+<p><span style="FONT-SIZE: 10pt; COLOR: blue; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">public</span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes"> <span style="COLOR: blue">static</span> <span style="COLOR: blue">void</span> SetVisible(<span style="COLOR: blue">this</span> <span style="COLOR: #2b91af">Visibility</span> visibility, <span style="COLOR: blue">bool</span> visible) {<br /><span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; </span>visibility = visible ? <span style="COLOR: #2b91af">Visibility</span>.Visible : <span style="COLOR: #2b91af">Visibility</span>.Collapsed;<br />}</span></p>
+<p>Except this doesn't work. Can you spot the problem?</p>
+<p>It compiles. It runs. But the value of IsPanelVisible never changes. Oh yea, C# is pass by value by default. And now the .Net Framework 3.0 limitation. This isn't possible:</p>
+<p><span style="FONT-SIZE: 10pt; COLOR: blue; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">public</span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes"> <span style="COLOR: blue">static</span> <span style="COLOR: blue">void</span> SetVisible(<span style="COLOR: blue">this</span> <b style="mso-bidi-font-weight: normal"><span style="COLOR: blue">ref</span></b> <span style="COLOR: #2b91af">Visibility</span> visibility, <span style="COLOR: blue">bool</span> visible) {</span></p>
+<p>You get "The parameter modifier 'ref' cannot be used with 'this'." Grr.</p>
+<p><b>Limitation #2, By Ref Automatic Properties</b></p>
+<p>Ok, so remove "this", and go back to C# 2.0 helper functions which extension methods are syntactic sugar for anyway:</p>
+<p><span style="FONT-SIZE: 10pt; COLOR: blue; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">public</span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes"> <span style="COLOR: blue">static</span> <span style="COLOR: blue">void</span> SetVisible(<b style="mso-bidi-font-weight: normal"><span style="COLOR: blue">ref</span> <span style="COLOR: #2b91af">Visibility</span></b> visibility, <span style="COLOR: blue">bool</span> visible) {</span></p>
+<p>And now our class can do:</p>
+<p><span style="FONT-SIZE: 10pt; COLOR: #2b91af; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">ExtensionMethods</span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-no-proof: yes">.SetVisible(<span style="COLOR: blue">ref</span> IsPanelVisible, makePanelVisible);</span></p>
+<p>Right? Not so fast I'm afraid. Compile error. "A property or indexer may not be passed as an out or ref parameter". And I guess this is reasonable. You can't pass the address of a function, which is what a property is in the background. So you should pass the private variable that backs the property.</p>
+<p>Except that I don't have one! I used an automatic property. And .Net doesn't let me access the private variable backing the automatic property. So I'm stuck!</p>
+<p>And this is .Net 3.0 limitation #2. Automatic properties are wonderful until you try to do much with them. Why couldn't the framework notice that I'm using an automatic property and pass the variable that I can't access by ref to my function?</p>
+<p>And now I find myself back in a .Net 2.0 world because all the features I like so much in 3.0 are more sugar than substance.</p>
+<p><b>Conclusion</b></p>
+<p>Allowing automatic properties to pass by reference or allowing access to the private member behind them would be nice. Allowing extension methods to change the instance they extend would be nice. But ultimately none of this would be a problem if Visible had been implemented as a Boolean. The way every other framework in the world does. &lt;/Complaining&gt;</p> 

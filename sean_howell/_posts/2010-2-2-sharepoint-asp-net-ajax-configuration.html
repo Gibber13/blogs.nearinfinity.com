@@ -1,0 +1,131 @@
+--- 
+permalink: /blogs/sean_howell/sharepoint_asp_net_ajax_configuration.html
+layout: blogs
+title: Sharepoint ASP .Net Ajax Configuration
+date: 2010-02-02 18:34:17 -05:00
+tags: .NET Web Development
+---
+In the world of web development, there is a little thing called ajax. Ajax is so simple because it is built in to Javascript. I like to use ajax to make web applications that look like they are not stuck in the past. Tools like jQuery make ajax so simple with its commands like:<div><pre class="prettyprint">$.get $.post $.load</pre>ASP .Net has, what they tout as ultra simple, the update panel for ajax post backs to the server. But, this tool is not as simple as it seems. While deceptively simple to stick on a page and wire up to the code behind, it takes much more to make this tool work.<div><br /><div>Like everything else in the Microsoft world, to make ASP .Net have ajax requires a dll and, through reading the documentation, a crap load of changes to the web.config file. Sure, it is easy to get the web.config all nice and set up if you have Visual Studios do it for you. Just create a new Web Site and start debugging the website. Voila, all of the configuration setting needed to use ajax are there.<br /></div><div><br /></div><div>But, for those whose have to do through code for, say, a Sharepoint web site that has to be deployed anywhere, they feel the pain of drudging through the required assembly strings and making SPWebConfigModifications. So, the first step on the path to Sharepoint ajaxiness is to go out to all the dlls and collect all the assembly strings needed:</div><div><br /><pre class="prettyprint">const string scriptResourceHandler = "System.Web.Handlers.ScriptResourceHandler,System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
+const string scripthandlerfactory = "ScriptHandlerFactory";
+const string scripthandlerfactoryappservice = "ScriptHandlerFactoryAppService";
+const string scriptresource = "ScriptResource";
+const string scriptModuleAssembly = "System.Web.Handlers.ScriptModule,System.Web.Extensions,Version=3.5.0.0,Culture=Neutral,PublicKeyToken=31bf3856ad364e35";
+const string webScriptAssembly = "System.Web.Script.Services.ScriptHandlerFactory, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35";
+const string webExtensionAssembly = "System.Web.Extensions,Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"</pre>After you have done that, or just copied the above assemblies, those assemblies have to be added to the web.config. That is where the SPWebConfigModification comes into play. First, you'll want to clear the modifications otherwise, modifications might appear for items that are long gone.&nbsp;</div><div><br /><pre class="prettyprint">webApp.WebConfigModifications.Clear();</pre>After that is set up, there is quite a bit to add to the WebConfigModification collection. Here OWNER, is something you set somewhere else and keep handy for when you have to remove all of the changes from the web.config.</div><div><br /><pre class="prettyprint">webApp.WebConfigModifications.Add(CreateControlSection());		webApp.WebConfigModifications.Add(CreateSafeControl(webExtensionAssembly,"System.Web.UI"));
+webApp.WebConfigModifications.Add(CreateAjaxAssembly(webExtensionAssembly));			webApp.WebConfigModifications.Add(CreateHttpScriptHandler(scriptModuleAssembly,"ScriptModule"));
+webApp.WebConfigModifications.Add(CreateScriptResource(scriptResourceHandler,"ScriptResource.axd","GET,HEAD"))
+webApp.WebConfigModifications.Add(CreateScriptResource(webScriptAssembly,"*_AppService.axd","*"));
+webApp.WebConfigModifications.Add(CreateScriptResource(webScriptAssembly,"*.asmx","*"));
+webApp.WebConfigModifications.Add(CreateWebServerSection());
+webApp.WebConfigModifications.Add(CreateWebServerHandlerSection());
+webApp.WebConfigModifications.Add(RemoveWebServiceHandler(scripthandlerfactory));
+webApp.WebConfigModifications.Add(RemoveWebServiceHandler(scripthandlerfactoryappservice));
+webApp.WebConfigModifications.Add(RemoveWebServiceHandler(scriptresource));
+webApp.WebConfigModifications.Add(CreateWebServiceHandler(webScriptAssembly,"*.asmx","*",scripthandlerfactory));
+webApp.WebConfigModifications.Add(CreateWebServiceHandler(webScriptAssembly,"*_AppService.axd","*",scripthandlerfactoryappservice));webApp.WebConfigModifications.Add(CreateWebServiceHandler(scriptResourceHandler,"ScriptResource.axd", "GET,HEAD", scriptresource));
+webApp.Farm.Services.GetValue<spwebservice>().ApplyWebConfigModifications();
+webApp.Update();
+/* Thus begins the many methods to add each little piece of the web.config */
+private SPWebConfigModification CreateScriptResource(string assembly,string path,string verb) {
+      return new SPWebConfigModification {
+		Path = "configuration/system.web/httpHandlers",
+		Type = SPWebConfigModification.SPWebConfigModificationType.EnsureChildNode,
+		Name = string.Format(CultureInfo.InvariantCulture,"add[@verb='{2}'][@path='{1}'][@type='{0}'][@validate='false']",assembly,path,verb),
+		Owner = OWNER,
+		Sequence = 0,
+		Value = string.Format("<add verb="{2}" path="{1}" type="{0}" validate="false">", assembly,path,verb)
+	};
+}
+
+private SPWebConfigModification CreateWebServiceHandler(string assembly,string path,string verb,string name) {
+	return new SPWebConfigModification {
+		Path = "configuration/system.webServer/handlers",
+		Type = SPWebConfigModification.SPWebConfigModificationType.EnsureChildNode,
+		Name = string.Format(CultureInfo.InvariantCulture,"add[@verb='{2}'][@path='{1}'][@type='{0}'][@preCondition='integratedMode'][@name='{3}']",assembly,path,verb,name),
+		Owner = OWNER,
+		Sequence = 0,
+		Value = string.Format("<add verb="{2}" path="{1}" type="{0}" precondition="integratedMode" name="{3}">", assembly,path,verb,name)
+	};
+}
+private SPWebConfigModification RemoveWebServiceHandler(string name) {
+	return new SPWebConfigModification {
+		Path = "configuration/system.webServer/handlers",
+		Type = SPWebConfigModification.SPWebConfigModificationType.EnsureChildNode,
+		Name = string.Format(CultureInfo.InvariantCulture,"add[@name='{0}']",name),
+		Owner = OWNER,
+		Sequence = 0,
+		Value = string.Format("<remove name="{0}">",name)
+	};
+}
+
+private static SPWebConfigModification CreateHttpScriptHandler(string assembly,string name) {
+	return new SPWebConfigModification {
+		Path = "configuration/system.web/httpModules",
+		Type = SPWebConfigModification.SPWebConfigModificationType.EnsureChildNode,
+		Name = string.Format(CultureInfo.InvariantCulture, "add[@name='{0}'] [@type='{1}']",name, assembly),
+		Owner = OWNER,
+		Sequence = 0,
+		Value = string.Format("<add name="{0}" type="{1}">",name, assembly)
+	};
+}
+
+private static SPWebConfigModification CreateAssembly(string assembly) {
+	return new SPWebConfigModification {
+	        Path = "configuration/system.web/compilation/assemblies",
+		Type = SPWebConfigModification.SPWebConfigModificationType.EnsureChildNode,
+		Name = string.Format(CultureInfo.InvariantCulture, "add[@assembly='{0}']", assembly),
+		Owner = OWNER,
+		Sequence = 0,
+		Value = string.Format(CultureInfo.InvariantCulture, "<add assembly="{0}">", assembly)
+	};
+}
+private static SPWebConfigModification CreateAjaxAssembly(string assembly) {
+	return new SPWebConfigModification {
+		Path = "configuration/system.web/pages/controls",
+		Type = SPWebConfigModification.SPWebConfigModificationType.EnsureChildNode,
+		Name = string.Format(CultureInfo.InvariantCulture, "add[@tagPrefix='{0}'][@namespace='{1}'][@assembly='{2}']","asp","System.Web.UI", assembly),
+		Owner = OWNER,
+		Sequence = 0,
+		Value = string.Format(CultureInfo.InvariantCulture, "<add tagprefix="{0}" namespace="{1}" assembly="{2}">","asp","System.Web.UI", assembly)
+	};
+}
+private static SPWebConfigModification CreateSafeControl(string assembly, string nameSpace) {
+	return new SPWebConfigModification {
+		Path = "configuration/SharePoint/SafeControls",
+		Type = SPWebConfigModification.SPWebConfigModificationType.EnsureChildNode,
+		Name = string.Format(CultureInfo.InvariantCulture, "SafeControl[@Assembly='{0}'][@Namespace='{1}'][@TypeName='*'][@Safe='True']", assembly, nameSpace),
+		Owner = OWNER,
+		Sequence = 0,
+		Value = string.Format(CultureInfo.InvariantCulture, "<safecontrol assembly="{0}" namespace="{1}" typename="*" safe="True">", assembly,				nameSpace)
+	};
+}
+private static SPWebConfigModification CreateControlSection() {
+	return new SPWebConfigModification {
+		Path = "configuration/system.web/pages",
+		Type = SPWebConfigModification.SPWebConfigModificationType.EnsureSection,
+		Name = "controls",
+		Value =@"<controls></controls>",
+		Sequence = 0,
+		Owner = OWNER
+	};
+}
+private static SPWebConfigModification CreateWebServerSection() {
+	return new SPWebConfigModification {
+		Path = "configuration",
+	        Type = SPWebConfigModification.SPWebConfigModificationType.EnsureSection,
+		Name = "system.webServer",
+		Value =@"<system.webserver></system.webserver>",
+		Sequence = 0,
+		Owner = OWNER
+	};
+}
+private static SPWebConfigModification CreateWebServerHandlerSection() {
+       return new SPWebConfigModification {
+		Path = "configuration/system.webServer",
+		Type = SPWebConfigModification.SPWebConfigModificationType.EnsureSection,
+		Name = "handlers",
+		Value =@"<handlers></handlers>",
+		Sequence = 0,
+		Owner = OWNER
+	};		
+}</safecontrol></add></add></add></remove></add></add></spwebservice></pre><br />So, why on earth does it take that much code to generate the xml required to use ajax in Sharepoint?</div></div></div> 

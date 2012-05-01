@@ -1,0 +1,50 @@
+--- 
+permalink: /blogs/jason_harwig/improving_css.html
+layout: blogs
+title: Improving CSS
+date: 2008-04-10 16:57:43 -04:00
+tags: CSS
+---
+Of the trinity of web technologies, CSS is by far the worst at this stage. It's a language that begs for more power.
+
+<p>Wouldn't it be cool if you could do this?</p>
+
+<code class="prettyprint">
+@variables {
+  NEAR_INFINITY_ORANGE: #C96522;
+}
+
+div.header {
+  background-color: var(NEAR_INFINITY_ORANGE);
+}
+</code> 
+<p>or do property transitions like this:
+<code class="prettyprint">
+div {
+  opacity: 0;
+  transition: opacity 1s linear;
+}
+
+div:hover {
+  opacity: 1;
+}
+</code>
+
+<p>or do transformations on elements?
+
+<code class="prettyprint">
+#downloadLink {
+  transform: rotate(10deg)
+}
+</code>
+
+<p>... well it's coming, and in some cases already here. The last two are already working in Safari 3.1 and there is a spec for CSS variables. 
+
+</p><ul><li><a href="http://disruptive-innovations.com/zoo/cssvariables">CSS Variables</a></li>
+<li><a href="http://webkit.org/specs/CSSVisualEffects/CSSTransitions.html">CSS Transitions</a></li>
+<li><a href="http://webkit.org/specs/CSSVisualEffects/CSSTransforms.html">CSS Transform</a></li></ul>
+
+<p>Hopefully we are past those days where a spec is released, but no one could use it until 5 years later. Ajax took ~6 years for crying out loud.
+
+
+</p><p>twitter: jharwig</p>

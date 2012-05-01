@@ -1,0 +1,191 @@
+--- 
+permalink: /blogs/john_cato/both_scale_and_crop_an_image_u.html
+layout: blogs
+title: Both Scale and Crop an Image using Javascript and CSS
+date: 2011-05-08 11:17:42 -04:00
+tags: CSS JavaScript
+---
+
+<script type='text/javascript' src='/blogs/john_cato/assets/prototype.js'></script>
+
+<script>
+
+var imageData = {
+  kittah: {  width:900, top:-175, left:-165, url: '/blogs/john_cato/assets/Kittah.jpg' },
+};
+
+var Croppenscaler = Class.create();
+Croppenscaler.prototype = {
+
+  initialize: function(options) {
+    var image = imageData[options.image];
+
+    this.url = image.url;
+    this.frameHeight = options.height || 400;
+    this.frameWidth = options.width || 300;
+
+    var scale = this.frameWidth / 300;
+
+    this.imageWidth = (image.width) * scale;
+    this.positionTop = (image.top) * scale;
+    this.positionLeft = (image.left) * scale;
+  },
+
+  buildFrame: function() {
+
+    var img = new Element('img',{src:this.url, 'class':'zoom'});
+    img.setStyle({
+      width: this.imageWidth+'px',
+      top: this.positionTop+'px',
+      left: this.positionLeft+'px',
+    });
+
+    var frame = new Element('div',{'class':'croppenscaler'});
+    frame.update(img);
+    frame.setStyle({
+      height:this.frameHeight+'px',
+      width:this.frameWidth+'px',
+    });
+
+    return frame;
+  },
+};
+
+var loadImages = function() {
+  $('cats').insert(new Croppenscaler({image:'kittah'}).buildFrame());
+  $('cats').insert(new Croppenscaler({image:'kittah',height:300}).buildFrame());
+  $('cats').insert(new Croppenscaler({image:'kittah',width:400,height:250}).buildFrame());
+  $('cats').insert(new Croppenscaler({image:'kittah',width:200,height:300}).buildFrame());
+  $('cats').insert(new Croppenscaler({image:'kittah',width:100,height:150}).buildFrame());
+}
+
+document.observe('dom:loaded',loadImages)
+</script>
+
+<style>
+  .entrybody img { max-width: none; }
+
+  .croppenscaler {
+    display: inline-block;
+    overflow: hidden;
+    border: 1px solid #000;
+    margin: 1.5px
+  }
+
+  .croppenscaler img {
+    position: relative;
+    border: none;
+  }
+</style>
+
+<p>
+A common CSS problem is the need to crop and scale an image on a page. Scaling an image is easily done using the hight and width attributes of the image. Likewise cropping an image can be accomplished by using the image as a background of an element and setting the hight and width of the element. Both scaling and cropping an image is a bit more involved however, and if it's something that's done often it pays to have a class that handles the creation of cropped and scaled images. For this purpose I've written the Croppenscaler.
+</p>
+
+<p>
+The idea here is to create a div element with a set size that has a nested div within that displays a relatively positioned image. I found that it was useful to have a hash of image data that defines the default size and crop position of an image. These values are adjusted when the frame is built so that no matter what scale the resulting frame has, the image is positioned in the same place.
+</p>
+
+<h3>CSS Classes</h3>
+
+<p>
+Let's examine the nessessary CSS classes first:
+</p>
+
+<pre class='prettyprint'>
+
+  .croppenscaler {
+    display: inline-block;
+    overflow: hidden;
+  }
+
+  .croppenscaler img {
+    position: relative;
+    border: none;
+  }
+
+</pre>
+
+<p>
+  The important attributes to note above are the use of overflow on the main croppenscaler, this ensures that the top frame has the intended size. The nested image is positioned relatively. All of the other CSS attributes are written in the style attribute because they have to be calculated when the frame is built.
+</p>
+
+<h3>The Croppenscaler Class:</h3>
+
+<p>
+  The javascript below uses the Prototype framework, but it could just as easily use JQuery or raw javascript to accomplish the same thing.
+</p>
+
+<pre class='prettyprint'>
+
+var imageData = {
+  kittah: {  width:900, top:-175, left:-165, url: '/blogs/assets/jcato/images/Kittah.jpg' },
+};
+
+var Croppenscaler = Class.create();
+Croppenscaler.prototype = {
+
+  initialize: function(options) {
+    var image = imageData[options.image];
+
+    this.url = image.url;
+    this.frameHeight = options.height || 400;
+    this.frameWidth = options.width || 300;
+
+    var scale = this.frameWidth / 300;
+
+    this.imageWidth = (image.width) * scale;
+    this.positionTop = (image.top) * scale;
+    this.positionLeft = (image.left) * scale;
+  },
+
+  buildFrame: function() {
+
+    var img = new Element('img',{src:this.url, 'class':'zoom'});
+    img.setStyle({
+      width: this.imageWidth+'px',
+      top: this.positionTop+'px',
+      left: this.positionLeft+'px',
+    });
+
+    var frame = new Element('div',{'class':'croppenscaler'});
+    frame.update(img);
+    frame.setStyle({
+      height:this.frameHeight+'px',
+      width:this.frameWidth+'px',
+    });
+
+    return frame;
+  },
+};
+
+</pre>
+
+<p>
+The class has two functions. The constructor takes a hash of options for the resulting frame; the image key and the height and width of the frame. In this version the constructor references an imageData hash to get the details about the image to display, but they could be passed into the function as well. The important thing is that the constructor has access to the height and width of the frame, as well as the default width of the image and the top and left attributes that define where the upper left corner of the image should be when it's displayed at its default width.
+</p>
+
+<p>
+The buildFrame() function takes the calculated sizes and uses them to construct the frame div, with a nested image at a scale that fits within the frame, and positioned the same at any scale.
+</p>
+
+<p>
+Then to use the class, create a new Croppenscaler with a hash that at least includes the image key, and an optional height and width, call the buildFrame() function and insert the resulting element onto the page.
+</p>
+
+<pre class='prettyprint'>
+var loadImages = function() {
+  $('cats').insert(new Croppenscaler({image:'kittah'}).buildFrame());
+  $('cats').insert(new Croppenscaler({image:'kittah',height:300}).buildFrame());
+  $('cats').insert(new Croppenscaler({image:'kittah',width:400,height:250}).buildFrame());
+  $('cats').insert(new Croppenscaler({image:'kittah',width:200,height:300}).buildFrame());
+  $('cats').insert(new Croppenscaler({image:'kittah',width:100,height:150}).buildFrame());
+}
+</pre>
+
+<p>
+The above code will then produce the clowder of cats below.
+</p>
+
+<div id='cats'></div>
+ 

@@ -1,0 +1,44 @@
+--- 
+permalink: /blogs/bryan_weber/rubyconf_2007_day_3.html
+layout: blogs
+title: RubyConf 2007 Day 3
+date: 2007-11-05 22:58:26 -05:00
+tags: Ruby
+---
+Highlights of day 3 for me:
+
+<ul>
+<li>Adhearsion</li>
+<li>RSpec</li>
+<li>Solr</li>
+<li>Metasploit</li>
+</ul>
+
+Adhearsion
+
+<br /><br />
+VOIP library built on top of Asterisk (which sounds awful to have to use).  Demos were cool.  Test coverage was ... low to put it mildly. :)  
+
+<br /><br />
+RSpec
+
+<br /><br />
+RSpec unit testing is fine, demo of ping pong development was simple, but the merge of another test framework (Fit I think? I can't recall for sure.) into the soon to be released RSpec version was simply awesome.  Hats off to the team for getting me interested in testing again for the first time in quite some while.  Basically, they've designed a DSL for BDD and a really cool looking UI.  I've read a fair bit before on BDD but never really saw what distinguished it from TDD to make me investigate it further.  I'm actually looking forward to the new version of RSpec being released now so I can start testing RSpec BDD style.  There are 3 ways that the new framework can be used: pure ruby, dsl and I forget... (probably some variation of the first 2).  The dsl version basically split the description part into a dsl (in theory to be used by "business users", which would almost never happen in practice) and the implementation part was still in ruby.  Ryan D. had a problem with the dsl version because it was too far away from ruby syntax, but no one in the crowd backed him up.  In fact, I think it is a positive.  I'd like to see JBehave and other BDD frameworks adopt the dsl so that tests could be written for any scenarios regardless of the implementation language!    
+
+<br /><br />
+Solr 
+
+<br /><br />
+So its been a little while since I last used Lucene, but I really liked this presentation and I thought it was one of the most relevant talks.  Solr basically exposes search via http.  I have some questions about using solr for federated searches which I'll be investigating further myself, but I'm sure that a significant percentage of projects have the need for something at least similar to solr.
+
+<br /><br />
+Metasploit
+
+<br /><br />
+OK, I've seen metasploit before, but its been ported from perl to ruby (the part of it that was in perl anyway)... so now its assembly, c and ruby.  And let's just say that attaching irb to running processes on remote boxes is way too easy and way cool.
+
+<br /><br />
+Honorable mention
+
+<br /><br />
+Justin's talk on identity (OpenID and CAS) was very practical and useful and rubigen might come in handy some day, but the presentation had too much video and not enough let's roll up our sleeves and write some code examples. 

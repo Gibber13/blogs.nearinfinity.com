@@ -1,0 +1,36 @@
+--- 
+permalink: /blogs/chris_lee/work_around_getting_tomcat_to.html
+layout: blogs
+title: "Chris's Blog Bytes - Best of both worlds: Hot and orderly deployment"
+date: 2008-05-31 15:56:45 -04:00
+tags: Java
+---
+<h2>The Problem:</h2>
+
+<p>On a project I am currently involved in, the architecture is such that 6 web applications are dependent on the same managing (JNDI populating) application. This means the dependency had to be loaded by the container before it loaded the rest of the dependent applications. <br />If the arbitrary loading sequence of Tomcat failed to load the manager first, then the subsequent deployments of other applications will fail. Keep in mind that the number of dependencies from this point forward will balloon from 6 to over 75 in the near future, so the size of this problem is only going to continue to grow.</p>
+
+<h2>Possible solutions:</h2>
+
+<ul>
+<li>Continue as-is, removing/undeploying all dependent applications prior to starting up the container.</li>
+<li>Mock out fake dependency place-holders for the dependent applications.</li>
+<li>Turn off hot deployment in Tomcat and specify each web application's context in server.xml</li>
+<li>Deploy JBoss inside of Tomcat which would provide JBoss web application deployment capability.</li>
+</ul>
+
+<h2>Problems with each option:</h2>
+
+<ul>
+<li>Too many applications (quite possibly 75+). Imagine having to undeploy everything just to re-deploy them.</li>
+<li>This is a pretty viable option, but technically it appeared to be an annoying challenge.</li>
+<li>Maintaining the server.xml would be yet another annoying headache. The complexity of the entire application does not need another configuration file.</li>
+<li>Possible, but getting it work right would just add another task to our ever growing backlog.</li>
+</ul>
+
+<h2>So, how'd it finally work?</h2>
+
+<p>Well, I ended up going down the route of defining deployment contexts in the server.xml. The directions to do this include disabling hot deployments (of course, if I'm going to tell you want to deploy, why would you hot deploy anything?). Well, that worked and the management application deployed first. Then I figured, hey, why not just enable hot deployment and keep the context definition for the management application in server.xml. Maybe then it will deploy that application first, then hot deploy the rest.</p>
+
+<p>And what do you know? It worked! Now you can hot deploy like it's going out of style and don't need to worry about your JDNI management providing application being deployed second or third or 75th.</p>
+
+<p>Good luck with your own Tomcat deployments. If worse comes to worst, just do what you want in the context file and it might just work!</p> 

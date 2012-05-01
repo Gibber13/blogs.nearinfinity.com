@@ -1,0 +1,32 @@
+--- 
+permalink: /blogs/bryan_weber/rubyconf_2007_day_2.html
+layout: blogs
+title: RubyConf 2007 Day 2
+date: 2007-11-03 20:43:25 -04:00
+tags: Ruby
+---
+Highlights of day 2 for me:
+
+<ul>
+<li>IronRuby, JRuby and Rubinius</li>
+<li>Mac OS X Loves Ruby</li>
+<li>Matz Keynote</li>
+</ul>
+
+<br />
+MRI (CRI) vs. IronRuby vs. JRuby vs. Rubinius vs. YARV
+<br /><br />
+IronRuby, JRuby and Rubinius presentations opened the day.  Nothing too new here.  IronRuby is the port of Ruby to .NET.  It has the farthest to go.  JRuby is pretty far along.  Rubinius contends that ports shouldn't be to .NET or the JVM, but to ruby itself, at least for as much of the runtime and kernel (read standard libraries) as possible.  IMHO this would make the jobs of the IronRuby and JRuby teams much easier, but unfortuantely, Rubinius is not complete so they cannot build on top of Rubinius. YARV is the much anticipated Ruby 1.9 virtual machine that promises significant performance improvements, but it wasn't really discussed in detail at this point. 
+
+<br /><br />
+Mac OS X Loves Ruby
+<br /><br />
+Focused on Leopard.  In particular focused on RubyCocoa and DTRACE.  The RubyCocoa examples were visually cool.  One used Ruby to open a GUI and make it read a message out loud.  XCode was used as the ruby editor, which it appears Apple is trying to coerce developers into using. The GUI was built using drag and drop in XCode and the ruby code was tied to GUI components by clicking and dragging in XCode.  Another example used a script to attach ruby to a running process (TextEdit) and manipulate the process (resize, change window name, change editor text) real time in irb.  This example was particularly interesting and grabbed my attention from a security standpoint.  While this stuff was cool, I don't write software only for OS X so I won't be touching any of it.  DTRACE is for debugging operating system calls by applications and it is included with Ruby on Leopard.
+
+<br /><br />
+Matz Keynote
+<br /><br />
+Focused mainly on Ruby 1.9 and 2.0 features.  1.9 is a transitional release that breaks compatibility with 1.8.6 syntax.  Ruby 1.9 will be released before the holiday season, ie end of 2007, but it seems like it might be a historical footnote. In fact, Ruby 1.8.6 will still be the production stable release.  Ruby 1.9 will switch from green threads to operating system threads.  1.9 introduces (somewhat controversially) parameters after optional parameters.  Matz cleared up the air by stating that this was a transitional stage on the way to named parameters which will be added at some point in the future.  
+
+<br /><br />
+Oh, and everyone in attendance is aware that tonight is daylight savings time. 

@@ -1,0 +1,221 @@
+--- 
+permalink: /blogs/jim_clark/thumbnail_generation_gotchas.html
+layout: blogs
+title: Thumbnail Generation Gotchas
+date: 2006-12-26 15:21:48 -05:00
+tags: Java
+---
+<p>
+    For a recent release of our software we had a requirement to generate and store thumbnail images.
+    We have documents that come in to our system with image attachments and we need to generate a
+    thumbnail image for each of the attachments that have a supported MIME type (gif, jpg, and png).
+    When I signed up for this assignment I thought it was a good opportunity to re-learn JavaÃ•s image APIs (itÃ•s been
+    almost seven years since doing any Swing or AWT work!). A lot of information is available on the web for generating
+    thumbnail images, however, the information is scattered and there is more than one way to perform this task. Additionally, there are several gotchas 
+    that I experienced rather than reading about.  Hopefully this article will get you started in the right direction and help you avoid
+    some of the problems I faced.
+</p>
+
+
+<h2>Scaling Images</h2>
+
+<p>
+    Before reading and writing images, I first needed to figure out how to actually scale an image, i.e. take an
+    original image and size it to an appropriate thumbnail size. Digging around the AWT package and the Image class
+    I found the <code>java.awt.Image.getScaledInstance</code> method. Piece of cake, just do something like:
+</p>
+
+<pre><code>
+    Image scaledInstance = image.getScaledInstance(thumbWidth, thumbHeight, hint);
+</code></pre>
+
+<p>
+    This worked fine and I used it for a couple of weeks when one of my <a
+        href="http://www.nearinfinity.com/blogs/page/jharwig">coworkers</a>
+    pointed out that this was no longer the best way to scale images
+    (see Bug <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6196792">6196792</a>) Instead, use the 2D
+    Graphics API and an
+    <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/awt/geom/AffineTransform.html">AffineTransform</a> for a better solution.
+</p>
+
+<pre><code>
+public static BufferedImage getThumbnail(BufferedImage image, 
+                                         int maxThumbWidth, 
+                                         int maxThumbHeight, 
+                                         RenderingHints hints)
+{
+   BufferedImage thumbnail = null;
+   if(image != null)
+   {
+       AffineTransform tx = new AffineTransform();
+       // Determine scale so image is not larger than the max height and/or width. 
+       double scale = scaleToFit(image.getWidth(), 
+                                 image.getHeight(), 
+                                 maxThumbWidth, maxThumbHeight);
+                 
+       tx.scale(scale, scale);
+
+       double d1 = (double) image.getWidth() * scale;
+       double d2 = (double) image.getHeight() * scale;
+       thumbnail = new BufferedImage(
+               ((int) d1) < 1 ? 1 : (int)d1,  // don't allow width to be less than 1
+               ((int) d2) < 1 ? 1 : (int)d2,  // don't allow height to be less than 1
+               image.getType() == BufferedImage.TYPE_CUSTOM ? 
+                                  BufferedImage.TYPE_INT_RGB : image.getType());
+       Graphics2D g2d = thumbnail.createGraphics();
+       g2d.setRenderingHints(hints);
+       g2d.drawImage(image, tx, null);
+       g2d.dispose();
+   }
+   return thumbnail;
+}
+
+
+private static double scaleToFit(double w1, double h1, double w2, double h2) {
+        double scale = 1.0D;
+        if (w1 > h1) {
+            if (w1 > w2)
+                scale = w2 / w1;
+            h1 *= scale;
+            if (h1 > h2)
+                scale *= h2 / h1;
+        } else {
+            if (h1 > h2)
+                scale = h2 / h1;
+            w1 *= scale;
+            if (w1 > w2)
+                scale *= w2 / w1;
+        }
+        return scale;
+    }
+
+    </code>
+</pre>
+
+<p>
+    Using this code I was able to scale an image, i.e. create a thumbnail, and now I needed to save it.
+</p>
+
+
+<h2>Storing Thumbnails</h2>
+
+<p>
+    Since I was working with J2SE 1.4, which only allows for creating images in JPEG and PNG formats, we decided to use the JPEG format for
+    thumbnails for its smaller file size.  
+    I needed a way to write my thumbnail to an output stream since we have a separate API for storing files. Fortunately
+    the <code>javax.imageio.ImageIO</code> package provided
+    an easy way to create JPEG images and put the image in to an OutputStream:
+</p>
+
+<pre>
+    ImageIO.write(myImage, "jpg", myOutputStream);
+</pre>
+
+<p>
+    I incorporated my changes in to the build and left for a week of training, everything seem to be working ok. Upon returning I found out that
+    thumbnails were "killing" our system.
+    Naturally, I questioned, "are you sure itÃ•s thumbnails causing the problem?" ItÃ•s just image creation. Sure enough, the problem was caused by
+    thumbnail generation.  It turns out the garbage collector went in to full GC mode when thumbnails were being created, specifically when hundreds 
+    or thousands of thumbnails were being generated. Ugh, back to the drawing board.
+</p>
+
+<p>After a little research, it was discovered that there are memory leaks in SunÃ•s ImageIO JPEG libraries
+    (<a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5015137">Bug 5015137</a>
+    and <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4827358">Bug 4827358</a>).
+    As our system was creating hundreds of thumbnails, everything else came to a screeching halt thanks to garbage
+    collection. What to do, what to do?
+</p>
+
+<p>
+    Supposedly these bugs are fixed in J2SE 1.5, however, upgrading wasn't an option.
+</p>
+<p>
+    One solution we looked at was creating thumbnails as PNG files. Fine, this works, no problems with performance.
+    YouÃ•ll just need to go out and buy a few extra hard drives. I was finding the PNGs to be 4, 5, 6 times larger than
+    JPEGs. I looked at ways to compress the PNGs via Java but didnÃ•t have much luck getting them down to a reasonable
+    size.
+</p>
+
+<p>
+    We also talked about having the thumbnail creation occur offline after the document was brought in to our system.
+    This seemed more complicated than we wanted to make it. Plus we were running out of time as the code deadline was
+    approaching.
+</p>
+
+<p>        
+Next a coworker sent a snippet of code, for encoding images to JPEG, that talked directly to <code>com.sun</code>
+JPEG classes.  This always seemed a no-no, i.e. Sun says: <em>"Note that the classes in the <code>com.sun.image.codec.jpeg</code> 
+package are not part of the core Java APIsÃ‰".</em>
+Since we werenÃ•t planning to upgrade the JDK any time soon we went with this approach for writing JPEGs.
+</p>
+        
+<pre>
+    JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(myByteArrayOutputStream);
+    JPEGEncodeParam encodeParams = encoder.getDefaultJPEGEncodeParam(myImage);
+    encodeParams.setQuality(0.8F, false);
+    encoder.setJPEGEncodeParam(encodeParams);
+    encoder.encode(myImage);
+</pre>
+
+<p>
+    Everyone was happy; we could create JPEG thumbnails by circumventing the ImageIO API and talking directly to the
+    com.sun classes. UntilÃ‰
+</p>
+
+<h2>Reading Images</h2>
+
+<p>
+    I noticed that certain thumbnails werenÃ•t being rendered correctly; rather they were rendered as black rectangles.
+</p>
+        
+<div style="background: black;height: 75px;width:100px"></div>        
+
+<p>
+    Now what? Was this something to do with the usage of the <code>JPEGImageEncoder</code>, i.e. talking directly to the <code>com.sun</code> classes? 
+    After a little research it turns out the problem existed previously when directly using <code>ImageIO</code> to encode and write images.
+    Therefore, no new problems were introduced. It seemed to be a problem only with GIF files. I ran a couple of tests on
+    Windows (dev environment) using my test GIFs and
+    they worked fine. I tested animated GIF files on Windows and they worked correctly. I tested the animated GIFs on Solaris.
+    These images were being rendered as black images. The animated GIF images that were "thumbnailed" on Solaris were not 
+    created correctly.  I was now able to repeat the problem.
+</p>
+
+<p>
+    To read images from the file system, the images I would create thumbnails from, I was using the AWT tookit:
+</p>
+
+<pre>
+    Image image = Toolkit.getDefaultToolkit().createImage(myFileBytes);
+</pre>
+
+<p>
+    Unlike Windows, the Solaris toolkit apparently didnÃ•t know how to handle images that were made up of multiple images (GIF89a). I
+    needed a way to create images, in my case from a byte array, that didn't result in a black image. Back to the ImageIO class. Turns out they have a <code>read</code>
+    method that can take an InputStream
+</p>
+
+<pre>
+    image = ImageIO.read(new ByteArrayInputStream(myImageByteArray));
+</pre>
+
+<p>
+    However, I was a little leery of the ImageIO class due to the problems I had seen with the <code>write</code> method.
+    I did find a bug related to <code>ImageIO.read</code> method (<a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4867874">Bug 4867874</a>),
+    but it pertained to JPEGs.
+    I decided to use <code>ImageIO.read</code> for GIF files and continue using the AWT toolkit for JPEGs and other types.  This was a fix
+    for our black image problem.
+</p>
+
+<p>
+    It seems as if our thumbnail processing is working as expected and we havenÃ•t seen noticeable degradation in
+    performance or the black image problem.
+</p>
+
+<p>
+    If youÃ•ll be doing image processing, such as thumbnail creation, make sure your application can handle the
+    processing requirements.
+    Test a worse case scenario, e.g. create 1000 thumbnails. Test with many different image samples with different image
+    formats (e.g. animated gifs)
+    and sizes (large image files). Unfortunately you'll have to actually view the images to verify expected output, but now you are 
+    hopefully aware of some of the issues surrounding the generation of thumbnails using the ImageIO APIs and the AWT toolkit.
+</p>

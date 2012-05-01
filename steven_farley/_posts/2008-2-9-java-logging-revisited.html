@@ -1,0 +1,87 @@
+--- 
+permalink: /blogs/steven_farley/java_logging_revisited.html
+layout: blogs
+title: Java Logging Revisited
+date: 2008-02-09 16:36:07 -05:00
+tags: Java
+---
+<p>I know this goes against the collective wisdom of Java developers everywhere, but I'll say it anyway: <a href="http://java.sun.com/j2se/1.5.0/docs/guide/logging/index.html">Java Logging</a> is not so bad.  Granted, its API isn't as simple as Apache <a href="http://commons.apache.org/logging/">Commons Logging</a> or <a href="http://logging.apache.org/log4j/index.html">Log4J</a>, and you may end up writing your own <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/logging/Formatter.html">Formatter</a>, but its core implementation is sound.  Of course, if you depend on libraries such as Spring, they require you to include 'commons-logging.jar' in your classpath.  In that case you can still choose to use the Java Logging API directly in your application and tell Commons to do the same by using a <a href="http://commons.apache.org/logging/guide.html#Configuration">'commons-logging.properties'</a> file.  There are numerous <a href="http://java-source.net/open-source/logging">other logging utilities</a> that you should also explore when deciding which library to commit to.</p>
+
+<p>So let's assume that you have chosen to use Java Logging, but you are not totally sold on the API.  You could choose to use Commons Logging if you don't mind the extra dependency.  But with a minimal amount of effort, it's not so difficult to write a thin wrapper around Java Logging that makes it more convenient to use than even the Apache offerings:</p>
+
+<pre class="prettyprint">public final class Log {
+  private Log() { }
+
+  private static final Map&lt;String, Logger&gt; loggers = new HashMap&lt;String, Logger&gt;();
+
+  public static void debug(String message, Object... params) {
+    log(Level.FINE, message, params);
+  }
+
+  public static void info(String message, Object... params) {
+    log(Level.INFO, message, params);
+  }
+
+  public static void warn(String message, Object... params) {
+    log(Level.WARNING, message, params);
+  }
+
+  public static void error(String message, Object... params) {
+    log(Level.SEVERE, message, params);
+  }
+
+  public static void log(Level level, String message, Object... params) {
+    final int stackPositionOfCaller = 2;
+    StackTraceElement caller = new Throwable().getStackTrace()[stackPositionOfCaller];
+    String className = caller.getClassName();
+    Logger logger;
+    synchronized (loggers) {
+      logger = loggers.get(className);
+      if (logger == null) {
+        logger = Logger.getLogger(className);
+        loggers.put(className, logger);
+      }
+    }
+    if (logger.isLoggable(level)) {
+      String formattedMessage;
+      Throwable thrown = null;
+      if (params.length == 0) {
+        formattedMessage = message;
+      }
+      else {
+        Object last = params[params.length - 1];
+        if (last instanceof Throwable) {
+          Object[] subParams = new Object[params.length - 1];
+          System.arraycopy(params, 0, subParams, 0, subParams.length);
+          formattedMessage = String.format(message, subParams);
+          thrown = (Throwable) last;
+        }
+        else {
+          formattedMessage = String.format(message, params);
+        }
+      }
+      LogRecord record = new LogRecord(level, formattedMessage);
+      record.setLoggerName(logger.getName());
+      record.setSourceClassName(className);
+      record.setSourceMethodName(caller.getMethodName());
+      record.setThrown(thrown);
+      record.setParameters(params);
+      logger.log(record);
+    }
+  }
+}
+</pre>
+
+<p>This particular implementation provides the following advantages:</p>
+
+<ul>
+<li>The <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/logging/Logger.html"><code>Logger</code></a> name is automatically set to be the fully-qualified class name of the caller, by using stack introspection.</li>
+<li>Log messages are formatted using the <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/String.html#format%28java.lang.String,%20java.lang.Object...%29"><code>String.format()</code></a> patterns and variable arguments.  The parameters are also assigned to the underlying <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/logging/LogRecord.html"><code>LogRecord</code></a>.</li>
+<li>If the last parameter to a method is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/Throwable.html"><code>Throwable</code></a>, it will be assigned to the <code>LogRecord</code>. </li>
+<li>The method names align more closely with the Log4j and Commons Logging method names.</li>
+</ul>
+
+<p>All methods are static wrappers around a Java <code>Logger</code>.  Each <code>Logger</code> is created as needed and then cached, one per calling class.  Execution time is about the same when compared to direct calls to <code>Logger</code>.</p>
+
+<p>You can <a href="http://www.nearinfinity.com/blogs/resources/sfarley/java-logging-revisited.zip">download</a> the code and use it as a starting point for your own logging utility.  A <a href="http://www.junit.org/">JUnit</a> test class is included which, in addition to testing the basic API, measures and compares execution times of the Java <code>Logger</code> and the <code>Log</code> class presented here.</p>
+ 

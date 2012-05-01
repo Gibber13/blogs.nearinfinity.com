@@ -1,0 +1,41 @@
+--- 
+permalink: /blogs/seth_schroeder/why_and_when_i_started_using_g.html
+layout: blogs
+title: Why and when I started using GNU Emacs
+date: 2009-01-10 19:21:36 -05:00
+tags: General
+---
+<p>Emacs is one of those polarizing topics among software developers. Maybe it's tripolar: Camp Emacs spars with Camp Vi to the great amusement of Camp Everyone Else. The heckling is especially raucous from Camp Java/C# IDE whose devotees ritually launch The Environment to press the '.' and ';' keys all day.
+<p>To make up for that rotten attempt at humor I decided to spend some time explaining why and how I use Emacs. This blog post covers the background, the why and when I switched. The next post will cover how I use/depend on it in my daily workflow.
+<p>When MacOS X first came out I was a certified <a href="http://www.freescale.com/webapp/sps/site/overview.jsp?code=CW_DEV_STUDIO&amp;tid=CWH">Metrowerks CodeWarrior</a> fanatic. They had the coolest booths at MacWorld, a killer logo, and everyone drooled over the new CWDev tools CD arrived. That powerful, graceful IDE killed Apple's <a href="http://developer.apple.com/tools/mpw-tools/">Macintosh Programmers' Workshop (MPW)</a>. Now <strong>that</strong> IDE was a strange beast:
+<ul>
+	<li>Ugly, ugly, ugly, and really unintuitive; its icon had binary on it (decimal value 13 I think? 01101?)</li>
+	<li>A C compiler with a <a href="http://ask.slashdot.org/comments.pl?sid=42699&amp;cid=4486500">good sense of humor</a></li>
+	<li>Regular expressions with bizzaro 8-bit characters in the syntax</li>
+	<li>Projector, the unlovable source code pseudo-control software</li>
+	<li>Locked in a mortal battle with Jasik's Debugger, which
+<ol>
+	<li>Was even <a href="http://www.jasik.com/castMenu.html">uglier and less intuitive</a> than <a href="http://developer.apple.com/tools/debuggers/MacsBug/">Macsbug</a>.</li>
+	<li>Was the only game in town for source level debugging of system extensions.</li>
+	<li>Had "shortcut" commands which used multiple meta keys at once</li>
+	<li>Was so uncool it was trés cool</li>
+</ol>
+</li>
+</ul>
+<p>Metrowerks really ruled the Classic/Carbon Mac development roost for a while. It was really good software. On awesome days I got use MWPro, Jasik, <a href="http://www.mathemaesthetics.com/ResorcererInfo.html">Resorcerer</a>, <strong>and</strong> <a href="http://www.mindvision.com/macvise.asp">Installer VISE</a>.
+<p>The fate of these tools was sad but clear when MacOS X arrived. Apple shed everything except its logo. Lots of good reasons to be sure but the process was messy. All the cool tools on my nerd belt could never keep up with the free, bundled tools built with asymmetric knowledge of Darwin and dyld(1).
+<p>At this point my current project was written in C++ and built on several platforms. It used <a href="http://www.snake.net/software/imake-stuff/imake-faq.html">imake</a> to build all platforms from a single imakefile... except the Mac build which was a maintenance drag. MacOS X was Unix, right, so all we had to do was port imake to a new platform (arggggggghhhhh). All the imake work in Terminal.app needed a good text editor. XCode wasn't it. CodeWarrior was doomed. I needed something else.
+<p>15 seconds with vi was quite enough, thank you.
+<p>I remembered this program called Emacs. Sure enough, it was installed. <strong>And boy howdy was it weird.</strong> Seriously, I had to press control-x and then control-s to save a file???! control-x and control-c to quit?!!! escape-w to paste??? ... for just one brief moment vi started to look better...
+<p>... but then Jasik's Debugger came to mind. It used multiple meta keys at once and that was okay, despite them appearing with Ω characters in the menu bar.
+<p>That transition to accepting Emacs as probably worth learning happened 5-6 years ago. Emacs is the only program I have used literally almost every work day since then (even using it right now :-). Initially I just used it to flit between a bunch of files quickly and keep a shell prompt up all day. Just in the last year Emacs has become even much more important as a task organizer and scheduler. But more on that in the next post!
+<p>Emacs is just one of the horses for a plethora of courses. I prefer vi for quick edits / wimpy *nix installations, and Eclipse for Java coding. Also, while <a href="http://www.gnu.org/software/emacs/">GNU Emacs</a> is a good distribution <a href="http://homepage.mac.com/zenitani/emacs-e.html">Carbon Emacs</a> is not to be missed if you are running a Mac. Grab a copy and have some fun with...
+<ul>
+	<li>M-x tetris</li>
+	<li>M-x list-colors-display</li>
+	<li>M-x animate-birthday-present</li>
+	<li>M-x glasses-mode (BestAppliedToCamelCaseText)</li>
+	<li>M-x artist-mode, then M-x artist-select-op-spray-can, then click and drag</li>
+</ul>
+<p>Task organization, SQL, and VCS chores are the killer apps within Emacs for me. I'll be discussing those in the next blog post. Until then please respond with questions and comments and (good) jokes about Emacs. If by any chance your curiousity was piqued then run, don't walk to the <a href="http://emacswiki.org">Emacs user community wiki</a>.
+<p>(This article was previously <a href="http://blogs.foognostic.net/2008/12/why-and-when-i-started-using-gnu-emacs/">posted</a> to my personal blog.) 

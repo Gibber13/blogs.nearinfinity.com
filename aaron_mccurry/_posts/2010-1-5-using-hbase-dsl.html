@@ -1,0 +1,106 @@
+--- 
+permalink: /blogs/aaron_mccurry/using_hbase-dsl.html
+layout: blogs
+title: Using HBase-dsl
+date: 2010-01-05 22:34:20 -05:00
+tags: Database Hadoop Java Persistence
+---
+At the beginning of last month I started prototyping various solutions for a customer using HBase. &nbsp;However I found myself writing tons of code to perform some fairly simple tasks. &nbsp;So I set out to simply my HBase code and ended up writing a Java <a href="http://wiki.github.com/nearinfinity/hbase-dsl" target="_blank">HBase DSL</a>. &nbsp;It's still fairly rough around the edges but it does allow the use of standard Java types and it's extensible.<div><br /><font class="Apple-style-span" style="font-size: 1.25em; "><font class="Apple-style-span" style="font-size: 1.25em; ">
+
+Simple Put and Get Example</font></font><br /><br /><b>
+
+Direct HBase API:</b><br />
+
+<br />
+<pre class="prettyprint">public class PutAndGet {
+   public static void main(String[] args) throws IOException {
+      HTable hTable = new HTable("test");
+
+      byte[] rowId = Bytes.toBytes("abcd");
+      byte[] famA = Bytes.toBytes("famA");
+      byte[] col1 = Bytes.toBytes("col1");
+      Put put = new Put(rowId).
+         add(famA, col1, Bytes.toBytes("hello world!"));
+      hTable.put(put);
+      Get get = new Get(rowId);
+      Result result = hTable.get(get);
+      byte[] value = result.getValue(famA, col1);
+      System.out.println(Bytes.toString(value));
+   }
+}
+</pre><b>HBase-dsl API:</b><br /><br />
+<pre class="prettyprint">public class PutAndGetWithDsl { 
+   public static void main(String[] args) throws IOException { 
+      HBase&lt;QueryOps, String&gt; hBase = new HBase&lt;QueryOps&lt;String&gt;, String&gt;(String.class);
+
+      hBase.save("test").  
+         row("abcd"). 
+            family("famA"). 
+               col("col1", "hello world!"); 
+      String value = hBase.fetch("test"). 
+         row("abcd").
+            family("famA"). 
+               value("col1", String.class)
+      System.out.println(value);
+   }
+ }</pre>
+
+Now this is where the dsl becomes more powerful!<div><br /><font class="Apple-style-span" style="font-size: 1.25em; "><font class="Apple-style-span" style="font-size: 1.25em; ">
+
+Scanner Example</font></font><br /><br /><b>
+
+Direct HBase API:</b><br /><br />
+
+<pre class="prettyprint">public class Scanner {
+   public static void main(String[] args) throws IOException {
+      byte[] famA = Bytes.toBytes("famA");
+      byte[] col1 = Bytes.toBytes("col1");  
+
+      HTable hTable = new HTable("test");  
+
+      Scan scan = new Scan(Bytes.toBytes("a"), Bytes.toBytes("z"));
+      scan.addColumn(famA, col1);  
+
+      SingleColumnValueFilter singleColumnValueFilterA = new SingleColumnValueFilter(
+           famA, col1, CompareOp.EQUAL, Bytes.toBytes("hello world!"));
+      singleColumnValueFilterA.setFilterIfMissing(true);  
+
+      SingleColumnValueFilter singleColumnValueFilterB = new SingleColumnValueFilter(
+           famA, col1, CompareOp.EQUAL, Bytes.toBytes("hello hbase!"));
+      singleColumnValueFilterB.setFilterIfMissing(true);  
+
+      FilterList filter = new FilterList(Operator.MUST_PASS_ONE, Arrays
+           .asList((Filter) singleColumnValueFilterA,
+                singleColumnValueFilterB));  
+
+      scan.setFilter(filter);  
+
+      ResultScanner scanner = hTable.getScanner(scan);  
+
+      for (Result result : scanner) {
+         System.out.println(Bytes.toString(result.getValue(famA, col1)));
+      }
+   }
+}</pre>
+<b>HBase-dsl API:</b><br /><br />
+
+<pre class="prettyprint">public class ScannerWithDsl {
+   public static void main(String[] args) throws IOException {
+      HBase&lt;QueryOps, String&gt; hBase = new HBase&lt;QueryOps&lt;String&gt;, String&gt;(String.class);
+
+      hBase.scan("test","a","z").
+         select().
+            family("famA").
+               col("col1").
+         where().
+            family("famA").
+               col("col1").eq("hello world!","hello hbase!").
+         foreach(new ForEach<row>() {
+            @Override
+            public void process(Row row) {
+               System.out.println(row.value("famA", "col1", String.class));
+            }
+         });
+  }
+}</row></pre><br />
+See the unit tests, for more examples.<br /><br /></div></div> 

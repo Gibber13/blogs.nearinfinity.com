@@ -1,0 +1,207 @@
+--- 
+permalink: /blogs/aaron_mccurry/column_oriented_databases.html
+layout: blogs
+title: Column Oriented Databases
+date: 2008-04-30 12:00:00 -04:00
+tags: General
+---
+<h2><font face="Arial, sans-serif">What is it?</font></h2>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">A column
+oriented database (or a column store database) is a database that
+stores it's information in a column oriented manor, instead of a row
+oriented manor.</font></p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">Take for
+example this simple table of information.</font></p>
+<p style="margin-bottom: 0in;">
+</p>
+<table border="1" bordercolor="#000000" cellpadding="4" cellspacing="0">
+	<tbody><tr valign="top">
+		<td bgcolor="#e6e6e6">
+			<p><font face="Arial, sans-serif"><b>Id</b></font></p>
+		</td>
+		<td bgcolor="#e6e6e6">
+			<p><font face="Arial, sans-serif"><b>FirstName</b></font></p>
+		</td>
+		<td bgcolor="#e6e6e6">
+			<p><font face="Arial, sans-serif"><b>LastName</b></font></p>
+		</td>
+		<td bgcolor="#e6e6e6">
+			<p><font face="Arial, sans-serif"><b>Gender</b></font></p>
+		</td>
+		<td bgcolor="#e6e6e6">
+			<p><font face="Arial, sans-serif"><b>BirthDate</b></font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td>
+			<p><font face="Arial, sans-serif">1</font></p>
+		</td>
+		<td>
+			<p><font face="Arial, sans-serif">John</font></p>
+		</td>
+		<td>
+			<p><font face="Arial, sans-serif">Doe</font></p>
+		</td>
+		<td>
+			<p><font face="Arial, sans-serif">M</font></p>
+		</td>
+		<td>
+			<p><font face="Arial, sans-serif">1/1/1980</font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td>
+			<p><font face="Arial, sans-serif">2</font></p>
+		</td>
+		<td>
+			<p><font face="Arial, sans-serif">Jane</font></p>
+		</td>
+		<td>
+			<p><font face="Arial, sans-serif">Doe</font></p>
+		</td>
+		<td>
+			<p><font face="Arial, sans-serif">F</font></p>
+		</td>
+		<td>
+			<p><font face="Arial, sans-serif">2/2/1981</font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td>
+			<p><font face="Arial, sans-serif">3</font></p>
+		</td>
+		<td>
+			<p><font face="Arial, sans-serif">John</font></p>
+		</td>
+		<td>
+			<p><font face="Arial, sans-serif">Smith</font></p>
+		</td>
+		<td>
+			<p><font face="Arial, sans-serif">M</font></p>
+		</td>
+		<td>
+			<p><font face="Arial, sans-serif">3/3/1979</font></p>
+		</td>
+	</tr>
+</tbody></table>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">It is
+very natural for a row oriented database to store the following
+information as sequential appending rows on disk.  This makes them
+very good for inserting and updating data (depending on
+implementation).</font></p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;">
+
+<font face="Arial, sans-serif">
+
+
+<table border="1" bordercolor="#000000" cellpadding="4" cellspacing="0">
+<tbody><tr><td>
+1,John,Doe,M,1/1/1980~2,Jane,Doe,F,2/2/1981~3,John,Smith,M,3/3/1979
+</td></tr>
+</tbody></table>
+
+
+</font>
+</p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">A column
+oriented database might store the data like this:</font></p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">
+
+<table border="1" bordercolor="#000000" cellpadding="4" cellspacing="0">
+<tbody><tr><td>
+1,2,3~John,Jane,John~Doe,Doe,Smith~M,F,M~1/1/1980,2/2/1981,3/3/1979
+</td></tr>
+</tbody></table>
+
+</font></p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">As you
+can imagine this type of structure would not perform well if you were
+making lots of changes to the data.  But if you are scanning through
+a column looking for values, the column oriented database groups all
+the values of a column together as opposed to spreading them out like
+the row store database would do.</font></p>
+<p style="margin-bottom: 0in;">
+</p>
+<h2><font face="Arial, sans-serif">Why do I care?</font></h2>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">Database
+vendors would argue that indexing the columns solves all the
+performance problems of a row store database.  And for most
+applications they are right, but one benefit that most column store
+databases provide that may not be apparent, is their ability to
+compress the data.  Take my example:</font></p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">
+
+<table border="1" bordercolor="#000000" cellpadding="4" cellspacing="0">
+<tbody><tr><td>
+1,2,3~<span style="background: rgb(255, 255, 0) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">John</span>,Jane,<span style="background: rgb(255, 255, 0) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">John</span>~<span style="background: rgb(61, 235, 61) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Doe</span>,<span style="background: rgb(61, 235, 61) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Doe</span>,Smith~<span style="background: rgb(255, 0, 0) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">M</span>,F,<span style="background: rgb(255, 0, 0) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">M</span>~1/1/1980,2/2/1981,3/3/1979
+</td></tr>
+</tbody></table>
+
+
+</font></p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">Because
+the type of each column is consistent, compression of the entire
+column can be a lot greater than compressing each row in a row store
+database (some newer RDBMs are adding compression features). 
+<a href="http://www.vertica.com/">Vertica</a>, a commercial column
+store database boasts up to 90% reduction in storage compared with a
+traditional row store databases.</font></p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">Query
+speed can also be greatly improved on a column store database versus
+a row store database, although that feature is more dependent on
+implementation then on the structure of the data.</font></p>
+<p style="margin-bottom: 0in;">
+</p>
+<h2><font face="Arial, sans-serif">Conclusion</font></h2>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">For
+problems where you are writing and updating a lot (OLTP in database
+talk) stick with a row store database.  But if you are reading more
+than you are writing (OLAP) a column store database might be
+something worth considering.</font></p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">Here are
+some column store databases that I have used or heard of:</font></p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">Open
+source:</font></p>
+<ul>
+	<li><p style="margin-bottom: 0in;"><font face="Arial, sans-serif"><a href="http://www.luciddb.org/">LucidDb</a>
+	- Java / JNI implementation</font></p>
+	</li><li><p style="margin-bottom: 0in;"><font face="Arial, sans-serif"><a href="http://monetdb.cwi.nl/">MonetDb</a></font></p>
+	</li><li><p style="margin-bottom: 0in;"><font face="Arial, sans-serif"><a href="http://db.csail.mit.edu/projects/cstore/">C-Store</a></font></p>
+</li></ul>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;"><font face="Arial, sans-serif">Commercial:</font></p>
+<ul>
+	<li><p style="margin-bottom: 0in;"><font face="Arial, sans-serif"><a href="http://www.vertica.com/">Vertica</a>
+	- Grid based column store database</font></p>
+</li></ul>
+<p style="margin-bottom: 0in;">
+</p> 

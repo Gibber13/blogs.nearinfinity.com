@@ -1,0 +1,206 @@
+--- 
+permalink: /blogs/bryan_weber/creating_unit_test_data_in.html
+layout: blogs
+title: Creating data in groovy with builders
+date: 2008-01-09 22:24:53 -05:00
+tags: Groovy
+---
+<p>
+We often have the need to create data.  We use data for integration tests, to populate database tables in production for releases, and many, many other reasons.  This article talks about one way to get data into your database in a way should allow for it to be modified without too much trouble when those changes come your way in the not so distant future...
+</p>
+
+<h1>Is this even a good idea?</h1>
+<p>
+Something that occurred to be recently is that builders, as implemented in Groovy (or JRuby for that matter), might be a good way to create and manage test data for some Java unit tests.  But I wasn't really sure, so I set out to determine if in fact it was a good idea or not.  If you aren't familiar with builders, read <a href="http://groovy.codehaus.org/Builders">Builders</a>. For better information, read Manning's Groovy in Action. From now on, I will assume you are already familiar with builders. If you are too lazy to follow the links, builders lend themselves to displaying tree based data structures well because the code is in a form that visually represents the data structure.  It does this by using some neat meta-programming tricks and closures.  If you aren't familiar with <a href="http://groovy.codehaus.org/Dynamic+Groovy">meta-programming</a> or <a href="http://groovy.codehaus.org/Closures">closures</a> you might want to read about them first as well. Wikipedia probably has better information on closures. [<a href="http://en.wikipedia.org/wiki/Closure_%28computer_science%29">Wikipedia Closures</a>]
+</p>
+
+<h1>What about XML?</h1>
+<p>
+In the past I have used xml to manage data for unit tests and in theory this means that Java objects or XSLT can be used to modify the data.  However, in practice, while either is adequate for modifying test data, neither is particularly simple or elegant.  Adding columns, modifying relationships, etc is typically not a trivial task when the data is in xml.  Let's be honest (and I can't believe I'm about to put this in writing), for test data, I want to modify it in a Spreadsheet (Excel or Open Office's Spreadsheet or iWork Numbers).  Why?  Well, because adding and removing columns is simple, macros are supported, copy and paste is simple, etc.  So why am I bringing this up?  Well, how about because data in a builder (a tree) can be exported to csv with very little code, modified and imported back into the builder with minimal code.  So why not store the data in csv format then?  I cannot think of any compelling reasons not to as a matter of fact, especially if you were to use the same data for tests in different languages!  But for now, I am keeping my data in groovy code, code that I believe is very readable.  (To be fair, you could go from xml to csv and back again, but reading and manipulating xml is more difficult than reading the same data in the builder tree. I have included the code below that goes from a builder to csv and back.  I challenge you to write code that does the same for xml.  It might be possible, but I believe that most, if not all, people would have to write more code to achieve the same result.  If you decide to keep your data in csv and not groovy then it might be a perfectly acceptable alternative to use xml, I'm not knocking it, I just think it can be done in a simpler way.) 
+</p>
+
+<h1>Trees vs. Graphs</h1>
+<p>
+Your first thought might be, well data for unit tests is probably an object graph, not a tree!  The data is most likely going to go into a RDBMS after all.  While this is true that the data is a graph, it can be represented as a tree(s).  A node in the tree can point to another node in the tree, not just one of its parent nodes.  Think xml refs if you are having a tough time following the idea.  The problem is that unlike xml refs there is no check to verify that the other end of the connection exists.  Therefore, I suggest loading the data into a RDBMS and let it do what it is good at, enforcing the relational integrity.  For testing, I suggest an in memory database like HSQL.
+As an aside, dividing the data into logical groups is also a good idea. (This can be done regardless of whether you use a tree or a graph.) It allows us to manage logical data sets independently.  For example, I might have users and roles which are kept separate from office locations.   
+</p>
+
+<h1>Referential Integrity</h1>
+<p>
+Pointers to data in other tree nodes are not referential so data integrity is not ensured.  Again, you are probably thinking, it sounds like I am trying to convince you that builders are NOT appropriate for creating and managing test data, but wait... the database can do it and do it well. So why not let the db do that work for you? Since the data itself does not guarantee the referential integrity you do not get static analysis time protection.  However, you can create unit tests that insert your data into an in memory data base and this will ensure that your data has its referential integrity.  Assuming of course that you run your unit tests and that you have foreign key relationships! 
+</p>
+
+<h1>Data Builders and Data Persisters</h1>
+<p>
+So, what does this code look like?  We'll get to it shortly.  But first, let's talk about what the "real" code will do?  Well, there are 2 primary things for each set of data.  
+
+</p><h2>Data Builders</h2>
+First, there is the data builder which is our tree of data. This is a groovy file that contains our actual data values. An example:
+
+<pre class="prettyprint">    def getData() {
+        new NodeBuilder().users {
+            user(user_id: "123", first_name: "Joe", last_name: "Smith") {
+                address(address_type: "home", street: "123 Main St.", city: "Springfield", state: "MA", zip: "12345")
+                address(address_type: "work", street: "456 South St.", city: "Boston", state: "MA", zip: "98765")
+            }
+            user(user_id: "456", first_name: "John", last_name: "Doe")
+            user(user_id: "789", first_name: "Jane", last_name: "Doe")
+        }
+    }
+</pre>
+
+<h2> Data Persisters</h2>
+Then there is our persister, which in our case uses GPath (similar to XPath, but walks Groovy objects) to pull data out of the builder and persist it.  In my case that means populating Hibernate objects and then saving the hibernate objects.  
+
+<pre class="prettyprint">    def persist(tree) {
+        tree.grep() { 
+          User user = new User()
+          user.userId = it.@user_id
+          user.firstName = it.@first_name
+          user.lastName = it.@last_name
+          it.address.grep() { address -&gt;
+            Address addr = new Address()
+            addr.addressType = address.@address_type
+            addr.street = address.@street
+            addr.city = address.@city
+            addr.state = address.@state
+            addr.zip = address.@zip
+            user.addresses.add(addr)
+          }
+          userDao.save(user)
+        }
+    }
+</pre>
+
+<p>
+We separate these objects so that multiple data sets can be used depending on the environment or test suite.  In other words, it is good to keep the data separate from the code that will manipulate the data.
+</p>
+
+<h1>The data</h1>
+<p>
+As an example, let's suppose we want to add some users to our database.  Let's assume that there are 3 users and the first user has  2 addresses.  The tree might look something like this in csv format:
+</p>
+
+<pre class="prettyprint">users
+,user,user_id,123,first_name,Joe,last_name,Smith
+,,address,address_type,home,street,123 Main St.,city,Springfield,state,MA,zip,12345
+,,address,address_type,work,street,456 South St.,city,Boston,state,MA,zip,98765
+,user,user_id,456,first_name,John,last_name,Doe
+,user,user_id,789,first_name,Jane,last_name,Doe
+</pre>
+
+What might this data look like in xml?
+<pre class="prettyprint">  &lt;users&gt;
+    &lt;user user_id="123" first_name="Joe" last_name="Smith"&gt;
+      &lt;address address_type="home" street="123 Main St." city="Springfield" state="MA" zip="12345" /&gt;
+      &lt;address address_type="work" street="456 South St." city="Boston" state="MA" zip="98765" /&gt;
+    &lt;/user&gt;
+    &lt;user user_id="456" first_name="John" last_name="Doe" /&gt;
+    &lt;user user_id="789" first_name="Jane" last_name="Doe" /&gt;
+  &lt;/users&gt;
+</pre>
+
+And in groovy?
+<pre class="prettyprint">users {
+  user(user_id:"123",first_name:"Joe",last_name:"Smith") {
+    address(address_type:"home",street:"123 Main St.",city:"Springfield",state:"MA",zip:"12345") 
+    address(address_type:"work",street:"456 South St.",city:"Boston",state:"MA",zip:"98765")
+  }
+  user(user_id:"456",first_name:"John",last_name:"Doe")
+  user(user_id:"789",first_name:"Jane",last_name:"Doe")
+}
+</pre>
+
+<p>
+Which do you find to be the most readable?  Some will say xml, most will say groovy.  But more importantly, the impedance is zero for groovy because it is already groovy code and no transformation is necessary.  Whereas, if we have xml some transformation is necessary.   
+</p>
+
+Let's suppose that we also have a Role table for security
+<pre class="prettyprint">roles
+,role,role_type,admin,description,System Administrator
+,role,role_type,data_entry,description,Data Entry
+</pre>
+
+What if we wanted to have a reference from a user to a role or vice versa?  Imagine something like this snippet:
+<pre class="prettyprint">user,user_id,123,first_name,Joe,last_name,Smith
+,role,admin
+,role,data_entry
+</pre>
+
+<p>
+Getting back to an earlier point, seeing this should probably scare you a little.  The string (think symbol if you like ruby or atom if you like many other programming languages) 'data_entry' is entered in two places so if it is modified in one place our structure breaks down.  Well, with foreign key constraints in your db this should be solved for MOST (but not all) cases.  
+</p>
+
+
+<h1>Isn't it about time for some code?</h1>
+<p>
+Code to convert a Builder to csv:
+</p>
+<pre class="prettyprint">    def print_csv(node,indent) {
+        def result = ""
+        result += "," * indent
+        result += "${node.name()},"
+        node.attributes().each { attribute -&gt;
+            result += "${attribute.key},${attribute.value},"
+        }
+        result += "\n"
+
+        node.grep() { child -&gt;
+            result += print_csv(child,indent+1)
+        }
+        result
+    }
+</pre>
+
+<p>
+Code to convert csv to a Builder:
+</p>
+<pre class="prettyprint">    def static read_csv(str) {
+        def lasts = []
+        def root
+        str.split('\n').each {line -&gt;
+           def arr = line.split(',')
+           def depth = 0
+           // determine depth
+           while ( arr[0] == "" ) {
+               arr = arr[1..&lt;arr.size()]
+               depth++
+           }
+           // determine parent node
+           def parent
+           if ( depth == 0 )
+             parent = null
+           else
+             parent = lasts[depth -1]
+           // create new node
+           Node node = new Node(parent,arr[0])
+           // is this our root?
+           if ( lasts.isEmpty() ) {
+               root = node
+           }
+           lasts[depth] = node
+           // process attributes
+           def key = null
+           arr[1..&lt;arr.size()].each {
+               if ( key == null ) {
+                   key = it
+               }
+               else {
+                   node.attributes().put(key,it)
+                   key = null
+               }
+           }
+        }
+        root
+    }    
+</pre>
+
+<h1>Conclusion</h1>
+<p>
+So is keeping data in this format for unit tests a good idea or not?  That's for you to decide!
+</p>
+
+<h1>Footnote</h1>
+<p>
+PS After writing this code, I became aware of the ObjectGraphBuilder in Groovy, which allows for relationships between nodes in the tree, but only to parent nodes.  Since we are interested in relationships to nodes in other branches or other trees I haven't seen a compelling reason to switch to the other Builder implementation yet.  
+</p> 

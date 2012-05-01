@@ -1,0 +1,60 @@
+--- 
+permalink: /blogs/lee_richardson/sharepoint_the_wild_west_of_so.html
+layout: blogs
+title: "SharePoint: The Wild West of Software Development"
+date: 2009-08-17 21:27:42 -04:00
+tags: .NET
+---
+<p>Some argue that Microsoft developers lack rigor -- that techniques like unit testing and continuous integration are virtually unheard of in this space. That's rubbish. I would be shocked if the percentage of developers that track code coverage is significantly different for the .Net or Java spaces (not quite mainstream, but respectable). Mind you I'm talking .Net development in general. SharePoint, now that's another story.<p>
+
+<div style='float:right; margin-left:10px;'>
+<script type='text/javascript'>
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2009/08/sharepoint-wild-west-of-software.html';
+
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+
+        document.write(div.innerHTML);
+    </script>
+</div>
+
+<p>The shadowy world of SharePoint is one in which source control is a distant memory, where no distinction is drawn between development, test and production environments, and where roaming bandits take over small towns with no fear of the law.</p>
+
+<p><a href="http://4.bp.blogspot.com/_gez10dNhuPk/Son--92lb_I/AAAAAAAABps/a2B3pE9iuW4/s1600-h/WildWest.png"><img style="cursor:pointer; cursor:hand;width: 400px; height: 264px;" src="http://4.bp.blogspot.com/_gez10dNhuPk/Son--92lb_I/AAAAAAAABps/a2B3pE9iuW4/s400/WildWest.png" border="0" alt=""id="BLOGGER_PHOTO_ID_5371104388324880370" /></a></p>
+
+<p>Why is this?  How has it come to be?  The answer is that for the most part SharePoint treats code and data as one in the same.  End users can modify data stores: they can add, delete and modify tables (Lists) and columns (Fields) at will.  They can open up SharePoint Designer and modify pages, customize workflows, rob banks, and run local Sherriff's out of town.</p>
+
+<p>And that's why end users <i>love</i> SharePoint.  It removes the slow, burdensome bureaucracy involved in doling out development resources from large centrally planned corporate or government IT departments and places that power directly in the hands of end users, allowing them to get their jobs done faster and to adapt to change quicker.  And that is why I maintain that as software developers SharePoint, or a product like it, is in our future -- like it or not.</p>
+
+<p>But the power given to end users makes rigor and good design extremely hard for developers because the production machine you deployed to last month may look completely different now that you're ready to redeploy.  And Microsoft makes good design even harder with an inflexible API.  Critical classes like SPSite (think SqlConnection) contain no public constructor, rendering them completely unmockable (unless you're willing to spend $450 <i>per developer</i> for some <a href="http://www.typemock.com/Buy.php">TypeMock Isolator</a> magic).  And vital classes like SPList (think DataSet) are marked final, crippling your ability to make nice strongly typed entities in your architectures.</p>
+
+<p>So what is a Type-A, quality minded software developer to do?</p>
+
+<p>The thing to keep in mind is that the challenges that SharePoint places on developers and architects simultaneously make good coding practices harder (but not impossible) while making them more important than ever.</p>
+
+<p>Because that column you thoughtfully added as required may get reset to optional by an end user in production, you need to write more good tests that validate once solid assumptions.  Because you can't inherit SPList, you'll need to encapsulate it, requiring more code per entity.  Because you can't mock essential SharePoint classes you will need to write more integration tests instead of unit tests.  Because you're writing integration tests your tests will be more fragile and you'll spend more time fixing the test code than the real code.</p>
+
+<p>And because you're spending more time focusing on quality while your Wild West, short term focused competition in the SharePoint world slings code together, they will appear faster and better able to get applications out the door.  It can be frustrating, because over time your well designed and well tested application will be more maintainable and will cost IT departments less.  But end users frequently don't understand this, so as long term minded SharePoint developers we must focus on educating end users.</p>
+
+<p>Combat the short term focused mindset by keeping everything in .wsp files, storing code in source control, avoiding the temptation to apply fixes in production, using continuous integration (yes, for SharePoint!), and most importantly tracking code coverage (yes, code coverage for SharePoint code!).  Put quality metrics in status reports for management to see.  Track defects and make your stats publicly available (since you'll have significantly fewer over time than code slingers, and you want end users asking for stats).  In short remind the world that quality counts, even in the shadowy realms of SharePoint.  If we work together we can bring law and order to the ... um, West.</p> 

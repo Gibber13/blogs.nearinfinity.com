@@ -1,0 +1,32 @@
+--- 
+permalink: /blogs/jason_harwig/server_side_javascript_and_jaxer.html
+layout: blogs
+title: Server-side JavaScript and Jaxer
+date: 2008-01-23 13:36:15 -05:00
+tags: JavaScript
+---
+<p>The web community has been buzzing about the new Ajax server, Jaxer, from Aptana. If you haven't heard see <a href="http://ejohn.org/blog/server-side-javascript-with-jaxer/">John's</a>, or <a href="http://ajaxian.com/archives/aptana-releases-jaxer-ajax-server-built-on-mozilla">Dion's Ajaxian</a> posts about it.</p>
+
+<p>Now, overall, I am really excited about the future in this project. The problem I had is all their examples use <i>synchronous</i> XMLHttpRequests. We <a href="http://ajaxblog.com/archives/2005/05/25/synchronous-requests-bad">already</a> <a href="http://www.oreillynet.com/xml/blog/2007/01/do_sync_calls_freeze_browsers.html">know</a> <a href="http://swik.net/Ajax/Ajax-Development-Gotchas">why</a> this is unfriendly to users.</p> 
+<p>Here is a shortened example from Aptana:  <br />
+
+<code class="prettyprint">
+&lt;script runat=&quot;client&quot;&gt;
+    var name = getName();
+    alert(name);
+&lt;/script&gt;
+</code>
+
+<code class="prettyprint">
+&lt;script runat=&quot;server-proxy&quot;&gt;
+    function getName(firstName) {
+        var name = ... // do something interesting
+        return name;
+    }
+&lt;/script&gt;
+</code>
+</p>
+
+<p>Here the call to getName() must return the name, so it runs synchronously. Jaxer provides a getNameAsync() method that accepts a callback (and uses an async XMLHttpRequest call) but it's hidden deep in a technical FAQ page.</p>
+
+<p>Obviously the synchronous code reads better, but until JavaScript has some kind of <a href="http://en.wikipedia.org/wiki/Continuation">continuation</a> support to make async calls look synchronous, <b>[functionName]Async should be the only -- or at least default -- means of server communication</b>. Otherwise all Jaxer apps will seem perceivably slow to users, not to mention preventing all other browser windows from responding while requests are active.</p>

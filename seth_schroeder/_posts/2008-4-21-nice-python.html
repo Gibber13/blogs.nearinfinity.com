@@ -1,0 +1,114 @@
+--- 
+permalink: /blogs/seth_schroeder/nice_python.html
+layout: blogs
+title: Nice, Python.
+date: 2008-04-21 23:26:37 -04:00
+tags: General
+---
+<p>Edit 2008-04-29: more and better results available <a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c">here</a>.
+</p><p>I've been waffling about glancing at Python. It comes off as a little ... dry? Indentation drives scope? I was afraid it would be another Objective-C; popular, modeled after successful languages, but just gets stuck in my mental parser. Even Visual Basic and Pascal (q.v. <i>Inside Macintosh</i>) passed that gate.
+
+</p><p>Anyways, <a href="http://projecteuler.net">Project Euler</a> seemed like a good way to learn a new language. Problem #1 is summing multiples of 3 or 5 less than one thousand. Some basic iteration handles the task pretty easily -- might as well be all trendy and mix in lambda functions. And, while the hood is open, why not try it in a couple of languages and generate an unscientific performance graph?
+
+</p><p>So back to the implementation -- the iterative approach is easy. But Python 2.5-ish natively supports set operations like union and intersection. Combine that with a built-in method to generate numeric sequences and the problem is basically solved. For the win -- it outperformed the iterative approach! Oh, and every language tested except Python showed negative numbers when the sum scrolled past 2**31.
+
+</p><p>Groovy, Python, C, and Emacs Lisp competed for best performance. And by competed, I mean quick and dirty code (esp. Lisp) run a few times on my MacBook Pro. Graphics first, then the code.
+</p><hr>
+<p><img src="/blogs/resources/seths/euler_graph.png" alt="perf graph" />
+</p><hr>
+<p><img src="/blogs/resources/seths/euler_table.png" alt="perf stats" />
+</p><p>The lisp numbers are the sketchiest -- (current-time) only spit out seconds.
+</p><p>Basic info: Groovy 1.5.5 binary release, Python 2.5.1 shipped with Leopard, GCC 4.0.1, Carbon Emacs Spring 2008
+</p><hr>
+<p>Python, iterative
+</p><pre class="prettyprint">import sys
+
+def multiple_checker(val):
+    return lambda test: test and val and test % val == 0
+
+mof3 = multiple_checker(3)
+mof5 = multiple_checker(5)
+sum = 0
+
+for i in range(10 ** int(sys.argv[1])):
+    if mof3(i) or mof5(i):
+        sum = sum + i
+
+print sum
+</pre>
+<hr>
+Python, set oriented
+<pre class="prettyprint">import sys
+
+exp = int(sys.argv[1])
+sum = 0
+
+for mof3or5 in set(range(3, 10**exp, 3)) | set(range(5, 10**exp, 5)):
+    sum = sum + mof3or5
+
+print sum
+</pre>
+<hr>
+Groovy, iterative
+<pre class="prettyprint">exp = Integer.parseInt(args[0])
+
+mof = { val, test -&gt; val &amp;&amp; test &amp;&amp; test % val == 0 }
+mof3 = mof.curry(3)
+mof5 = mof.curry(5)
+
+sum = 0 as BigDecimal
+
+(3..&lt;(10**exp)).each {
+    if (mof3(it) || mof5(it)) {
+        sum += it
+    }
+}
+
+println sum
+</pre>
+<hr>
+Emacs Lisp, iterative (be nice, I'm really weak here)
+<pre class="prettyprint">(defun multiple_of (a b)
+  (= 0 (% a b))
+)
+
+(defun val-to-add (val)
+  (cond
+   ((multiple_of val 3) val)
+   ((multiple_of val 5) val)
+   (0)
+   )
+  )
+
+(defun sum-of-3or5-multiples (exp)
+  (let ((num 3) (sum 0.0))
+    (while (&lt; num (expt 10 exp))
+      (setq sum (+ sum (val-to-add num)))
+      (setq num (1+ num))
+      )
+    sum
+    )
+  )
+</pre>
+<hr>
+C, iterative. Not very much code here, would have probably taken more lines of Java!
+<pre class="prettyprint">#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+
+#define multiple_of(a, b) ((a == 0 || b == 0) ? 0 : a % b == 0)
+
+int main(int argc, char** argv)
+{
+    int exp = atoi(argv[1]);
+    double sum = 0;
+    int i;
+
+    for (i = 3; i &lt; pow(10, exp); i++)
+        if (multiple_of(i, 3) || multiple_of(i, 5))
+            sum += i;
+
+    printf("%0.0f\n", sum);
+
+    return 0;
+}
+</pre> 

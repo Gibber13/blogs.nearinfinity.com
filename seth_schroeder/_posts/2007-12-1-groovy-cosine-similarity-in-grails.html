@@ -1,0 +1,107 @@
+--- 
+permalink: /blogs/seth_schroeder/groovy_cosine_similarity_in_grails.html
+layout: blogs
+title: Groovy cosine similarity in Grails
+date: 2007-12-01 19:41:28 -05:00
+tags: Grails Groovy
+---
+<p>I really appreciate <a href="http://www.nearinfinity.com/blogs/page/mwizeman">Matt</a> and <a href="http://www.nearinfinity.com/blogs/page/rdonaway">Bob</a> <a href="http://www.nearinfinity.com/blogs/page/seths?entry=finding_similar_strings_using_character">showing</a> me <b>significantly</b> better ways to compare strings. Yet another perk of working for this company :)
+
+</p><p>I've been spending time with <a href="http://grails.codehaus.org/">grails</a> lately. One of my biggest beefs is 100% accuracy required 100% of the time when typing parameters to the "grails" application. Not a big deal (esp. with emacs M-/)... but what an opportunity to do something useful with cosine similarity!
+
+</p><p>All code on this page is licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2</a> license.
+
+</p><p>The heart of the code. Please ignore the lack of error handling and optimization.
+
+</p><pre class="prettyprint">    static def similarity(l_seq, r_seq, degree=2) {
+        def l_histo = countNgramFrequency(l_seq, degree)
+        def r_histo = countNgramFrequency(r_seq, degree)
+        
+        dotProduct(l_histo, r_histo) /
+            Math.sqrt(dotProduct(l_histo, l_histo) *
+                      dotProduct(r_histo, r_histo))
+    }
+</pre>
+
+<p> This probably isn't ideal Groovy, but I sure appreciated the syntax improvements to arrays and maps.
+</p><pre class="prettyprint">    static def countNgramFrequency(sequence, degree) {
+        def histo = [:]
+        def items = sequence.size()
+
+        for (int i = 0; i + degree &lt;= items; i++)
+        {
+            def gram = sequence[i..&lt;(i + degree)]
+            histo[gram] = 1 + histo.get(gram, 0)
+        }
+        histo
+    }
+</pre>
+
+<p>Still nothing specific to strings here...
+</p><pre class="prettyprint">    static def dotProduct(l_histo, r_histo) {
+        def sum = 0
+        l_histo.each { key, value ->
+            sum = sum + l_histo[key] * r_histo.get(key, 0)
+        }
+        sum
+    }
+</pre>
+
+<p>Finally, here's something useful:
+
+</p><pre class="prettyprint">    static def stringSimilarity (l_str, r_str, degree=2) {
+        similarity(l_str.toLowerCase().toCharArray(),
+                   r_str.toLowerCase().toCharArray(),
+                   degree)
+    }
+</pre>
+
+<p>... okay, how to apply this to grails? Just one more bit of code:
+
+</p><pre>    static def mostSimilar(pattern, candidates, threshold=0) {
+        def topScore = 0
+        def bestFit = null
+
+        candidates.each { candidate ->
+            def score = stringSimilarity(pattern, candidate)
+            if (score > topScore) {
+                topScore = score
+                bestFit = candidate
+            }
+        }
+
+        if (topScore &lt; threshold)
+            bestFit = null
+
+        bestFit
+    }
+</pre>
+
+<p>Drop this into GrailsScriptRunner.groovy and now this:
+</p><ul><li>grails create-domain-class</li></ul>
+<p>... is equivalent to <b>all</b> of these:
+</p><ul>
+<li>grails craete-domain-class
+</li><li>grails domain
+</li><li>grails dom
+</li></ul>
+<p>To everyone who read this far, thank you :) And... one other observation. Strings are ordered sequences (of chars). What about file contents (lines) and directory contents (file names)?
+
+</p><pre class="prettyprint">    static def fileSimilarity (l_file, r_file, degree=3) {
+        similarity(new File(l_file).readLines(),
+                   new File(r_file).readLines(),
+                   degree)
+    }
+
+    static def dirSimilarity(l_dir, r_dir, degree=3) {
+        def l_files = []
+        def r_files = []
+
+        new File(l_dir).eachFileRecurse { l_files &lt;&lt; it.name }
+        new File(r_dir).eachFileRecurse { r_files &lt;&lt; it.name }
+
+        similarity(l_files, r_files, degree)
+    }
+</pre>
+<p><i>edit 2007-12-05 --  size() method works for arrays and lists; easier than length and size properties. Contribution much appreciated!
+</i></p><i><p>-- seth.schroeder _at_ nearinfinity.com</p></i> 

@@ -1,0 +1,170 @@
+--- 
+permalink: /blogs/scott_leberknight/can_java_be_saved.html
+layout: blogs
+title: Can Java Be Saved?
+date: 2009-11-09 15:23:10 -05:00
+tags: Java
+---
+ <h3>Java and Evolution</h3>
+
+<p>The Java language has been around for a pretty long time, and in my view is now a stagnant language. I don't consider it <a href="http://codemonkeyism.com/java-dead/">dead</a> because I believe it will be around for probably decades if not longer. But it appears to have reached its evolutionary peak, and it doesn't look it's going to be evolved any further. This is not due to problems inherent in the language itself. Instead it seems the problem lies with Java's stewards (Sun and the JCP) and their unwillingness to evolve the language to keep it current and modern, and more importantly the goal to keep backward compatibility at all costs. Not just Sun, but also it seems the large corporations with correspondingly large investments in Java like IBM and Oracle aren't exactly chomping at the bit to improve Java. I don't even know if they think it even needs improvement at all. So really, the ultra-conservative attitude towards change and evolution is the problem with Java from my admittedly limited view of things.</p>
+
+<p>That's why I don't hate Java. But, I do hate the way it has been treated by the people charged with improving it. It is clear many in the Java community want things like closures and a native property syntax but instead we got Project Coin. This, to me, is sad really. It is a shame that things like closures and native properties were not addressed in Java/JDK/whatever-it-is-called 7.</p>
+
+<h3>Why Not?</h3>
+
+<p>I want to know why Java can't be improved. We have concrete examples that it is possible to change a major language in major ways. Even in ways that break backward compatibility in order to evolve and improve. Out with the old, in with the new. Microsoft with C# showed that you can successfully evolve a language over time in major ways. For example C# has always had a property syntax but it now also has many features found in dynamically typed and functional languages such as type inference and, effectively, closures. With LINQ it introduced functional concepts. When C# added generics they did it correctly and retained the type information in the compiled IL, whereas Java used type-erasure and simply dropped the types from the compiled  bytecode. There is a great irony here: though C# began life about five or six years after Java, it not only has caught up but has surpassed Java in most if not all ways, and has continued to evolve while Java has become stagnant.</p>
+
+<p>C# is not the only example. Python 3 is a major overhaul of the Python language, and it introduced breaking changes that are not backwards compatible. I believe they provide a migration tool to assist you should you want to move from the 2.x series to version 3 and beyond. Microsoft has done this kind of thing as well. I remember when they made Visual Basic conform to the .NET platform and introduced some rather gut wrenching (for VB developers anyway) changes, and they also provided a tool to aid the transition. One more recent example is Objective-C which has experienced a resurgence in importance mainly because of the iPhone. Objective-C has been around longer than all of Java, C#, Ruby, Python, etc. since the 1980s. Apple has made improvements to Objective-C and it now sports a way to define and synthesize properties and most recently added blocks (effectively closures). If a language that pre-dates Java (Python also pre-dates Java by the way) can evolve, I just don't get why Java can't.</p>
+
+<p>While it is certainly possible to remain on older versions of software, forcing yourself to upgrade can be a Good Thing, because it ensures you don't get the "COBOL Syndrome" where you end up with nothing but binaries that have to run on a specific hardware platform forever and you are trapped until you rewrite or you go out of business. The other side of this, of course, is that organizations don't have infinite time, money, and resources to update every single application. Sometimes this too can be good, because it forces you to triage older systems, and possibly consolidate or outright eliminate them if they have outlived their usefulness. In order to facilitate large transitions, I believe it is very important to use tools that help automate the upgrade process, e.g. tools that analyze code and fix it if possible (reporting all changes in a log) and which provide warnings and guidance when a simple fix isn't possible.</p>
+
+<h3>The JVM Platform</h3>
+
+<p>Before I get into the changes I'd make to Java to make it not feel like I'm developing with a straightjacket on while having to type masses of unnecessary boilerplate code, I want to say that I think the JVM is a great place to be. Obviously the JVM itself facilitates developing all kinds of languages as evidenced by the huge number of languages that run on the JVM. The most popular ones and most interesting ones these days are probably JRuby, Scala, Groovy, and Clojure though there are probably hundreds more. So I suppose you could make an argument that Java doesn't need to evolve any more because we can simply use a more modern language that runs on the JVM.</p>
+
+<p>The main problem I have with that argument is simply that there is already a ton of Java code out there, and there are many organizations who are simply not going to allow other JVM-based languages; they're going to stick with Java for the long haul, right or wrong. This means there is a good chance that even if you can manage convince someone to try writing that shiny new web app using Scala and its Lift framework,  JRuby on Rails, Grails, or Clojure, chances are at some point you'll also need to maintain or enhance existing large Java codebases. Wouldn't you like to be able to first upgrade to a version of Java that has closures, native property syntax, method/property handles, etc?</p>
+
+<p>Next I'll choose what would be my top three choices to make Java much better immediately.</p>
+
+<h3>Top Three Java Improvements</h3>
+
+<p>If given the chance to change just three things about Java to make it better, I would choose these:</p>
+
+<ul>
+<li>Remove checked exceptions</li>
+<li>Add closures</li>
+<li>Add formal property support</li>
+</ul>
+
+<p>I think these three changes along would make coding in Java much, much better. Let's see how.</p>
+
+<h4>Remove Checked Exceptions</h4>
+
+<p>By removing checked exceptions you eliminate a ton of boilerplate try/catch clauses that do nothing except log a message, wrap and re-throw as a RuntimeException, pollute the API with throws clauses all over the place, or worst of all empty catch blocks that can cause very subtle and evil bugs. With unchecked exceptions, developers still have the option to catch exceptions that they can actually handle. It would be interesting to see how many times in a typical Java codebase people actually handle exceptions and do something at the point of exception, or whether they simply punt it away for the caller to handle, who in turn also punts, and so forth all the way up the call stack until some global handler catches it or the program crashes. If I were a betting man, I'd bet a lot of money that for most applications, developers punt the vast majority of the time. So why force people to handle something they cannot possible handle?</p>
+
+<h4>Add Closures</h4>
+
+<p>I specifically listed removing checked exceptions first, because to me it is the first step to being able to have a closure/block syntax that isn't totally horrendous. If you remove checked exceptions, then adding closures would seem to be much easier since you don't need to worry at all about what exceptions could possibly be thrown and there is obviously no need to declare exceptions. Closures/blocks would lead to better ability to handle collections, for example as in Groovy but in Java you would still have types (note I'm also using a literal property syntax here):</p>
+
+<pre class="prettyprint">
+// Find all people whose last name is "Smith"
+List&lt;Person&gt; peeps = people.findAll { Person person -> person.lastName.equals("Smith");   } 
+</pre>
+
+or
+
+<pre class="prettyprint">
+// Create a list of names by projecting the name property of a bunch of Person objects
+List&lt;String&gt; names = people.collect { Person person -> person.name; }
+</pre>
+
+<p>Not quite as clean as Groovy but still much better than the for loops that would traditionally be required (or trying to shoehorn functional-style into Java using the <a href="http://commons.apache.org/collections/">Jakarta Commons Collections</a>  or <a href="http://code.google.com/p/google-collections/">Google Collections</a>). Removal of checked exceptions would allow, as mentioned earlier, the block syntax to not have to deal with declaring exceptions all over the place. Having to declare checked exceptions in blocks makes the syntax worse instead of better, at least when I saw the various closure proposals for Java/JDK/whatever 7 which did not get included. Requiring types in the blocks is still annoying, especially once you get used to Ruby and Groovy, but it would be passable.</p>
+
+<h4>Native Property Syntax</h4>
+
+<p>The third change should do essentially what Groovy for properties does but should introduce a "property" keyword (i.e. don't rely on whether someone accidentally put an access modifier in there as Groovy does). The syntax could be very clean:</p>
+
+<pre class="prettyprint">
+property String firstName;
+property String lastName;
+property Date dateOfBirth;
+</pre>
+
+<p>The compiler could automatically generate the appropriate getter/setter for you like Groovy does. This obviates the need to manually code the getter/setter. Like Groovy you should be able to override either or both. It de-clutters code enormously and removes a ton of lines of silly getter/setter code (plus JavaDocs if you are actually still writing them for every get/set method). Then you could reference properties as you would expect: person.name is the "getter" and person.name = "Fred" is the "setter." Much cleaner syntax, way less boilerplate code. By the way, if someone used the word "property" in their code, i.e. as a variable name, it is just not that difficult to rename refactor, especially with all the advanced <a href="http://www.jetbrains.com/idea/">IDEs</a> in the Java community that do this kind of thing in their sleep.</p>
+
+<p>Lots of other things could certainly be done, but if just these three were done I think Java would be much better off, and maybe it would even come into the 21st century like Objective-C. (See the very long but very good <a href="http://arstechnica.com/apple/reviews/2009/08/mac-os-x-10-6.ars">Ars Technica Snow Leopard review</a> for information on Objective-C's new <a href="http://arstechnica.com/apple/reviews/2009/08/mac-os-x-10-6.ars/10#blocks">blocks</a> feature.)</p>
+
+<h3>Dessert Improvements</h3>
+
+<p>If (as I suspect they certainly will :-) ) Sun/Oracle/whoever takes my suggestions and makes these changes and improves Java, then I'm sure they'll want to add in a few more for dessert. After the main course which removes checked exceptions, adds closures, and adds native property support, dessert includes the following:</p>
+
+<ul>
+<li>Remove type-erasure and clean up generics</li>
+<li>Add property/method handles</li>
+<li>String interpolation</li>
+<li>Type inference</li>
+<li>Remove "new" keyword
+</ul>
+
+<h4>Clean Up Generics</h4>
+
+<p>Generics should simply not remove type information when compiled. If you're going to have generics in the first place, do it correctly and stop worrying about backward compatibility. Keep type information in the bytecode, allow reflection on it, and allow me to instantiate a "new T()" where T is some type passed into a factory method, for example. I think an improved generics implementation could basically copy the way C# does it and be done.</p>
+
+<h4>Property/Method Handles</h4>
+
+<p>Property/method <a href="http://blogs.sun.com/jrose/entry/method_handles_in_a_nutshell">handles</a> would allow you to reference a property or method directly. They would make code that now must use strings strongly typed and refactoring-safe (IDEs like IntelliJ already know how to search in text and strings but can never be perfect) much nicer. For example, a particular pet peeve of mine and I'm sure a lot of other developers is writing Criteria queries in Hibernate. You are forced to reference properties as simple strings. If the lastName property is changed to surname then you better make sure to catch all the places the String "lastName" is referenced. So you could replace code like this:</p>
+
+<pre class="prettyprint">
+session.createCriteria(Person.class)
+	.add(Restrictions.eq("lastName", "Smith")
+	.addOrder(Order.asc("firstName")
+	.list();
+</pre>
+
+<p>with this using method/property handles:</p>
+
+<pre class="prettyprint">
+session.createCriteria(Person.class)
+	.add(Restrictions.eq(Person.lastName, "Smith")
+	.addOrder(Order.asc(Person.firstName)
+	.list();
+</pre>
+
+<p>Now the code is strongly-typed and refactoring-safe. JPA 2.0 tries mightily to overcome having strings in the new criteria query API  with its metamodel. But I find it pretty much appalling to even look at, what with having to create or code-generate a separate "metamodel" class which you reference like "_Person.lastName" or some similar awful way. This metamodel class lives only to represent properties on your real model object for the sole purpose of making JPA 2.0 criteria queries strongly typed. It just isn't worth it and is total overkill. In fact, it reminds me of the bad-old days of rampant over-engineering in Java (which apparently is still alive and well in many circles but I try to avoid it as best I can). The right thing is to fix the language, not to invent something that adds yet more boilerplate and more complexity to an already overcomplicated ecosystem.</p>
+
+<p>Method handles could also be used to make calling methods using reflection much cleaner than it currently is, among other things. Similarly it would make accessing properties via reflection easier and cleaner. And with only unchecked exceptions you would not need to catch the four or five kinds of exceptions reflective code can throw.</p>
+
+<h4>String Interpolation</h4>
+
+<p>String interpolation is like the sorbet that you get at fancy restaurants to cleanse your palate. This would seem to be a no-brainer to add. You could make code like:</p>
+
+<pre class="prettyprint">
+log.error("The object of type  ["
+    + foo.getClass().getName()
+    + "] and identifier ["
+    + foo.getId()
+    + "] does not exist.", cause);
+</pre>
+
+<p>turn into this much more palatable version (using the native property syntax I mentioned earlier):</p>
+
+<pre class="prettyprint">
+log.error("The object of type [${foo.class.name}] and identifier [${foo.id}] does not exist.", cause);
+</pre>
+
+<h4>Type Inference</h4>
+
+<p>I'd also suggest adding type inference, if only for local variables like C# does. Why do we have to repeat ourselves? Instead of writing:</p>
+
+<pre class="prettyprint">
+Person person = new Person();
+</pre>
+
+<p>why can't we just write:</p>
+
+<pre class="prettyprint">
+var person = new Person();
+</pre>
+
+<p>I have to believe the compiler and all the tools are smart enough to infer the type from the "new Person()". Especially since other strongly-typed JVM languages like Scala do exactly this kind of thing.</p>
+
+<h4>Elminate "new"</h4>
+
+<p>Last but not least, and actually not the last thing I can think of but definitely the last I'm writing about here, let's get rid of the "new" keyword and either go with Ruby's new <i>method</i> or Python's constructor syntax, like so:</p>
+
+<pre class="prettyprint">
+// Ruby-like new method
+var person = Person.new()
+
+// or Python-like construction
+var person = Person()
+</pre>
+
+<p>This one came to me recently after hearing <a href="http://en.wikipedia.org/wiki/Bruce_Eckel">Bruce Eckel</a> give an excellent talk on language evolution and archaeology. He had a ton of really interesting examples of why things are they way they are, and how Java and other languages like C++ evolved from C. One example was the reason for "new" in Java. In C++ you can allocate objects on the stack or the heap, so there is a stack-based constructor syntax that does not use "new" while the heap-based constructor syntax uses the "new" operator. Even though Java only has heap-based object allocation, it retained the "new" keyword which is not only boilerplate code but also makes the entire process of object construction pretty much immutable: you cannot change anything about it nor can you easily add hooks into the object creation process.</p>
+
+<p>I am not an expert at all in the low-level details, and Bruce obviously knows what he is <a href="http://www.amazon.com/Thinking-C-2-Practical-Programming/dp/0130353132/">talking</a> <a href="http://www.amazon.com/Thinking-Java-4th-Bruce-Eckel/dp/0131872486/">about</a> way more than I do, but I can say that I believe the Ruby and Python syntaxes are not only nicer but more internally consistent, especially in the Ruby case because there is no special magic or sauce going on. In Ruby, new is just a method, on a class, just like everything else.</p>
+
+<h3>Conclusion to this Way Too Long Blog Entry</h3>
+
+<p>I did not actually set out to write a blog whose length is worthy of a <a href="http://blogs.tedneward.com/">Ted Neward</a> blog. It just turned out that way. (And I do in fact like reading Ted's long blogs!) Plus, I found out that <a href="http://en.wikipedia.org/wiki/Speculative_fiction">speculative fiction</a> can be pretty fun to write, since I don't think pretty much any of these things are going to make it into Java anytime soon, if ever, and I'm sure there are lots of people in the Java world who hate things like Ruby won't agree anyway.</p> 

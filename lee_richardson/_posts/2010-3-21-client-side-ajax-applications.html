@@ -1,0 +1,595 @@
+--- 
+permalink: /blogs/lee_richardson/client_side_ajax_applications.html
+layout: blogs
+title: Client Side AJAX Applications in SharePoint 2010 - Part 1
+date: 2010-03-21 18:37:06 -04:00
+tags: .NET
+---
+<p>If you haven't played with it yet, one of the things you'll immediately notice about SharePoint 2010 is that the UI is extremely AJAX centric.  For instance modifying or adding list items is either done in-line with partial page refreshes or via lightbox popups.  It's very pleasant to use.</p>
+
+<div style='float:right; margin-left:10px;'>
+<script type='text/javascript'>
+        var currentPageUrl = 'http://rapidapplicationdevelopment.blogspot.com/2010/03/client-side-ajax-applications-in.html';
+
+        /* Digg */
+        var diggIframe = document.createElement('iframe');
+        diggIframe.setAttribute('src', 'http://digg.com/tools/diggthis.php?u=' + currentPageUrl);
+        diggIframe.setAttribute('height', '80');
+        diggIframe.setAttribute('width', '52');
+        diggIframe.setAttribute('frameborder', '0');
+        diggIframe.setAttribute('scrolling', 'no');
+        diggIframe.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+
+        /* DotNetKicks */
+        var dotnetkicksLink = document.createElement('a');
+        dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+        var dotnetkicksImg = document.createElement('img');
+        dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+        dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+        dotnetkicksImg.setAttribute('border', '0');
+        dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+        dotnetkicksLink.appendChild(dotnetkicksImg);
+
+        var div = document.createElement('div');
+        div.appendChild(dotnetkicksLink);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(diggIframe);
+
+        document.write(div.innerHTML);
+    </script>
+</div>
+
+
+<p>One of the consequences of this Web 2.0 design is that the expectations of SharePoint end users will significantly increase.  No longer will long delays and/or full page refreshes in your SharePoint based custom applications be acceptable.  End users may not be able to clearly articulate it, but unless as developers we update our techniques to match the new technology our SharePoint based applications will begin to feel stale and will stick out from the rest of SharePoint 2010.</p>
+<p>Fortunately Microsoft has stepped up the support it offers Web 2.0 developers in a big way.  One of the most compelling features is in how SharePoint exposes all list data via REST/ATOM <i>and</i> JSON.  This feature combined with the new templating feature of ASP.Net AJAX 4 allows developers to easily write fast, responsive user interfaces.  I will explore these two technologies in the following series:</p>
+
+<p>
+<a href="http://www.nearinfinity.com/blogs/lee_richardson/client_side_ajax_applications.html">Part 1 - Exploring WCF Data Services in SharePoint 2010</a><br />
+<a href="http://www.nearinfinity.com/blogs/lee_richardson/client_side_ajax_applications_1.html">Part 2 - Creating a read-only page with ASP.Net AJAX 4.0 Templates</a><br />
+<a href="http://www.nearinfinity.com/blogs/lee_richardson/client_side_ajax_applications_2.html">Part 3 - Writing data back to SharePoint with ASP.Net AJAX 4.0 Templates</a><br/>
+<a href="http://www.nearinfinity.com/blogs/lee_richardson/aspajax_4_templates_part_4_-_j.html">Part 4 - jQuery and Manual JSON Object Manipulation</a>
+</p>
+
+<p><b>Why do we need yet another framework?</b></p>
+<p>If you attempt to develop Web 2.0 applications in SharePoint with the techniques you have today there are really only two approaches: ASP.Net AJAX and server side controls or manually coding JavaScript, probably with jQuery or other JavaScript Libraries.  If you take the ASP.Net AJAX approach you'll undoubtedly be using an UpdatePanel to get partial page refreshes and then writing ASP.Net code like you always have.  There are several problems with this approach:</p>
+
+<ul>
+<li>It sends the entire ViewState with every asynchronous request - this can result in slow, unresponsive apps (this can actually sneak up on you once you have a lot of production data as happened to me recently)</li>
+<li>Even without a ViewState the UpdatePanel transmits large amounts of HTML (rather than lightweight JSON data)</li>
+<li>It runs through the entire page lifecycle on updates, executing everything on the page even if it isn't relevant to what you're doing</li>
+<li>ASP.Net AJAX doesn't have the simplicity of an ETag based HTTP caching like with a REST solution</li>
+<li>Finally SharePoint just doesn't work well with UpdatePanel, I can't tell you how many issues I've had with various controls not working out of the box</li>
+</ul>
+
+<p>And if you take the manual JavaScript rout you are faced with a number of different problems:</p>
+
+<ul>
+<li>You have to write <i>a lot</i> of plumbing code</li>
+ <ul>
+  <li>You have to write a service to return your data</li>
+  <li>You have to pay particular attention to security and permissions since you're exposing your API's to the world</li>
+  <li>You have to convert your data (ideally JSON) into HTML with probably string concatenation or document.createElement statements</li>
+ </ul>
+<li>Your UI code is not clearly separated from your data access code making your code hard to maintain</li>
+<li>Saving data back to the server involves even more plumbing code</li>
+</ul>
+
+<p>SharePoint 2010 combined with ASP.Net AJAX 4.0 solves these problems.  It probably introduces new problems too, but I haven't run into too many thus far.  So over the next couple of posts I hope to convince you that we do need yet another web framework and that Microsoft is headed in a great direction with these technologies.</p>
+<p><b>So How Does it Work?</b></p>
+<p>In WSS 3.0 you were able to access list data with the SOAP based Lists.asmx.  This technique worked well for .Net desktop apps or server side application pages, but not so well with client side JavaScript.  SharePoint 2010 exposes its list data with REST based ListData.svc (though WCF Data Services which I'll describe in more detail below).  Once you install <a href=" http://ajax.codeplex.com/releases/view/35895 ">WCF Data Services</a> on a machine with SharePoint 2010 you can simply navigate to http://[server]/[optional site]/_vti_bin/ListData.svc and see all of the lists you have permission to access.  The result will look like this:</p>
+
+<p><span style="font-size:9.5pt;line-height:115%;
+font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;
+mso-bidi-language:AR-SA">&lt;?</span><span style="font-size:9.5pt;line-height:
+115%;font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;color:#A31515;mso-ansi-language:EN-US;mso-fareast-language:EN-US;
+mso-bidi-language:AR-SA">xml</span><span style="font-size:9.5pt;line-height:
+115%;font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;
+mso-bidi-language:AR-SA"> </span>
+ <span style="font-size:9.5pt;line-height:115%;
+font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;color:red;mso-ansi-language:EN-US;mso-fareast-language:EN-US;
+mso-bidi-language:AR-SA">version</span><span style="font-size:9.5pt;line-height:
+115%;font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;color:blue;mso-ansi-language:EN-US;mso-fareast-language:EN-US;
+mso-bidi-language:AR-SA">=</span><span style="font-size:9.5pt;line-height:115%;
+font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:
+AR-SA">&quot;<span style="color:blue">1.0</span>&quot;<span style="color:blue"> </span>
+ <span style="color:red">encoding</span><span style="color:blue">=</span>&quot;<span 
+  style="color:blue">iso-8859-1</span>&quot;<span style="color:blue"> </span>
+ <span style="color:red">standalone</span><span style="color:blue">=</span>&quot;<span 
+  style="color:blue">yes</span>&quot;<span style="color:blue">?&gt;<br />
+ &lt;</span><span style="color:#A31515">service</span><span style="color:blue">
+ </span><span style="color:red">xml:base</span><span style="color:blue">=</span>&quot;<span 
+  style="color:blue">http://localhost/mySite/_vti_bin/ListData.svc/</span>&quot;<span 
+  style="color:blue">
+ <br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span></span><span style="color:red">
+ xmlns:atom</span><span style="color:blue">=</span>&quot;<span style="color:blue">http://www.w3.org/2005/Atom</span>&quot;<span 
+  style="color:blue">
+ <br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span></span><span style="color:red">
+ xmlns:app</span><span style="color:blue">=</span>&quot;<span style="color:blue">http://www.w3.org/2007/app</span>&quot;<span 
+  style="color:blue">
+ <br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span></span><span style="color:red">xmlns</span><span 
+  style="color:blue">=</span>&quot;<span style="color:blue">http://www.w3.org/2007/app</span>&quot;<span 
+  style="color:blue">&gt;<br />
+ <span style="mso-spacerun:yes">&nbsp; </span>&lt;</span><span style="color:#A31515">workspace</span><span 
+  style="color:blue">&gt;<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span style="color:#A31515">atom:title</span><span 
+  style="color:blue">&gt;</span>Default<span style="color:blue">&lt;/</span><span 
+  style="color:#A31515">atom:title</span><span style="color:blue">&gt;<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span style="color:#A31515">collection</span><span 
+  style="color:blue"> </span><span style="color:red">href</span><span 
+  style="color:blue">=</span>&quot;<span style="color:blue">Iterations</span>&quot;<span 
+  style="color:blue">&gt;<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span style="color:#A31515">atom:title</span><span 
+  style="color:blue">&gt;</span>Iterations<span style="color:blue">&lt;/</span><span 
+  style="color:#A31515">atom:title</span><span style="color:blue">&gt;<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;/</span><span style="color:#A31515">collection</span><span 
+  style="color:blue">&gt;<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span style="color:#A31515">collection</span><span 
+  style="color:blue"> </span><span style="color:red">href</span><span 
+  style="color:blue">=</span>&quot;<span style="color:blue">UserStories</span>&quot;<span 
+  style="color:blue">&gt;<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span style="color:#A31515">atom:title</span><span 
+  style="color:blue">&gt;</span>UserStories<span style="color:blue">&lt;/</span><span 
+  style="color:#A31515">atom:title</span><span style="color:blue">&gt;<br />
+ <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;/</span><span style="color:#A31515">collection</span><span 
+  style="color:blue">&gt;<br />
+ <span style="mso-spacerun:yes">&nbsp; </span>&lt;/</span><span style="color:#A31515">workspace</span><span 
+  style="color:blue">&gt;<br />
+ &lt;/</span><span style="color:#A31515">service</span><span style="color:blue">&gt;</span></span></p>
+
+<p>You can then append the names of lists (e.g. http://localhost/site/_vti_bin/ListData.svc/UserStories) and immediately view the list items in the list as an ATOM feed.  A typical result looks like this:</p>
+
+ <p class="MsoNormal">
+  <span style="font-size:
+9.5pt;font-family:Consolas;color:blue">&lt;?</span><span style="font-size:9.5pt;
+font-family:Consolas;color:#A31515">xml</span><span style="font-size:9.5pt;
+font-family:Consolas;color:blue"> </span>
+  <span style="font-size:9.5pt;
+font-family:Consolas;color:red">version</span><span style="font-size:9.5pt;
+font-family:Consolas;color:blue">=</span><span style="font-size:9.5pt;
+font-family:Consolas">&quot;<span style="color:blue">1.0</span>&quot;<span style="color:blue">
+  </span><span style="color:red">encoding</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">iso-8859-1</span>&quot;<span style="color:blue"> </span>
+  <span style="color:red">standalone</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">yes</span>&quot;<span style="color:blue">?&gt;<br />
+  &lt;</span><span style="color:#A31515">feed</span><span style="color:blue"> </span>
+  <span style="color:red">xml:base</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">http://localhost/mySite/_vti_bin/ListData.svc/</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span></span>
+  <span style="color:red">xmlns:d</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">http://schemas.microsoft.com/ado/2007/08/dataservices</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span></span>
+  <span style="color:red">xmlns:m</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">http://schemas.microsoft.com/ado/2007/08/dataservices/metadata</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span></span>
+  <span style="color:red">xmlns</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">http://www.w3.org/2005/Atom</span>&quot;<span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">title</span><span style="color:blue"> </span>
+  <span style="color:red">type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">text</span>&quot;<span style="color:blue">&gt;</span>UserStories<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">title</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">id</span><span style="color:blue">&gt;</span>http://localhost/mySite/_vti_bin/ListData.svc/UserStories<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">id</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">updated</span><span style="color:blue">&gt;</span>2010-03-20T02:20:26Z<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">updated</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">link</span><span style="color:blue"> </span>
+  <span style="color:red">rel</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">self</span>&quot;<span style="color:blue"> </span>
+  <span style="color:red">title</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">UserStories</span>&quot;<span style="color:blue"> </span>
+  <span style="color:red">href</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">UserStories</span>&quot;<span style="color:blue"> /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">entry</span><span style="color:blue"> </span>
+  <span style="color:red">m:etag</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">W/</span><span style="color:red">&amp;quot;</span><span 
+   style="color:blue">3</span><span style="color:red">&amp;quot;</span>&quot;<span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">id</span><span style="color:blue">&gt;</span>http://localhost/mySite/_vti_bin/ListData.svc/UserStories(2)<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">id</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">title</span><span style="color:blue"> </span>
+  <span style="color:red">type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">text</span>&quot;<span style="color:blue">&gt;</span>Blah<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">title</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">updated</span><span style="color:blue">&gt;</span>2010-03-19T15:13:28-05:00<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">updated</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">author</span><span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">name</span><span style="color:blue"> /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;/</span><span 
+   style="color:#A31515">author</span><span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">link</span><span style="color:blue"> </span>
+  <span style="color:red">rel</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">edit</span>&quot;<span style="color:blue"> </span>
+  <span style="color:red">title</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">UserStoriesItem</span>&quot;<span style="color:blue"> </span>
+  <span style="color:red">href</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">UserStories(2)</span>&quot;<span style="color:blue"> /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">link</span><span style="color:blue"> </span>
+  <span style="color:red">rel</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">http://schemas.microsoft.com/ado/2007/08/dataservices/related/Predecessors</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">application/atom+xml;type=feed</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">title</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Predecessors</span>&quot;<span style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">href</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">UserStories(2)/Predecessors</span>&quot;<span 
+   style="color:blue"> /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">link</span><span style="color:blue"> </span>
+  <span style="color:red">rel</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">http://schemas.microsoft.com/ado/2007/08/dataservices/related/Priority</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">application/atom+xml;type=entry</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">title</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Priority</span>&quot;<span style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">href</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">UserStories(2)/Priority</span>&quot;<span style="color:blue"> 
+  /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">link</span><span style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">rel</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">http://schemas.microsoft.com/ado/2007/08/dataservices/related/Status</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">application/atom+xml;type=entry</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">title</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Status</span>&quot;<span style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">href</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">UserStories(2)/Status</span>&quot;<span style="color:blue"> /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">link</span><span style="color:blue"> </span>
+  <span style="color:red">rel</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">http://schemas.microsoft.com/ado/2007/08/dataservices/related/Iteration</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">application/atom+xml;type=entry</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">title</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Iteration</span>&quot;<span style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">href</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">UserStories(2)/Iteration</span>&quot;<span style="color:blue"> 
+  /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">link</span><span style="color:blue"> </span>
+  <span style="color:red">rel</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">http://schemas.microsoft.com/ado/2007/08/dataservices/related/Attachments</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">application/atom+xml;type=feed</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">title</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Attachments</span>&quot;<span style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">href</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">UserStories(2)/Attachments</span>&quot;<span 
+   style="color:blue"> /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">category</span><span style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">term</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Microsoft.SharePoint.DataService.UserStoriesItem</span>&quot;<span 
+   style="color:blue">
+  <br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  </span><span style="color:red">scheme</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">http://schemas.microsoft.com/ado/2007/08/dataservices/scheme</span>&quot;<span 
+   style="color:blue"> /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">content</span><span style="color:blue"> </span>
+  <span style="color:red">type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">application/xml</span>&quot;<span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;</span><span 
+   style="color:#A31515">m:properties</span><span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:ContentTypeID</span><span 
+   style="color:blue">&gt;</span>0x01080070E2807D369BD94FBD6C057D3110E6D3<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">d:ContentTypeID</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:Title</span><span style="color:blue">&gt;</span>Do 
+  Something<span style="color:blue">&lt;/</span><span style="color:#A31515">d:Title</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:PriorityValue</span><span 
+   style="color:blue">&gt;</span>(2) Normal<span style="color:blue">&lt;/</span><span 
+   style="color:#A31515">d:PriorityValue</span><span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:StatusValue</span><span 
+   style="color:blue">&gt;</span>Not Started<span style="color:blue">&lt;/</span><span 
+   style="color:#A31515">d:StatusValue</span><span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:Complete</span><span style="color:blue">
+  </span><span style="color:red">m:type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Edm.Double</span>&quot;<span style="color:blue"> </span>
+  <span style="color:red">m:null</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">true</span>&quot;<span style="color:blue"> /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:AssignedToID</span><span 
+   style="color:blue"> </span><span style="color:red">m:type</span><span 
+   style="color:blue">=</span>&quot;<span style="color:blue">Edm.Int32</span>&quot;<span 
+   style="color:blue"> </span><span style="color:red">m:null</span><span 
+   style="color:blue">=</span>&quot;<span style="color:blue">true</span>&quot;<span 
+   style="color:blue"> /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:TaskGroupID</span><span 
+   style="color:blue"> </span><span style="color:red">m:type</span><span 
+   style="color:blue">=</span>&quot;<span style="color:blue">Edm.Int32</span>&quot;<span 
+   style="color:blue"> </span><span style="color:red">m:null</span><span 
+   style="color:blue">=</span>&quot;<span style="color:blue">true</span>&quot;<span 
+   style="color:blue"> /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:Description</span><span 
+   style="color:blue">&gt;</span><span style="color:red">&amp;lt;</span>div<span 
+   style="color:red">&amp;gt;&amp;lt;</span>/div<span style="color:red">&amp;gt;</span><span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">d:Description</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:StartDate</span><span style="color:blue">
+  </span><span style="color:red">m:type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Edm.DateTime</span>&quot;<span style="color:blue">&gt;</span>2010-02-20T00:00:00<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">d:StartDate</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:DueDate</span><span style="color:blue">
+  </span><span style="color:red">m:type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Edm.DateTime</span>&quot;<span style="color:blue"> </span>
+  <span style="color:red">m:null</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">true</span>&quot;<span style="color:blue"> /&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:Points</span><span style="color:blue">
+  </span><span style="color:red">m:type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Edm.Double</span>&quot;<span style="color:blue">&gt;</span>3<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">d:Points</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:IterationID</span><span 
+   style="color:blue"> </span><span style="color:red">m:type</span><span 
+   style="color:blue">=</span>&quot;<span style="color:blue">Edm.Int32</span>&quot;<span 
+   style="color:blue">&gt;</span>3<span style="color:blue">&lt;/</span><span 
+   style="color:#A31515">d:IterationID</span><span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:ID</span><span style="color:blue"> </span>
+  <span style="color:red">m:type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Edm.Int32</span>&quot;<span style="color:blue">&gt;</span>2<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">d:ID</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:ContentType</span><span 
+   style="color:blue">&gt;</span>Task<span style="color:blue">&lt;/</span><span 
+   style="color:#A31515">d:ContentType</span><span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:Modified</span><span style="color:blue">
+  </span><span style="color:red">m:type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Edm.DateTime</span>&quot;<span style="color:blue">&gt;</span>2010-03-19T15:13:28<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">d:Modified</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:Created</span><span style="color:blue">
+  </span><span style="color:red">m:type</span><span style="color:blue">=</span>&quot;<span 
+   style="color:blue">Edm.DateTime</span>&quot;<span style="color:blue">&gt;</span>2010-02-20T15:32:26<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">d:Created</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:CreatedByID</span><span 
+   style="color:blue"> </span><span style="color:red">m:type</span><span 
+   style="color:blue">=</span>&quot;<span style="color:blue">Edm.Int32</span>&quot;<span 
+   style="color:blue">&gt;</span>1<span style="color:blue">&lt;/</span><span 
+   style="color:#A31515">d:CreatedByID</span><span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:ModifiedByID</span><span 
+   style="color:blue"> </span><span style="color:red">m:type</span><span 
+   style="color:blue">=</span>&quot;<span style="color:blue">Edm.Int32</span>&quot;<span 
+   style="color:blue">&gt;</span>1<span style="color:blue">&lt;/</span><span 
+   style="color:#A31515">d:ModifiedByID</span><span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:Owshiddenversion</span><span 
+   style="color:blue"> </span><span style="color:red">m:type</span><span 
+   style="color:blue">=</span>&quot;<span style="color:blue">Edm.Int32</span>&quot;<span 
+   style="color:blue">&gt;</span>3<span style="color:blue">&lt;/</span><span 
+   style="color:#A31515">d:Owshiddenversion</span><span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:Version</span><span style="color:blue">&gt;</span>3.0<span 
+   style="color:blue">&lt;/</span><span style="color:#A31515">d:Version</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+  &lt;</span><span style="color:#A31515">d:Path</span><span style="color:blue">&gt;</span>/mySite/Lists/User 
+  Stories<span style="color:blue">&lt;/</span><span style="color:#A31515">d:Path</span><span 
+   style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;/</span><span style="color:
+#A31515">m:properties</span><span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>&lt;/</span><span 
+   style="color:#A31515">content</span><span style="color:blue">&gt;<br />
+  <span style="mso-spacerun:yes">&nbsp; </span>&lt;/</span><span 
+   style="color:#A31515">entry</span><span style="color:blue">&gt;<br />
+  &lt;/</span><span style="color:#A31515">feed</span><span style="color:blue">&gt;<br 
+   style="mso-special-character:line-break" />
+  <![if !supportLineBreakNewLine]>
+  <br style="mso-special-character:line-break" />
+  <![endif]></span><o:p></o:p></span>
+ </p>
+
+<p>You can append various parameters to filter, sort, or paginate your data from this page.  For example http://localhost/site/_vti_bin/ListData.svc/UserStories?$filter=(PriorityValue eq '(2) Normal')&$orderby=Title will return list items whose priority is normal sorted by title.  See <a href="http://msdn.microsoft.com/en-us/magazine/cc668784.aspx ">Query Expressions</a> on MSDN for more details.</p>
+
+<p>Now if you're interested you can take it a step further by viewing the data as JSON.  To do this you'll need to modify the HTTP headers.  Fortunately there is a tool from Microsoft for viewing, replaying, and modify HTTP sessions called <a href="http://www.fiddler2.com/fiddler2/ ">Fiddler</a>.  After you install it open Fiddler from the add-in in your web browser (I used IE, but Firefox should work too).  Then refresh the web page for a list (in my case ListData.svc/UserStories).  Now in Fiddler drag the last request to the Request Builder, ensure "Automatically Authenticate" is checked in options, and replace "Accept: */*" with "Accept application/json". When you click Execute you should see something like:</p>
+
+<p><span style="font-size:9.5pt;line-height:115%;
+font-family:Consolas;mso-fareast-font-family:Calibri;mso-fareast-theme-font:
+minor-latin;mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:
+AR-SA">{<br />
+ <span style="color:maroon">&quot;d&quot;</span> : {<br />
+ <span style="color:maroon">&quot;results&quot;</span>: [<br />
+ {<br />
+ <span style="color:maroon">&quot;__metadata&quot;</span>: {<br />
+ <span style="color:maroon">&quot;uri&quot;</span>: <span style="color:maroon">
+ &quot;http://localhost/demoprep/_vti_bin/ListData.svc/UserStories(2)&quot;</span>,
+ <br />
+ <span style="color:maroon">&quot;etag&quot;</span>: <span style="color:maroon">&quot;W/\&quot;3\&quot;&quot;</span>,
+ <br />
+ <span style="color:maroon">&quot;type&quot;</span>: <span style="color:maroon">
+ &quot;Microsoft.SharePoint.DataService.UserStoriesItem&quot;<br />
+ </span>}, <span style="color:maroon">&quot;ContentTypeID&quot;</span>:
+ <span style="color:maroon">&quot;0x01080070E2807D369BD94FBD6C057D3110E6D3&quot;</span>,
+ <br />
+ <span style="color:maroon">&quot;Title&quot;</span>: <span style="color:maroon">&quot;Blah&quot;</span>,
+ <br />
+ <span style="color:maroon">&quot;Predecessors&quot;</span>: {<br />
+ <span style="color:maroon">&quot;__deferred&quot;</span>: {<br />
+ <span style="color:maroon">&quot;uri&quot;</span>: <span style="color:maroon">
+ &quot;http://localhost/demoprep/_vti_bin/ListData.svc/UserStories(2)/Predecessors&quot;<br />
+ </span>}<br />
+ }, <span style="color:maroon">&quot;Priority&quot;</span>: {<br />
+ <span style="color:maroon">&quot;__deferred&quot;</span>: {<br />
+ <span style="color:maroon">&quot;uri&quot;</span>: <span style="color:maroon">
+ &quot;http://localhost/demoprep/_vti_bin/ListData.svc/UserStories(2)/Priority&quot;<br />
+ </span>}<br />
+ }, <span style="color:maroon">&quot;PriorityValue&quot;</span>: <span style="color:maroon">
+ &quot;(2) Normal&quot;</span>, <span style="color:maroon">&quot;Status&quot;</span>: {<br />
+ <span style="color:maroon">&quot;__deferred&quot;</span>: {<br />
+ <span style="color:maroon">&quot;uri&quot;</span>: <span style="color:maroon">
+ &quot;http://localhost/demoprep/_vti_bin/ListData.svc/UserStories(2)/Status&quot;<br />
+ </span>}<br />
+ }, <span style="color:maroon">&quot;StatusValue&quot;</span>: <span style="color:maroon">
+ &quot;Not Started&quot;</span>,
+ <br />
+ <span style="color:maroon">&quot;Complete&quot;</span>: <span style="color:
+blue">null</span>,
+ <br />
+ <span style="color:maroon">&quot;AssignedToID&quot;</span>: <span style="color:blue">null</span>,
+ <br />
+ <span style="color:maroon">&quot;TaskGroupID&quot;</span>: <span style="color:blue">null</span>,
+ <br />
+ <span style="color:maroon">&quot;Description&quot;</span>: <span style="color:maroon">
+ &quot;&lt;div&gt;&lt;/div&gt;&quot;</span>,
+ <br />
+ <span style="color:maroon">&quot;StartDate&quot;</span>: <span style="color:maroon">
+ &quot;\/Date(1266624000000)\/&quot;</span>,
+ <br />
+ <span style="color:maroon">&quot;DueDate&quot;</span>: <span style="color:blue">null</span>,
+ <br />
+ <span style="color:maroon">&quot;Points&quot;</span>: 3,
+ <br />
+ <span style="color:maroon">&quot;Iteration&quot;</span>: {<br />
+ <span style="color:maroon">&quot;__deferred&quot;</span>: {<br />
+ <span style="color:maroon">&quot;uri&quot;</span>: <span style="color:maroon">
+ &quot;http://localhost/demoprep/_vti_bin/ListData.svc/UserStories(2)/Iteration&quot;<br />
+ </span>}<br />
+ }, <span style="color:maroon">&quot;IterationID&quot;</span>: 3,
+ <br />
+ <span style="color:maroon">&quot;ID&quot;</span>: 2,
+ <br />
+ <span style="color:maroon">&quot;ContentType&quot;</span>: <span style="color:maroon">
+ &quot;Task&quot;</span>,
+ <br />
+ <span style="color:maroon">&quot;Modified&quot;</span>: <span style="color:
+maroon">&quot;\/Date(1269011608000)\/&quot;</span>,
+ <br />
+ <span style="color:maroon">&quot;Created&quot;</span>: <span style="color:maroon">
+ &quot;\/Date(1266679946000)\/&quot;</span>,
+ <br />
+ <span style="color:maroon">&quot;CreatedByID&quot;</span>: 1,
+ <br />
+ <span style="color:maroon">&quot;ModifiedByID&quot;</span>: 1,
+ <br />
+ <span style="color:maroon">&quot;Owshiddenversion&quot;</span>: 3,
+ <br />
+ <span style="color:maroon">&quot;Version&quot;</span>: <span style="color:maroon">&quot;3.0&quot;</span>,
+ <br />
+ <span style="color:maroon">&quot;Attachments&quot;</span>: {<br />
+ <span style="color:maroon">&quot;__deferred&quot;</span>: {<br />
+ <span style="color:maroon">&quot;uri&quot;</span>: <span style="color:maroon">
+ &quot;http://localhost/demoprep/_vti_bin/ListData.svc/UserStories(2)/Attachments&quot;<br />
+ </span>}<br />
+ }, <span style="color:maroon">&quot;Path&quot;</span>: <span style="color:maroon">
+ &quot;/demoprep/Lists/User Stories&quot;<br />
+ </span>}<br />
+ ]<br />
+ }<br />
+ }<br style="mso-special-character:line-break" />
+ <![if !supportLineBreakNewLine]>
+ <br style="mso-special-character:line-break" />
+ <![endif]></span></p>
+
+<p>
+<a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://2.bp.blogspot.com/_gez10dNhuPk/S6YnvZgs-4I/AAAAAAAABr0/lFSbUWxfsAc/s1600-h/Fiddler.gif"><img style="cursor:pointer; cursor:hand;width: 400px; height: 191px;" src="http://2.bp.blogspot.com/_gez10dNhuPk/S6YnvZgs-4I/AAAAAAAABr0/lFSbUWxfsAc/s400/Fiddler.gif" border="0" alt=""id="BLOGGER_PHOTO_ID_5451088094233951106" /></a>
+</p>
+
+<p>That's SharePoint data as JavaScript Object Notation.  Notice the etag and href's to associated list data.  Cool.</p>
+
+<p>But ListData.svc isn't just for reading data.  To experiment with it try deleting a list item.  To do this in fiddler set the HTTP verb to "DELETE", set the URL to a particular list item's URL (e.g. http://localhost/site/_vti_bin/ListData.svc/UserStories(2) where 2 is the ID for a list item), leave Request Headers empty, and hit Execute.  Refresh the list of items and yours is gone.  Permanently.  The item isn't even in the recycle bin.</p>
+<p><b>Security in WCF Data Services</b></p>
+<p>So at this point you are undoubtedly concerned about security.  Just to give some background ListData.svc is provided by a technology called <a href="http://en.wikipedia.org/wiki/ADO.NET_Data_Services">WCF Data Services</a>, which was formerly called ADO.Net Data Services, which was code named Astoria.  And WCF Data Services is an implementation of the open data protocol (OData) which <a href=" http://www.hanselminutes.com/default.aspx?showID=223 ">Scott Hanselman</a> has an excellent podcast about.</p>
+<p>This technology was originally designed for exposing database data.  And in this scenario you do have to handle your own security.  SharePoint 2010, however, takes things a step further by giving you WCF Data Services (nearly) out of the box while also handling your authorization security.</p>
+<p>For instance if you modify the row level permissions for a list item to deny read permissions to a user then ListData.svc will not return that list item for that user.  If you try to access the URL for that list item directly SharePoint returns a 404.  If you try to modify or delete a list item you don't have permissions to modify then SharePoint returns a 401 Unauthorized.</p>
+<p>Very cool.  I find this especially nice because you don't have to worry about maintaining your security code.  It's intimately tied to SharePoint 2010's security model which is already quite sophisticated.</p>
+<p>Incidentally, security is not all that's included when you use these services.  SharePoint also performs data validation and returns the appropriate HTTP error codes if you for instance violate the new uniqueness constraint.</p>
+<p><b>Summary</b></p>
+<p>SharePoint offers everything you've seen so far (nearly) out of the box and without a line of code.  This sets the stage for writing some nice client side applications with technologies like ASP.Net AJAX 4.0 client site templating.  Which is exactly what I intend to do in <a href="http://www.nearinfinity.com/blogs/lee_richardson/client_side_ajax_applications_1.html">Part 2 - Creating a read-only page with ASP.Net AJAX 4.0 Templates</a>.</p> 

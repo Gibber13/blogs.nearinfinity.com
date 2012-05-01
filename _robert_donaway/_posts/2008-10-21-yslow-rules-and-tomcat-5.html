@@ -1,0 +1,36 @@
+--- 
+permalink: /blogs/robert_donaway/yslow_rules_and_tomcat_5.html
+layout: blogs
+title: YSlow Rules and Tomcat 5.5 SSL
+date: 2008-10-21 08:14:11 -04:00
+tags: Java
+---
+<p>A few weeks ago I attended <a href="http://www.therichwebexperience.com/conference/washing_dc/index.html">The Rich Web Experience</a> where I went to talks by Scott Davis and Nathaniel Schutta and heard about using <a href="http://developer.yahoo.com/yslow/">YSlow</a> to measure how well your web application performs. Of course I rushed right back to the office to check my current project's grade and implement as many of the performance enhancing techniques as I could. My application is running in Tomcat 5.5 over SSL. As it turned out this posed an unexpected challenge and in the end the solution was trickier than I anticipated.  In case anyone else is in the same boat I'll reference the helpful article I found and summarize what I did to improve my grade.</p>
+
+<p>Adding a far-future expires header to static content (rule 3) should have been no problem. I started out creating a simple filter that I applied to CSS, JavaScript and image files. Here's the crux of the code.</p>
+
+<pre class="prettyprint">response.setHeader("Expires", "Wed, 21 Oct 2009 11:49:28 GMT");
+response.setHeader("Cache-Control", "public");
+</pre>
+
+<p>To be safe, I actually set the expires header to be one day after the current time because I read that if you set it too far in the future some browsers may reject it.  Well, the filter <em>did</em> change the expires header but according to <a href="http://getfirebug.com/">Firebug</a>, Tomcat kept going back to the server to download the files anyway. The problem was a pragma no-cache header put in by Tomcat for some reason.  This appears to trump the expires header. After some failed attempts to get rid of that pesky header I found <a href="http://www.symphonious.net/2007/06/19/caching-in-tomcat/">this article</a> which prompted me to add the following to my context.XML file.</p>
+ 
+<pre class="prettyprint">&lt;Valve className="org.apache.catalina.authenticator.SSLAuthenticator" disableProxyCaching="false" /&gt;
+</pre>
+
+<p>This solved my caching problem.</p>
+
+<p>Next on the laundry list was CSS and JavaScript minification (rule 10). Like most projects we are using several different JavaScript libraries and divide our custom-written JavaScript into several files.  Our CSS is similarly divided. I wanted to use <a href="http://developer.yahoo.com/yui/compressor/">YUI compressor</a> to minify these into a single JS and a single CSS file. (Single files to satisfy rule 1.)  Of course we don't want to have to read or edit the code in this minified state so I wrote an ant target to concatenate the files in the correct order and then invoke the compressor. This works well unless you're trying to debug JavaScript in Firebug so I put in a switch to disable the minification during development.</p>
+
+<p>The next task was to make sure the CSS comes at the top of our pages and the JavaScript at the bottom (rules 5 and 6). We use <a href="http://www.opensymphony.com/sitemesh/">SiteMesh</a> so putting our single CSS file in the head was no problem. It just goes in the master decorator page. So far we have been able to avoid page-specific CSS so we need just the one link tag on every page. Putting the JavaScript right before the end of the body tag was a little trickier. Almost all of our pages have page-specific JS code that uses functions and variables from the different libraries that have been rolled into the single JS file. So the link to this script must appear before the page-specific script. I achieved this by setting a request attribute called pagejs in pages that need specific script.  Then this text gets rendered after the script link but before the end body tag in the master decorator page, like so.</p>
+
+<pre class="prettyprint">...
+&lt;/div&gt;
+&lt;script type="text/javascript" src="&lt;c:url value="/scripts/script.js" /&gt;"&gt;
+${pagejs}
+&lt;/body&gt;
+</pre>
+
+<p>I played around with externalizing the page-specific JS but much of it is generated dynamically. Even when it was completely static there wasn't much of a performance boost by extracting it so we keep it inline. (I think this is because the JavaScript gets loaded serially.) One thing I like about this approach is that I can still put the JavaScript at the top of my JSP's where I'm used to seeing it and let the decorator take care of rendering it at the bottom.</p>
+
+<p>After performing these fairly simple modifications I've noticed a big improvement in performance. The user hits the home page and the browser downloads two extra minified files and a few images.  Then for the rest of the day users are just loading dynamic HTML and taking the rest from cache.  My only remaining task is to make use of a content delivery network or something like it for the static content. That ought to raise my B grade to an A!  Thanks Firebug and YSlow!!!</p> 
