@@ -1,0 +1,130 @@
+--- 
+permalink: /blogs/aaron_mccurry/what_happens_to_lucene_when.html
+layout: blogs
+title: What Happens To Lucene When You Go Big...  Part 1
+date: 2008-04-30 13:30:00 -04:00
+tags: Java Lucene Security
+---
+{% raw %}
+<p style="margin-bottom: 0in;">My current project has some unique
+searching requirements.</p>
+<p style="margin-bottom: 0in;">
+</p>
+<h2>Requirements</h2>
+<ul>
+	<li><p style="margin-bottom: 0in;">Fuzzy searching is a must
+	(Soundex, Levenshtein, etc.)</p>
+	</li><li><p style="margin-bottom: 0in;">Has to be fast, a must with any
+	searching solution</p>
+	</li><li><p style="margin-bottom: 0in;">Has to provide access control</p>
+	</li><li><p style="margin-bottom: 0in;">Full data load indexing needs to
+	be completed in a reasonable amount of time</p>
+	</li><li><p style="margin-bottom: 0in;">Scoring needs to be a custom
+	implementation</p>
+	</li><li><p style="margin-bottom: 0in;">Needs to run on a predetermined
+	environment, meaning that new hardware purchases are not going to
+	happen any time soon</p>
+	</li><li><p style="margin-bottom: 0in;">And last but not least is ability
+	do all these things on a dataset that exceeds a billion records</p>
+</li></ul>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;">So we have had a lot of constraints to
+deal with, the hardest one by far is the last one.</p>
+<p style="margin-bottom: 0in;">
+</p>
+<h2>The Data</h2>
+<p style="margin-bottom: 0in;">
+</p>
+<ul>
+	<li><p style="margin-bottom: 0in;">1 billion
+	plus records</p>
+	</li><li><p style="margin-bottom: 0in;">Over 30
+	million unique terms</p>
+</li></ul>
+<p style="margin-bottom: 0in;">
+</p>
+<h2>Indexing and Searching Server Specs</h2>
+<p style="margin-bottom: 0in;">
+</p>
+<ul>
+	<li><p style="margin-bottom: 0in;">20 CPUs</p>
+	</li><li><p style="margin-bottom: 0in;">32 Gig of ram</p>
+	</li><li><p style="margin-bottom: 0in;">Dedicated SAN
+	storage</p>
+</li></ul>
+<p style="margin-bottom: 0in;">
+</p>
+<h2>First Searching Experiences</h2>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;">After getting the
+index built in multiple partitions, I fired up a simple Lucene
+console to do some simple searches with a Lucene multi searcher.  Ran
+out of memory with 2 Gig heap, tried the maximum heap size for the 32
+bit JVM we were using, 3.3 Gig, and that ran out of memory as well. 
+So, initial tries to just run one search were unsuccessful.</p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;">Then we installed
+a 64-bit JVM and tried an 8 Gig heap, and it worked!  I could run
+searches and after the first couple of warm up searches it was
+getting 20 - 80 ms responses on single term searches.  Great,
+but then we tried a Fuzzy search, which uses a Levenshtein algorithm
+to calculate matches, 2 minutes 45 seconds, this was unacceptable.</p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;">Next we wrote our
+own Levenshtein Lucene query and got the 2 minutes plus search down
+to about one second.  We found that the built in Lucene Fuzzy query
+was taking 85-95% of the time to find the terms to search.  Then
+after those terms were found the actual search with those expanded
+terms only took a second to two depending on how many terms were
+found.  So we replaced the built in Fuzzy query with a custom one
+that gets near instantaneous results on Levenshtein fuzzy matches. 
+Problem solved.</p>
+<p style="margin-bottom: 0in;">
+</p>
+<h2>Indexing Time</h2>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;">After our initial
+proof of concept was complete, we needed to improve the indexing time
+down to something more reasonable.  The index creation from scratch
+was taking 36 - 48 hours to build with 20 CPUs running at 100%
+utilization.  Which means that the machine was indexing about 9,000
+records a second.  Not bad for Lucene 2.2, but not that great.</p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;">First we stopped
+merging the indexes after we created them, that by itself was taking
+about 12 hours.  At this point we also started searching these
+multiple indexes in parallel, and we are seeing modest increases in
+query performance.</p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;">Second, we
+upgraded to Lucene 2.3, this provided a huge increase in indexing
+speed.  Our index creation time went from 36 - 48 hours
+(depending on if we merged indexes or not) down to 3-4 hours.  The
+indexing process is now indexing around 125,000+ records a second. 
+Huge improvement, if you haven't upgraded to 2.3, you should!</p>
+<p style="margin-bottom: 0in;">
+</p>
+<h2>Current Development</h2>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;">We are in the
+process of adding access control to Lucene as well as adding new
+custom queries and scoring.  So far Lucene has performed better than
+any of the competition that it has come up against, and with it's
+price point it seems to have won acceptance on our project.</p>
+<p style="margin-bottom: 0in;">
+</p>
+<p style="margin-bottom: 0in;">In upcoming parts
+I will go into more details about the technical solutions that we
+have developed to solve these problems, as well others that I haven't
+mentioned yet.</p>
+<p style="margin-bottom: 0in;">
+</p> 
+{% endraw %}

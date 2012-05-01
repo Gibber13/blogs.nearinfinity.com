@@ -1,0 +1,43 @@
+--- 
+permalink: /blogs/jason_harwig/testing_custom_javascript_libraries_with.html
+layout: blogs
+title: Testing JavaScript Objects with Function.prototype.call
+date: 2007-10-11 18:33:31 -04:00
+tags: JavaScript Testing
+---
+{% raw %}
+<p>This is a short tip that I found useful for testing complex JavaScript objects using <a href="http://www.thefrontside.net/crosscheck">crosscheck</a>. For more information on crosscheck see my article on <a href="/blogs/page/jharwig?entry=javascript_unit_testing">JavaScript Unit Testing with Crosscheck</a>. </p>
+
+<p>Testing instance methods can be a pain if the functions use instance variables and the object is heavyweight. In my case the constructor did a lot with the DOM that I didn't want to mock. Instead of invoking the function through an instance of an object, I called it statically. </p> 
+<h3>Function.call</h3>
+<p>"call" is a built in function on the function prototype in JavaScript -- just a little confusing :). Using function.call we can invoke functions and pass in an object with properties that the function depends on. Here is an example documentation of the function, and an example use case. <br />
+
+<code class="prettyprint">
+Function.prototype.call(instance, parameters...);
+
+var x = { message: 'Hello World' };
+var hello_function = function(name) {
+  alert(this.message + ", " + name);
+}
+hello_function.call(x, 'jason');
+</code>
+</p>
+
+<h3>Crosscheck and call</h3>
+<p>To test an instance function in crosscheck, set the object to values you want the function to get and use call to invoke it. Here is an example function and test. <br />
+
+<code class="prettyprint">
+// function to test
+String.prototype.trim = function() {
+   return this.replace(/^\s+|\s+$/g,'');
+}
+
+// crosscheck test
+assertTrim: function() {
+   assertEquals('text', String.prototype.trim.call('  text');
+   assertEquals('text', String.prototype.trim.call('  text  \n ');
+}
+</code>
+</p>
+
+<p>Keep increasing that coverage!</p>{% endraw %}

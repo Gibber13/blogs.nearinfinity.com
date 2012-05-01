@@ -1,0 +1,51 @@
+--- 
+permalink: /blogs/jason_harwig/taking_polyglot_programming_fu.html
+layout: blogs
+title: Taking Polyglot Programming Further
+date: 2010-04-01 00:00:00 -04:00
+---
+{% raw %}
+<p>I consider polyglot programming to be using the best tool for the problem. Some languages are&nbsp;inherently&nbsp;better at solving certain types of problems. We should embrace these advantages and switch freely between languages.
+
+<p>Today, we are introducing Hydra, the meta-language that runs on the JVM. Hydra supports (and encourages!) any JVM-based language at any time in the file.
+
+<p>Example: Person.hyrdra
+
+<pre class="prettyprint">:groovy
+class Person {
+
+  :ruby
+  # define properties
+  attr_accessor :first_name, :last_name
+
+  :python
+  """ 
+    Get the full name by concatenating first, last
+  """
+  def full_name (self):
+    print "%s %s" % (self.first_name, self.last_name)
+
+  :java
+  /**
+   * Set the firstName attribute to name. (Useless javadoc)
+   *
+   * @param name the new first name value
+   */
+  public void setFirstName(String name) {
+      String prefix = "Setting first name to ";
+
+      :clojure
+      (print prefix)
+      (defn printChar [c] (print c))
+
+      :javascript
+      name.forEach(printChar);<br />
+      :java
+      this.firstName = name;      
+  }
+
+  // Switch to python so ending '}' isn't needed ;)
+  :python</pre>
+
+<p>Sent from my iPad 
+{% endraw %}

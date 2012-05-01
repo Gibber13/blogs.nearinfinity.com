@@ -1,0 +1,10 @@
+--- 
+permalink: /blogs/aaron_mccurry/lucene_compression.html
+layout: blogs
+title: Lucene Compression
+date: 2011-04-21 09:00:00 -04:00
+tags: Java Lucene
+---
+{% raw %}
+ <div>For a number of years I have used Lucene for both search and data storage. &nbsp;Meaning, I store all the data necessary to display search results in the Lucene index. &nbsp;This means that there is typically a lot of data in the FDT file, and compressing that data becomes a necessity as the indexes grow in size.</div><div><br /></div><div>In version 3.0 support for field compression was dropped by Lucene. &nbsp;I could compress each field into a byte array and store the data in document, but if you have <i>a lot</i> of small fields in a document this doesn't work very well. &nbsp;It typically won't save you any disk space, and actually it might cost you some depending on the compression algorithm.</div><div><br /></div><div>So I have built a block level compression for the FDT file in the form of a Lucene directory. &nbsp;It allows you to choose whatever compression algorithm you want and whatever block size makes sense for your data.</div><div><br /></div><div>The block level compression allows you to compress the entire document (possibly&nbsp;multiple&nbsp;documents) into a single block and achieve a higher compress ratio than if you had compressed each field separately.</div><div><br /></div><div>Plus you don't have to modify any of your Lucene code, other than wrapping your <i>real</i> directory with the compressed implementation.</div><div><br /></div><div>NOTE: &nbsp;This only works with the compound files turned off.</div><div><br /></div><div><a href="https://github.com/nearinfinity/lucene-compression">https://github.com/nearinfinity/lucene-compression</a></div> 
+{% endraw %}

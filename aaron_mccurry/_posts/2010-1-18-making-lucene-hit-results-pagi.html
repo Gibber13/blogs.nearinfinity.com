@@ -1,0 +1,41 @@
+--- 
+permalink: /blogs/aaron_mccurry/making_lucene_hit_results_pagi.html
+layout: blogs
+title: Lucene Hit Paging Made Easier
+date: 2010-01-18 16:16:59 -05:00
+tags: Java Lucene
+---
+{% raw %}
+Lucene gives users the ability to search massive amounts of data in a very short amount of time. &nbsp;However allowing users to page through the entire result set of their search can be difficult and risky depending on how many users are performing searches and how many of those users are paging through 100's if not 1,000's of hits per page.<div><br /></div><div>Problem Scenario:</div><div><br /></div><div><ul><li>Each of your indexes contains 100,000,000's documents.</li><li>You have 500 users on your system&nbsp;actively&nbsp;performing searches.</li><li>You have 100 search results per page.</li><li>And, your typical user pages through the first 10 pages of results. &nbsp;(Normal&nbsp;occurrence&nbsp;on some systems)</li></ul></div><div><br /></div><div>So for the 10th page you will have to collect 1,000 hits, at a cost of a float plus an int plus some object overhead per hit. &nbsp;So let's say 20 bytes per hit. &nbsp;So you have 500 users * 1,000 hits * 20 bytes = 10,000,000 bytes or 10M. &nbsp;Easy, no problem, right?</div><div><br /></div><div>Well what if you also give the users an easy way to move to the end of the result set. &nbsp;Hmm... &nbsp;Well for a result set size of 10,000 it's no big deal. &nbsp;But what if you hand out result sets in the order of a 1,000,000 or even 10,000,000.</div><div><br /></div><div>At this point you really just want to prevent the system from running out of memory. &nbsp;Because if you have 25 users getting 10,000,000 results each and they all click last page at the same time. &nbsp;That's going to cost you 5 Gig of heap! &nbsp;At least. &nbsp;Some might say that it won't ever happen, but in my experience, if it can happen, it will.</div><div><br /></div><div>So I created a Paging Hit Collector, that windows the hits to the users. &nbsp;It's uses the last hit collected from the previous search pass, to feed the next search pass. &nbsp;So yes if a user clicks the last page, it might perform multiple searches but, the system won't run out of memory.</div><div><br /></div><div>The user's will get there answer&nbsp;eventually, and if your system gives them some feedback as it searches and pages, they will probably sit and wait for it to come back. &nbsp;Instead of giving up and hitting cancel and search and cancel and search, and making the system worse and worse.</div><div><br /></div><b>
+
+The Simple Example:</b><div><b><br /></b><div><div>
+<pre class="prettyprint">IndexSearcher searcher = new IndexSearcher(reader);<br />
+TermQuery query = new TermQuery(new Term("f1", "value"));
+IterablePaging paging = new IterablePaging(searcher, query, 100);<br />
+for (ScoreDoc sd : paging.skipTo(90)) {
+&nbsp;&nbsp;System.out.println("doc id [" + sd.doc + "] " + 
+&nbsp;&nbsp;&nbsp;&nbsp;"score [" + sd.score + "]");
+}
+</pre>
+</div></div><b><div><b><br /></b></div>
+
+The More Advanced Example:</b></div><div><b><br /></b><div><div>
+<pre class="prettyprint">IndexSearcher searcher = new IndexSearcher(reader);<br />
+TotalHitsRef totalHitsRef = new TotalHitsRef();
+ProgressRef progressRef = new ProgressRef();<br />
+TermQuery query = new TermQuery(new Term("f1", "value"));
+IterablePaging paging = new IterablePaging(searcher, query, 100);<br />
+for (ScoreDoc sd : paging.skipTo(90).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gather(20).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;totalHits(totalHitsRef).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;progress(progressRef)) {<br />
+&nbsp;&nbsp;System.out.println("time [" + progressRef.queryTime() + "] " + 
+&nbsp;&nbsp;&nbsp;&nbsp;"total hits [" + totalHitsRef.totalHits() + "] " + 
+&nbsp;&nbsp;&nbsp;&nbsp;"searches [" + progressRef.searchesPerformed() + "] " + 
+&nbsp;&nbsp;&nbsp;&nbsp;"position [" + progressRef.currentHitPosition() + "] " + 
+&nbsp;&nbsp;&nbsp;&nbsp;"doc id [" + sd.doc + "] " + 
+&nbsp;&nbsp;&nbsp;&nbsp;"score [" + sd.score + "]");
+}
+</pre>
+</div></div><div><br /></div><div>Here's a link to the code <a href="https://issues.apache.org/jira/browse/LUCENE-2215">LUCENE-2215</a>.</div><div><br /></div></div> 
+{% endraw %}

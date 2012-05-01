@@ -1,0 +1,121 @@
+--- 
+permalink: /blogs/aaron_mccurry/tuning_the_ibm_jvm_for_large_h.html
+layout: blogs
+title: Tuning the IBM JVM for large heaps
+date: 2009-04-24 20:53:36 -04:00
+tags: General Java Lucene
+---
+{% raw %}
+
+ 
+ 
+ 
+Recently I have been rewriting a lot of our lucene search engine code
+for a web application that I'm currently supporting.&nbsp; Our physical
+environment is a little different than most, we have a single very
+large computer (a left over from a previous project) running several
+virtual machines.&nbsp; The virtual machine that we are currently using for
+our searching duties is a 64 cpu 128G box.<br />
+
+<br />
+Before I go into the tuning saga, I would like to say that in a
+previous version of the search engine we ran many more (16), smaller
+jvms all on the same box.&nbsp; They work together through a main controller
+module that coordinates calls to all the searching jvms.&nbsp; After the
+rewrite of the
+searchers, there was a lot of pressure to get the new code out the
+door.&nbsp; The new code partitions the data and searching duties in a very
+similar way to the previous version, however I haven't had time to
+focus
+on getting all the parts broken up across all the jvms.&nbsp; It's very
+doable, but do to customer priorities it hasn't been developed.&nbsp; But I
+was in
+luck (kinda), our environment was a single computer, so I thought I
+will just run one large jvm.&nbsp; I knew going in that garbage collection
+(GC) was going to be a
+problem, I just didn't realize how much.<br />
+
+<br />
+Currently, we are running the 64-bit IBM java 6 jvm, the IBM jvm is very
+different from the Sun jvm, but no more so than in the GC tuning
+department.&nbsp; In the Sun jvm you have all kinds of settings to tweak,
+algorithms to use etc.&nbsp; The IBM jvm just isn't as advanced, you have 4
+different GC policies, and sizing for various parts of the internals.&nbsp;
+And that's it!&nbsp; Great, it should be simple right?&nbsp; Well sorta.<br />
+
+<br />
+
+First try, bring the system online with a 50G (yes that's gigabytes)
+heap, with all the default settings.&nbsp; Run some load tests and see where
+we are.<br />
+
+<br />
+
+Everything is running great right up to the first full GC, 25 seconds
+doesn't sound that long but when you are waiting for a computer to
+return results, it's an eternity.&nbsp; For those that don't know, when a
+full GC occurs (some of the newer Sun algorithms are different) it
+stops the world (STW).&nbsp; This means the JVM is frozen until the GC is
+complete.&nbsp; No good.<br />
+
+<br />
+
+So the default policy is the optthruput policy (-Xgcpolicy:optthruput).&nbsp; After digging through the IBM documentation,
+this type of policy should be used for maximum throughput, but at the
+expense of pauses during GC.&nbsp; They also mention that this should be
+used for batch processing when pauses are really a problem.<br />
+
+<br />
+
+Next I tried the optavgpause policy (-Xgcpolicy:optavgpause), this is
+suppose to smooth out the GCs by kicking off the mark phase early.&nbsp; I'm
+not going to talk about mark, sweep, and compaction, you can find it
+here (<a href="http://www.ibm.com/developerworks/ibm/library/i-incrcomp/">http://www.ibm.com/developerworks/ibm/library/i-incrcomp/</a>).&nbsp; But
+basically it's suppose to run a concurrent parallel mark phase before
+the jvm runs out of heap space and performs a full GC that STW.&nbsp; This did help,
+got us down in the 10-15 second range on average, but the problem was
+that the mark phase was too slow to start under heavy load and didn't
+give us a whole lot of concurrent marking before the STW.&nbsp; I found this
+out by adding -verbose:gc, this adds a lot of debugging information to the
+standard out.&nbsp; You should just run this all the time, it provides a lot
+of useful information about your application.<br />
+
+<br />
+
+Next I tried subpool (-Xgcpolicy:subpool), it worked fine but was
+plagued by the same problem, slow full GCs.&nbsp; Subpool is suppose to work
+better on large SMP machines like ours, but in the end it was more of
+the same.&nbsp; It's full GCs were in the 10-12 second range, plus the application seemed
+to run slower, by about 10%.<br />
+
+<br />
+And last I tried gencon (-Xgcpolicy:gencon), the newest of all
+their
+policies.&nbsp; Gencon is suppose to be used on "transactional systems",
+systems that create a lot of short lived objects.&nbsp; Isn't that what most
+java applications do?&nbsp; When I started it up, it seemed to be faster,
+and our load test confirmed that, 30% more throughput.&nbsp; But the amazing
+thing was that the full GCs were fast, really fast, in the 200-400ms
+range, for a 50G heap!&nbsp; But wait, it wasn't using most of the heap, and
+it was GCing all the time.&nbsp; Back to the verbose:gc log, AHA!&nbsp; The
+nursery was too small, it was about 10% of the heap, and because our
+application is almost all short lived objects I decided to increase the
+size of the nursery.&nbsp; I gave it 50% of the heap, and the time between
+GCs slowed down, but the time to perform the GC was still in the 350ms
+range.&nbsp; Awesome!<br />
+
+<br />
+
+I finally settled on 100G heap with 50% a nursery, and the full GCs are
+now in the 400-600ms range.&nbsp; I can live with that, because this gives
+us a huge ceiling for load, and capacity.<br />
+
+<br />
+
+So to summarize, if you application needs to run a huge heap size, and
+you are using the IBM jvm, I would start by using the gencon policy.&nbsp;
+It seems to be the most modern of all their policies, and it seems to
+work the best.<br /><br />Good luck!<br />
+
+ 
+{% endraw %}

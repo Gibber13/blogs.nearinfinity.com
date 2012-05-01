@@ -1,0 +1,58 @@
+--- 
+permalink: /blogs/jason_harwig/javascript_puzzler.html
+layout: blogs
+title: Javascript Puzzler
+date: 2006-08-04 19:38:09 -04:00
+tags: JavaScript
+---
+{% raw %}
+<p>
+Here's an interesting bug in Internet Explorer I ran across today: </p><blockquote>When using window.location to go to a named anchor inside of an iframe, using a String object versus a string primitive produces different results.</blockquote>  Okay, it's pretty hard to explain, let's look at a demo.  We need two source html files, a main outer page, and a page for the iframe.
+<p> 
+<h3>main.html</h3>
+<code class="prettyprint">
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+    &lt;p&gt;MAIN CONTENT&lt;/p&gt;
+    &lt;iframe src=&quot;iframe.html&quot; width=&quot;200px&quot; height=&quot;250px&quot;&gt;&lt;/iframe&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code>
+
+<h3>iframe.html</h3>
+<code class="prettyprint">
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;&lt;/title&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
+    function run() {
+        window.location = new String(&quot;#here&quot;);
+    }
+    setTimeout(&quot;run()&quot;, 2000);
+    &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    ... Some breaks ...
+    &lt;a name=&quot;here&quot; /&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code>
+<p>When main.html is opened in Internet Explorer 6 (<a href="/blogs/resources/jharwig/main1.html" target="_blank">try it</a>), the iframe doesn't move to the anchor, instead it refreshes itself with the contents of it's containing html page -- main.html.  Huh?  If we change set window.location to "#here" instead of instantiating a new String object, it works as expected (<a href="/blogs/resources/jharwig/main2.html" target="_blank">try it</a>).  What is going on here? Let us try to break down the line in question.</p>
+
+<h3>Javascript's string primitives and String Objects</h3>
+<p>Javascript provides both string primitives and String objects<sup>1</sup>. A string object is created by new String(""), whereas a primitive is declared by quotes. The object contains methods like charAt and properties like length and is automatically instantiated anonymously if you write something like: "hello world!".length.</p>
+
+<h3>window.location</h3>
+<p>The location object is special. Isn't it? You can set it to a string, or any of it's properties.  Could IE be confused when objects are being passed in? Maybe confusing a string object with a location object?</p>
+
+<p>Anyone have any other ideas?</p>
+
+<p>Of, course, the better way to go to an anchor on the current page is setting the hash property of the location object. Using a string primitive versus a String object both work equally well. Here's an example.</p>
+<code class="prettyprint">
+// Both of these work
+window.location.hash = 'top';
+window.location.hash = new String('top');
+</code>
+
+<p><sup>1</sup><a href="http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Objects:String">Mozilla's page on Strings</a></p>{% endraw %}

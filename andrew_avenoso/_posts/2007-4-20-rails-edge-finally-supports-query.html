@@ -1,0 +1,55 @@
+--- 
+permalink: /blogs/andrew_avenoso/rails_edge_finally_supports_query.html
+layout: blogs
+title: Rails edge finally supports Query Caching
+date: 2007-04-20 13:26:00 -04:00
+tags: Ruby
+---
+{% raw %}
+I just learned about a feature in Rails that I've been wanting for a long time.
+In the past, if you were to run two identical database queries in a row, it would hit the database twice<br/>
+<code class="prettyprint">
+p = Person.find 1
+p = Person.find 1
+</code><br/><br/>
+produces the following logging<br/>
+<code class="prettyprint">
+Person Load (0.010000)?[0m   ?[0;1mSELECT * FROM people WHERE (people.`id` = 1)
+Person Load (0.010000)?[0m   ?[0;1mSELECT * FROM people WHERE (people.`id` = 1)
+</code><br/><br/>
+
+If you freeze to the Rails Edge the previous code will now produce this<br/>
+<code class="prettyprint">
+Person Load (0.010000)?[0m   ?[0;1mSELECT * FROM people WHERE (people.`id` = 1)
+CACHE (0.000000)?[0m   ?[0mSELECT * FROM people WHERE (people.`id` = 1)
+</code><br/><br/>
+So the second call is being pulled from the cache and takes 0.000000 seconds to retrieve
+
+By default this is available when running in a controller or .rhtml
+<p>If you want to see this work on the console you can use the cache method </p>
+<code class="prettyprint">
+Person.cache do
+&nbsp;&nbsp;p = Person.find 1
+&nbsp;&nbsp;p = Person.find 1
+end
+</code><br/><br/>
+
+This is by no means a replacement for memcache, but I like it because it increases performance without having to do any additional coding or configuration.
+Another thing to remember is that the cache only lasts as long as the request, so you don't need to worry about stale data or cache expiration.
+
+Now... Why would any programmer do a find for the same id multiple times in one request?
+You probably won't, but ActiveRecord will.
+If you have a highly denormalized database with many lookup tables, this can be a huge performance improvement.
+Let's say you have 5 stores, 200 products and 5 product_types
+<code class="prettyprint">
+<br /><br />s = Store.find 1, :include=&gt;:products
+s.products.each { |p| puts "#{p.name} is of type #{p.product_type.name}" }<br /><br /></code>
+Doing a <code class="prettyprint">puts</code> is obviously a contrived example, but I often traverse model relationships like this in my views.
+
+Before this feature, these two lines would have produced 201 database queries
+Now with Query Caching this will be between 2 and 6 queries.
+
+You might think that you could just add a <code class="prettyprint">:include =&gt; :product_type</code> in your product model.  This works while you're loading products, but not if you've already included products in store.  In other words, it appears that ActiveRecord can only do an <code class="prettyprint">:include</code> one level deep
+
+This is a great way to keep from having to roll your own solution or monkey patch ActiveRecord, I look forward to this feature moving from edge to production. 
+{% endraw %}

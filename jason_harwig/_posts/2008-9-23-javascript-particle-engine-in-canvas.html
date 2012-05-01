@@ -1,0 +1,34 @@
+--- 
+permalink: /blogs/jason_harwig/javascript_particle_engine_in_canvas.html
+layout: blogs
+title: JavaScript Particle Engine in Canvas
+date: 2008-09-23 19:24:23 -04:00
+tags: JavaScript
+---
+{% raw %}
+<p>The most popular entry I've written at Near Infinity has been the <a href="http://www.nearinfinity.com/blogs/page/jharwig?entry=javascript_particle_engine">JavaScript Particle Engine</a>.  It had limitations because I used transparent images and only made one color -- black. I recreated the fire demo for a talk -- Advanced Web Graphics with Canvas -- that I gave at the <a href="http://therichwebexperience.com/conference/speaker/jason_harwig.html">Rich Web Experience</a>. I'll post the slides, sample code, and some more demos in upcoming entries.</p>
+ 
+<p>
+The code only took an hour to port from images to canvas, and had a number of benefits:
+</p><ul>
+<li>Lots more particles can be drawn (20 before, 150 now)</li>
+<li>Multiple colors for more realistic modeling</li>
+</ul>
+
+<p>
+As with all these prototypes I don't spend time porting to IE, but it would work. It would be slower and vml doesn't draw radial gradients correctly so it wouldn't look as good.
+</p>
+
+<p><a href="http://www.nearinfinity.com/jason_harwig/assets/particle_canvas.js">Particle Source</a>
+
+<h3>demo</h3>
+
+<p><input id="particle_canvas_demo" style="position:relative; left:100px" options="{y_force:-1.9, max_particles: 150, respawn: 10, vel:[-2, 2], life:[0.02, .06]}" name="button" class="emitter" type="button" value="Start on Fire" />
+<br />
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.2/prototype.js"></script>
+<script type="text/javascript" src="/jason_harwig/assets/canvas.js"></script>
+<script type="text/javascript" src="/blogs/assets/particle_canvas.js"></script>
+<script type="text/javascript">
+new Emitter($('particle_canvas_demo'));
+</script></p>{% endraw %}

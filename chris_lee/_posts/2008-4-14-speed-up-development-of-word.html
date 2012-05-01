@@ -1,0 +1,102 @@
+--- 
+permalink: /blogs/chris_lee/speed_up_development_of_word.html
+layout: blogs
+title: Add a little Velocity to the speed of those Word exports
+date: 2008-04-14 18:30:48 -04:00
+tags: Java
+---
+{% raw %}
+<p>In a few of the corporate environments I've been privileged to be a developer within, I have been exposed to the ever popular requirement of the user needing a web application screen and export it to word. If you developed solutions to this problem, you know they aren't the hardest things to get working quickly, but they are one of the more tedious things to get working in the manner the user wants. From different fonts, to formats, to inner-tables to whatever else they want, those "power" Word users know what Word can do, and they expect it from their ever popular "developers".</p>
+
+<p>One of my most recent excursions into development of a Word exports had me using the iText libraries. iText libraries can be used in a few types of document rendering application situations. With respect to the most recent application, I was asked to provide both PDF and Word document exports.</p>
+
+<p>iText provides a couple different document writer classes for both PDF and Word  document creation, as well as a generic package for document creation. The export-type specific classes for each PDF and Word both provide different types of specific implementation options for each respective export type. For specific implementations, they are great options to go with.</p>
+
+<p>Unfortunately, if you have to create both PDF and Word document export options, leveraging each specific implementation class to get those features that each specific implementation offers results in largely the same amount of functionality, through different classes to get two exports (PDF and Word) that look the same.</p>
+
+<p>Now you may be thinking, why not just use the generic document builder offered from iText for each export? Well, you could do that, but you lose some implementation offerings for both PDF and Word if you go with the generic version. And in those cases where the PDF and Word exports are simple, this may be a viable option. But in my case, for reasons outside my control, the exports were complicated. And due to one specific thing the user wanted, inner tables, I didn't even have the option of using iText's RTF2Writer class because it doesn't even support inner tables.</p>
+
+<p>So looking down the barrel of two different implementations of exporting (PDF and Word) and a complicated Word document, I looked at something else: Velocity.</p>
+
+<p>Velocity is a template-ing engine. In short, you can give it a template (or document in my case), scattered with some Velocity Template Language (VTL), a context full of key/value pairs that will be put into the document via the VTL and voila, you have a document built of a template full of specific values based on whatever the user wanted.</p>
+
+<h3>But how does it work?</h3>
+
+<p>First off, you need a template engine. In our simple case, create a Word document and place the following text in it. But in the real world, this would be a complicated table, picture, and everything-else-Word-has-to-offer filled document that you don't want to build back from scratch in iText. </p>
+
+<pre class="prettyprint">Hello World, My name is ${firstName} and I work for ${company}.
+</pre>
+
+<p>Save the document as whatever named you'd like (i.e. simplecase) and save it as a Word XML document.</p>
+
+<p>Now that we have a template document</p>
+
+<p>Here is a snippet of code that shows the creation of a Velocity Processor (the engine), a context (what will be put into the template to create the document), and the processing of the template into a document.</p>
+
+<pre class="prettyprint">    
+    VelocityProcessor vcp = new VelocityProcessor();
+    VelocityContext vc = new VelocityContext();
+
+    vcp.setTemplateFile("simplecase.xml");
+     
+    vc.put("firstName", "Chris");
+    vc.put("company", "Near Infinity");
+
+    ByteArrayInputStream bias = (ByteArrayInputStream) vcp.mergeData(vc);
+</pre>
+
+<p>Let's take a look at the code and discuss, briefly, what it does.</p>
+
+<p>This block of code creates the Velocity processor and Velocity context. The processor will consume the template and the context, process the template, and output the processed document. The third line creates a Velocity context which will be used store key/value pairs of data. In the next snippet of code, you will see how this used.</p>
+ 
+<pre class="prettyprint">     VelocityProcessor vcp = new VelocityProcessor();
+     VelocityContext vc = new VelocityContext();
+</pre>
+
+<p>This block of code tells the processor (vcp) which template file to process via setTemplateFile(..). And the last two lines tell the context what to replace ${firstName} and ${company} with when processing the template file.</p>
+
+<pre class="prettyprint">     vcp.setTemplateFile("simplecase.xml");
+     
+     vc.put("firstName", "Chris");
+     vc.put("company", "Near Infinity");
+</pre>
+
+<p>This last block of code is the actual processing directive. Calling mergeData(..) on the processor, passing in the context to process with, sends the processor on its way to merging in the context to the template file. The output of this call is a byte array stream.</p>
+
+<pre class="prettyprint">     ByteArrayInputStream bias = (ByteArrayInputStream) vcp.mergeData(vc);
+</pre>
+
+<p> And that's it! Now we have created a byte array stream with the new document, processed with the context. Simply write this stream out to a file and open it with Word. You will see the contents of the document are:</p>
+
+<pre class="prettyprint">    Hello World, My name is Chris and I work for Near Infinity.
+</pre>
+
+<p> Now how did this benefit me in ways that iText could not? Well, in this example, even though it's pretty simple, I turned probably 10-15 lines of iText code into 6, adding in the file output code would bring it to a shade over 10. But more importantly, had this document been more complicated with tables, tables inside of tables, pictures, graphics, different fonts and the like, it could have been created inside of Word by one of your design department persons, and then given to you and retrofitted with VTL. Then, you would pass the context and template file to Velocity and voila, a Word export. And that's a lot simpler than coding <b>hundreds</b> of lines of iText code to create a document that, more likely not, will not be the same as the intended Word document.</p>
+
+<p>Using Velocity, even if you design the Word document yourself, moves a lot of heavy lifting off to Word, instead of writing the code in iText, which in the end can save lots of time. If you, like me, had to provide PDF <b>and</b> Word exports, this virtually eliminates half of the code by allowing you to leverage the PDF specific implementations of iText, and not rewrite the code into a RTF or generic implementation of iText as well. And, if you don't have to write PDF implementations, all the better!</p>
+
+<h3>But what's the catch?</h3>
+
+<p>Well, the catch is editing the document after you have gone back into the XML the first time, and coded in VTL. Unfortunately, Word will strip out the VTL from your template file if you were to open it in Word to try and edit it after the fact. This means if you want to edit the file after the you have gone back in and inserted VTL, you will have to following a process similar to this:</p>
+
+<ul>
+ <li>Make a backup of your template file (the file with VTL in it).</li>
+ <li>Open the template file in Word and make your desired changes.</li>
+ <li>Save the template file as a new (XML Word) file, or you could just save it back to the old file because you have a back-up.</li>
+</ul>
+
+<p>Now you have two choices. You can go back into the new file (via Word) and add the VTL back in, or you can go into the old file and retrofit back in the new changes to the Word document by working with the Word XML. When it comes to change the XML vs. adding back in the VTL, it's really going to be dependent on your situation. If you have so much VTL (loops, conditionals and variables) in your document, it may be worth it to work with the XML. If you have just variables (${}) to replace, then working inside of Word will be quicker and is obviously more desirable (especially after you see the Word XML). </p>
+
+<p>Working with the XML may seem like a pain. But I would argue that programatically changing iText when people want visual changes to a Word document is just as painful, and quite frankly more difficult seeing as it's more likely than not that when dealing with complicated Word documents, using iText will force your users to make concessions based on the limits of the iText API.</p>
+
+<p>Not to mention removing all that iText code from your code base is always an extra plus too!</p>
+
+<p>Here are a couple resources to check out in your exploration of Word and PDF exports:</p>
+
+<ul>
+<li><a href="http://velocity.apache.org/engine/devel/">Velocity Engine</a></li>
+<li><a href="http://www.lowagie.com/iText/">iText</a></li>
+</ul>
+
+Good Luck! 
+{% endraw %}
