@@ -29,7 +29,7 @@ The first attempt of solving this problem was to write a custom parser that did 
 
 <h4>Example code</h4>
 
-<pre class="prettyprint">
+{% highlight text %}
 public boolean isValidDate(String dateStr) {
 	switch(dateStr.length()) {
 		case 4:
@@ -53,7 +53,7 @@ public boolean isValidDate(String dateStr) {
 			return false;				
 	}		
 }
-</pre>
+{% endhighlight %}
 
 <h4>Outcome</h4>
 
@@ -67,7 +67,7 @@ After about 5 tries of getting the date validation correct, a new approach was t
 
 <h4>Example code</h4>
 
-<pre class="prettyprint">
+{% highlight text %}
 public boolean isValidDate(String dateStr, String...formats) {
 	for (String format : formats) {
 		try {
@@ -94,7 +94,7 @@ public boolean isValidDate(String dateStr, String...formats) {
 	
 	return false;
 }
-</pre>
+{% endhighlight %}
 
 <h4>Outcome</h4>
 
@@ -110,7 +110,7 @@ We then needed to find a way to further slim down our code.  A <a href="http://w
 
 <h4>Example Code</h4>
 
-<pre class="prettyprint">
+{% highlight text %}
 public boolean isValidDate(String dateStr, String...formats) {
 	for (String format : formats) {
 		SimpleDateFormat sdf = new SimpleDateFormat(format);
@@ -124,13 +124,13 @@ public boolean isValidDate(String dateStr, String...formats) {
 	}
 	return false;
 }
-</pre>
+{% endhighlight %}
 
 <h4>Outcome</h4>
 
 <p>This piece of code was a very simple, clean solution to the problem.  However, there was one issue that crept into this example.  If I made the call <tt>isValidDate("25BAD2007", "MM/dd/yyyy", "MM/yyyy", "yyyy", "ddMMMyyyy", "MMMyyyy")</tt> the return value would be true.  The reason for this is because even though the date had more than just a year, the 2007 part passed yyyy.  The only solution to this issue that I have been able to come up with is to add some logic outside of the <tt>isValidDate</tt> method that quickly determines the formats to pass in.  Though this seems like the parsing logic was just moved from inside the method to out, it is actually less logic in the long run.  Here is the example to call the <tt>isValidDate</tt> method:</p>
 
-<pre class="prettyprint">
+{% highlight text %}
 boolean validDate = false;
 if (dateStr.length() == 4) {
 	validDate = isValidDate(dateStr, "yyyy");
@@ -139,7 +139,7 @@ if (dateStr.length() == 4) {
 } else {
 	validDate = isValidDate(dateStr, "ddMMMyyyy", "MMMyyyy");
 }
-</pre>
+{% endhighlight %}
 
 <h3>Summary</h3>
 

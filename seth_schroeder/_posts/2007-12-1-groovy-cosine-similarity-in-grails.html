@@ -13,7 +13,7 @@ tags: Grails Groovy
 
 </p><p>The heart of the code. Please ignore the lack of error handling and optimization.
 
-</p><pre class="prettyprint">    static def similarity(l_seq, r_seq, degree=2) {
+</p>{% highlight text %}    static def similarity(l_seq, r_seq, degree=2) {
         def l_histo = countNgramFrequency(l_seq, degree)
         def r_histo = countNgramFrequency(r_seq, degree)
         
@@ -21,10 +21,10 @@ tags: Grails Groovy
             Math.sqrt(dotProduct(l_histo, l_histo) *
                       dotProduct(r_histo, r_histo))
     }
-</pre>
+{% endhighlight %}
 
 <p> This probably isn't ideal Groovy, but I sure appreciated the syntax improvements to arrays and maps.
-</p><pre class="prettyprint">    static def countNgramFrequency(sequence, degree) {
+</p>{% highlight text %}    static def countNgramFrequency(sequence, degree) {
         def histo = [:]
         def items = sequence.size()
 
@@ -35,30 +35,30 @@ tags: Grails Groovy
         }
         histo
     }
-</pre>
+{% endhighlight %}
 
 <p>Still nothing specific to strings here...
-</p><pre class="prettyprint">    static def dotProduct(l_histo, r_histo) {
+</p>{% highlight text %}    static def dotProduct(l_histo, r_histo) {
         def sum = 0
         l_histo.each { key, value ->
             sum = sum + l_histo[key] * r_histo.get(key, 0)
         }
         sum
     }
-</pre>
+{% endhighlight %}
 
 <p>Finally, here's something useful:
 
-</p><pre class="prettyprint">    static def stringSimilarity (l_str, r_str, degree=2) {
+</p>{% highlight text %}    static def stringSimilarity (l_str, r_str, degree=2) {
         similarity(l_str.toLowerCase().toCharArray(),
                    r_str.toLowerCase().toCharArray(),
                    degree)
     }
-</pre>
+{% endhighlight %}
 
 <p>... okay, how to apply this to grails? Just one more bit of code:
 
-</p><pre>    static def mostSimilar(pattern, candidates, threshold=0) {
+</p>{% highlight text %}    static def mostSimilar(pattern, candidates, threshold=0) {
         def topScore = 0
         def bestFit = null
 
@@ -75,7 +75,7 @@ tags: Grails Groovy
 
         bestFit
     }
-</pre>
+{% endhighlight %}
 
 <p>Drop this into GrailsScriptRunner.groovy and now this:
 </p><ul><li>grails create-domain-class</li></ul>
@@ -87,7 +87,7 @@ tags: Grails Groovy
 </li></ul>
 <p>To everyone who read this far, thank you :) And... one other observation. Strings are ordered sequences (of chars). What about file contents (lines) and directory contents (file names)?
 
-</p><pre class="prettyprint">    static def fileSimilarity (l_file, r_file, degree=3) {
+</p>{% highlight text %}    static def fileSimilarity (l_file, r_file, degree=3) {
         similarity(new File(l_file).readLines(),
                    new File(r_file).readLines(),
                    degree)
@@ -102,6 +102,6 @@ tags: Grails Groovy
 
         similarity(l_files, r_files, degree)
     }
-</pre>
+{% endhighlight %}
 <p><i>edit 2007-12-05 --  size() method works for arrays and lists; easier than length and size properties. Contribution much appreciated!
 </i></p><i><p>-- seth.schroeder _at_ nearinfinity.com</p></i> 

@@ -11,7 +11,7 @@ tags: Groovy Java
 
 <p>In order to put these pieces together, you need to do a bit of configuration. In the articles I used Spring 2.5.x which was <i>current at the time in early 2009</i>. The configuration looked like this:</p>
 
-<pre class="prettyprint">
+{% highlight text %}
 &lt;bean id="dataSource"
   class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
     &lt;!-- set data source props, e.g. driverClassName, url, username, password... --&gt;
@@ -26,11 +26,11 @@ tags: Groovy Java
   script-source="database:com/nearinfinity/demo/DemoGroovyPdfGenerator.groovy"&gt;
     &lt;lang:property name="companyName" value="Database Groovy Bookstore"/&gt;
 &lt;/lang:groovy&gt;
-</pre>
+{% endhighlight %}
 
 <p>In Spring 2.5.x this works because the <code>&lt;lang:groovy&gt;</code> tag looks for a Spring bean with id "scriptFactoryPostProcessor" and if one exists it uses it, if not it creates it. In the above configuration we created our own "scriptFactoryPostProcessor" bean for <code>&lt;lang:groovy&gt;</code> tags to utilize. So all's well...until you move to Spring 3.x at which point the above configuration no longer works. This was pointed out to me by João from Brazil who tried the sample code in the articles with Spring 3.x, and it did not work. After trying a bunch of things, we eventually determined that in Spring 3.x the <code>&lt;lang:groovy&gt;</code> tag looks for a <code>ScriptFactoryPostProcessor</code> bean whose id is "org.springframework.scripting.config.scriptFactoryPostProcessor" not just "scriptFactoryPostProcessor." So once you figure this out, it is easy to change the above configuration to:</p>
 
-<pre class="prettyprint">
+{% highlight text %}
 &lt;bean id="org.springframework.scripting.config.scriptFactoryPostProcessor"
   class="com.nearinfinity.spring.scripting.support.CustomScriptFactoryPostProcessor"&gt;
     &lt;property name="dataSource" ref="dataSource"/&gt;
@@ -40,6 +40,6 @@ tags: Groovy Java
   script-source="database:com/nearinfinity/demo/DemoGroovyPdfGenerator.groovy"&gt;
     &lt;lang:property name="companyName" value="Database Groovy Bookstore"/&gt;
 &lt;/lang:groovy&gt;
-</pre>
+{% endhighlight %}
 
 <p>Then, everything works as expected and the Groovy scripts can reside in your database and be automatically reloaded when you change them. So if you download the article sample code as-is, it will work since the bundled Spring version is 2.5.4, but if you update to Spring 3.x then you'll need to modify the configuration in applicationContext.xml for example #7 (EX #7) as shown above to change the "scriptFactoryPostProcessor" bean to be "org.springframework.scripting.config.scriptFactoryPostProcessor." Note there is a scheduled JIRA issue <a href="https://jira.springframework.org/browse/SPR-5106">SPR-5106</a> that will make the <code>ScriptFactoryPostProcessor</code> mechanism pluggable, so that you won't need to extend the default <code>ScriptFactoryPostProcessor</code> and replace the default bean, etc. But until then, this hack continues to work pretty well.</p> 

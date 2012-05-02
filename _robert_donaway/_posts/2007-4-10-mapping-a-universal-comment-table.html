@@ -9,7 +9,7 @@ tags: Java
 
 <p>Here is the (Oracle) DDL for a situation like this, where two domain objects, <code>Person</code> and <code>Vehicle</code>, stored in the <code>PERSON</code> and <code>VEHICLE</code> tables, store their comments in the <code>COMMENTS</code> table:</p>
 
-<pre class="prettyprint">CREATE TABLE COMMENTS
+{% highlight text %}CREATE TABLE COMMENTS
 ( COMMENT_ID   NUMERIC(12) NOT NULL
 , CREATED_ON   DATE        NOT NULL
 , CREATED_BY   VARCHAR(50) NOT NULL
@@ -23,7 +23,7 @@ tags: Java
 , CHECK (COMMENT TYPE IN ('P', 'V'))
 , CHECK ((PERSON_ID IS NULL AND VEHICLE_ID IS NOT NULL) OR (PERSON_ID IS NOT NULL AND VEHICLE_ID IS NULL))
 );
-</pre>
+{% endhighlight %}
 
 <p>Note that this table has a single synthetic primary key, which is generated sequentially as records are inserted.  Also, I chose to have separate columns for the <code>PERSON</code> and <code>VEHICLE</code> keys so that I can enforce integrity with a foreign key constraint.  The check constraint ensures that exactly one of these is not null.  The <code>COMMENT_TYPE</code> column will be 'P' if the comment is about a <code>Person</code> and 'V' if the comment is about a <code>Vehicle</code>.  Of course, the <code>COMMENT_TYPE</code> can be inferred from the data in the <code>PERSON_ID</code>
 and <code>VEHICLE_ID</code> columns, but it will come in handy, as we will see later. </p>
@@ -32,7 +32,7 @@ and <code>VEHICLE_ID</code> columns, but it will come in handy, as we will see l
 However, a <code>Comment</code> object should also have a reference back to its domain object, so that we can navigate to it easily.  
 One way to model this type of relationship is to create specific <code>PersonComment</code> and <code>VehicleComment</code> classes, which extend the generic <code>Comment</code> class.  Here is some sample code, leaving out the accessor methods and other details:</p>
 
-<pre class="prettyprint">public class Person {
+{% highlight text %}public class Person {
     private Long personId;
     ...
     private Set&lt;PersonComment&gt; comments;
@@ -63,14 +63,14 @@ public class VehicleComment extends Comment {
     private Vehicle vehicle;
     ...
 }
-</pre>
+{% endhighlight %}
 
 <p>So how do we map these classes using Hibernate?  Since all instances of a <code>Comment</code> will be stored in the <code>COMMENTS</code> table,
 we use the "Table per class hierarchy" mapping strategy.  The <code>COMMENT_TYPE</code> column will be the discriminator that tells
 Hibernate what concrete type to construct when querying for <code>Comment</code> objects.  Here is the main part of the mapping file, Comment.hbm.xml, 
 that maps the <code>PersonComment</code> and <code>VehicleComment</code> classes to the <code>COMMENTS</code> table:</p>
 
-<pre class="prettyprint">&lt;hibernate-mapping&gt;
+{% highlight text %}&lt;hibernate-mapping&gt;
 &lt;class name="Comment" table="COMMENTS"&gt;
     &lt;id name="commentId" column="COMMENT_ID"&gt; ... &lt;/id&gt;
     &lt;discriminator column="COMMENT_TYPE"/&gt;
@@ -91,17 +91,17 @@ that maps the <code>PersonComment</code> and <code>VehicleComment</code> classes
     &lt;/subclass&gt;
 &lt;/class&gt;
 &lt;/hibernate-mapping&gt;
-</pre>
+{% endhighlight %}
 
 <p>Notice that there is no Java property that maps to the discriminator column.  Once we specify it in the <code>subclass</code> tag, we can forget 
 about it since Hibernate takes care of populating it in the database.  The collection mappings for the <code>Person</code> and <code>Vehicle</code> 
 classes are straightforward.  Here is the one for <code>Person</code>:</p>
 
-<pre class="code">    &lt;set name="comments" inverse="true"&gt;
+{% highlight text %}    &lt;set name="comments" inverse="true"&gt;
         &lt;key&gt;&lt;column="PERSON_ID"/&gt;&lt;/key&gt;
         &lt;one-to-many class="PersonComment"/&gt;
     &lt;/set&gt;
-</pre>
+{% endhighlight %}
 
 <p>One very nice feature of this mapping strategy is the way queries work.  If you are using HQL, the query "from Comment where ..." will 
 return a list of <code>Comment</code> objects of varying concrete types, either <code>PersonComment</code> or <code>VehicleComment</code> depending 

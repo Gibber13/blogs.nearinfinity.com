@@ -27,7 +27,7 @@ tags: Groovy Java
 </p><hr>
 <a name="Code"> </a>
 <h3>Grouping rss items by keyword</h3>
-<pre class="prettyprint"><a name="line_1"> 1:</a>  def groupByKeyword(groups) {
+{% highlight text %}<a name="line_1"> 1:</a>  def groupByKeyword(groups) {
 <a name="line_2"> 2:</a>      def stream;
 <a name="line_3"> 3:</a>      def map = [:]
 <a name="line_4"> 4:</a>
@@ -55,10 +55,10 @@ tags: Groovy Java
 <a name="line_26">26:</a>
 <a name="line_27">27:</a>      return map;
 <a name="line_28">28:</a>  }
-</pre>
+{% endhighlight %}
 <hr>
 <h3>collecting parameters and printing the results</h3>
-<pre class="prettyprint"><a name="line_29">29:</a>    static void main(args) {
+{% highlight text %}<a name="line_29">29:</a>    static void main(args) {
 <a name="line_30">30:</a>
 <a name="line_31">31:</a>        def url = args[0];
 <a name="line_32">32:</a>
@@ -76,13 +76,13 @@ tags: Groovy Java
 <a name="line_44">44:</a>            }
 <a name="line_45">45:</a>        }
 <a name="line_46">46:</a>    }
-</pre>
+{% endhighlight %}
 <hr>
 <a name="Results"> </a>
 <h3>Results</h3>
 <h4>Input:</h4><code>    http://digg.com/rss/indexprogramming.xml java[s] java[^s] groovy haskell erlang microsoft emacs lisp</code>
 <h4>Output:</h4>
-<pre>GROOVY
+{% highlight text %}GROOVY
 ERLANG
 JAVA[^S]
 EMACS
@@ -92,10 +92,10 @@ JAVA[S]
     * The Javascript Programming Language
 HASKELL
 MICROSOFT
-</pre>
+{% endhighlight %}
 <h4>Input:</h4><code>http://digg.com/rss/indexprogramming.xml java[s] java[^s] groovy haskell erlang microsoft emacs lisp</code>
 <h4>Output:</h4>
-<pre>GROOVY
+{% highlight text %}GROOVY
 ERLANG
 JAVA[^S]
 EMACS
@@ -107,7 +107,7 @@ HASKELL
     *  Haskell's HTTP library: how it sucks, how to fix it
 MICROSOFT
     *  Microsoft funds questionable study attacking GPL 3 draft process
-</pre>
+{% endhighlight %}
 <hr>
 <a name="Review"> </a>
 <h3>A mini code review</h3>
@@ -142,7 +142,7 @@ MICROSOFT
 <ul>
 <li> Wow, that's a lot of .class files per lines of Groovy:
 
-<pre class="prettyprint">$ wc -l *.groovy
+{% highlight text %}$ wc -l *.groovy
       24 Hola.groovy
       90 RssReader.groovy
      114 total
@@ -151,7 +151,7 @@ $ echo .groovy &amp;&amp; ls *.groovy | wc -l; echo .class &amp;&amp; ls *.class
        2
 .class
       14
-</pre>
+{% endhighlight %}
 </li><li>Google Trends comparison of <a href="http://www.google.com/trends?q=groovy+java%2C+jruby&amp;ctab=0&amp;geo=all&amp;date=all&amp;sort=0">Groovy and JRuby</a>
 </li><li><a href="http://jcp.org/en/jsr/detail?id=241">Groovy</a> was started in early 2004! Version 1.0 was <a href="http://docs.codehaus.org/display/GROOVY/2007/01/02/Groovy+1.0+is+there">released</a> almost three years later. This <a href="http://www.sdtimes.com/article/story-20070115-04.html">article</a> describes the waning and waxing of progress implementing the language. 
 </li></ul> 

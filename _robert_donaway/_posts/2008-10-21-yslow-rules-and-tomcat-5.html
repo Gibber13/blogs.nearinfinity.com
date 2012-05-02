@@ -9,14 +9,14 @@ tags: Java
 
 <p>Adding a far-future expires header to static content (rule 3) should have been no problem. I started out creating a simple filter that I applied to CSS, JavaScript and image files. Here's the crux of the code.</p>
 
-<pre class="prettyprint">response.setHeader("Expires", "Wed, 21 Oct 2009 11:49:28 GMT");
+{% highlight text %}response.setHeader("Expires", "Wed, 21 Oct 2009 11:49:28 GMT");
 response.setHeader("Cache-Control", "public");
-</pre>
+{% endhighlight %}
 
 <p>To be safe, I actually set the expires header to be one day after the current time because I read that if you set it too far in the future some browsers may reject it.  Well, the filter <em>did</em> change the expires header but according to <a href="http://getfirebug.com/">Firebug</a>, Tomcat kept going back to the server to download the files anyway. The problem was a pragma no-cache header put in by Tomcat for some reason.  This appears to trump the expires header. After some failed attempts to get rid of that pesky header I found <a href="http://www.symphonious.net/2007/06/19/caching-in-tomcat/">this article</a> which prompted me to add the following to my context.XML file.</p>
  
-<pre class="prettyprint">&lt;Valve className="org.apache.catalina.authenticator.SSLAuthenticator" disableProxyCaching="false" /&gt;
-</pre>
+{% highlight text %}&lt;Valve className="org.apache.catalina.authenticator.SSLAuthenticator" disableProxyCaching="false" /&gt;
+{% endhighlight %}
 
 <p>This solved my caching problem.</p>
 
@@ -24,12 +24,12 @@ response.setHeader("Cache-Control", "public");
 
 <p>The next task was to make sure the CSS comes at the top of our pages and the JavaScript at the bottom (rules 5 and 6). We use <a href="http://www.opensymphony.com/sitemesh/">SiteMesh</a> so putting our single CSS file in the head was no problem. It just goes in the master decorator page. So far we have been able to avoid page-specific CSS so we need just the one link tag on every page. Putting the JavaScript right before the end of the body tag was a little trickier. Almost all of our pages have page-specific JS code that uses functions and variables from the different libraries that have been rolled into the single JS file. So the link to this script must appear before the page-specific script. I achieved this by setting a request attribute called pagejs in pages that need specific script.  Then this text gets rendered after the script link but before the end body tag in the master decorator page, like so.</p>
 
-<pre class="prettyprint">...
+{% highlight text %}...
 &lt;/div&gt;
 &lt;script type="text/javascript" src="&lt;c:url value="/scripts/script.js" /&gt;"&gt;
 ${pagejs}
 &lt;/body&gt;
-</pre>
+{% endhighlight %}
 
 <p>I played around with externalizing the page-specific JS but much of it is generated dynamically. Even when it was completely static there wasn't much of a performance boost by extracting it so we keep it inline. (I think this is because the JavaScript gets loaded serially.) One thing I like about this approach is that I can still put the JavaScript at the top of my JSP's where I'm used to seeing it and let the decorator take care of rendering it at the bottom.</p>
 

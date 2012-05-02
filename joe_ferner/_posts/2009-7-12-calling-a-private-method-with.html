@@ -6,16 +6,16 @@ date: 2009-07-12 16:38:30 -04:00
 tags: .NET
 ---
 <p>I needed this yesterday and was amazed at how many forums and blogs I needed to visit before I found the answer. So I decided to blog about it myself so that I wouldn't forget about where to find the answer again.</p>
-<p>If you have a class like this and need to call "PrivateMethod" <pre class="prettyprint">public class PrivateMethodClass {
+<p>If you have a class like this and need to call "PrivateMethod" {% highlight text %}public class PrivateMethodClass {
   private int PrivateMethod(int arg1, ref int arg2, out int arg3) {
     arg2 = arg2 + 10;
     arg3 = 999;
     return arg1;
   }
 }
-</pre>
+{% endhighlight %}
 <p></p>
-<p>This is the code you need to call it <pre class="prettyprint">PrivateMethodClass target = new PrivateMethodClass();
+<p>This is the code you need to call it {% highlight text %}PrivateMethodClass target = new PrivateMethodClass();
 MethodInfo methodInfo = typeof(PrivateMethodClass).GetMethod(
   "PrivateMethod",
   BindingFlags.NonPublic | BindingFlags.Instance,
@@ -35,6 +35,6 @@ Console.WriteLine("parameter[0]: " + parameters[0]);
 Console.WriteLine("parameter[1]: " + parameters[1]);
 Console.WriteLine("parameter[2]: " + parameters[2]);
 Console.WriteLine("result: " + result);
-</pre>
+{% endhighlight %}
 <p></p>
 <p>There are two things that are different from a typical reflection call. The first is the call to "MakeByRefType" which as the name suggests makes a reference type from a type. This is required for a "ref" or a "out" parameter. The second is the creation of the parameters array before invoking the method. </p> 

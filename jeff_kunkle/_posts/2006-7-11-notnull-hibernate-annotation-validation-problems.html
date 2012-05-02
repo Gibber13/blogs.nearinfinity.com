@@ -18,7 +18,7 @@ In order for the annotation-based validation framework to execute, Hibernate Ann
 Luckily, there is a workaround, although it feels like a bit of a hack. As I mentioned previously, the <code>DefaultSaveOrUpdateEventListener</code> gets a chance to run before any "pre-insert" or "pre-update" events so we can use that to our advantage. The following <code>SaveOrUpdateEventListener</code> simply extends the Hibernate Annotations-provided <code>ValidateEventListener</code> and calls the validation method on "save-update" events rather than "pre-insert" and "pre-update" events.
 </p>
 
-<pre class="prettyprint lang-java">
+{% highlight text %}
 public class ValidationEventListener 
     extends ValidateEventListener 
     implements SaveOrUpdateEventListener {
@@ -35,7 +35,7 @@ public class ValidationEventListener
   }
 
 }
-</pre>
+{% endhighlight %}
 
 <p>
 One extemely important thing to remember when using this workaround is that you must configure the <code>DefaultSaveOrUpdateEventListener</code> as the second "save-update" listener (following the <code>ValidationEventListener</code>) or your objects will never be persisted.

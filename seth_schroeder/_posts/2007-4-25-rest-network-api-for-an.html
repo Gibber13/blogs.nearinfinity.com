@@ -17,64 +17,64 @@ tags: General
   <td bgcolor="#D3EDFF">Create a sheet</td>
 
   <td bgcolor="#FFE8D3">
-<pre>POST /fauxcel/finances HTTP/1.1
+{% highlight text %}POST /fauxcel/finances HTTP/1.1
 Host: 192.168.113.115:8080
-</pre>
+{% endhighlight %}
 </td>
   <td bgcolor="#F5FFD3">
-    <pre>HTTP/1.1 200 OK
+    {% highlight text %}HTTP/1.1 200 OK
 Server: Apache-Coyote/1.1
 Content-Length: 0
 Date: Wed, 25 Apr 2007 19:26:39 GMT
-    </pre>
+    {% endhighlight %}
   </td>
 </tr>
 <tr>
   <td bgcolor="#D3EDFF">Populate a cell</td>
 
   <td bgcolor="#FFE8D3">
-<pre>POST /fauxcel/finances/A/1 HTTP/1.1
+{% highlight text %}POST /fauxcel/finances/A/1 HTTP/1.1
 Host: 192.168.113.115:8080
 Content-Type: text/text;charset=utf-8
 Content-Length: 34
 
 {"value":"123.45", "type":"value"}
-</pre>
+{% endhighlight %}
 </td>
   <td bgcolor="#F5FFD3">
-<pre>HTTP/1.1 200 OK
+{% highlight text %}HTTP/1.1 200 OK
 Server: Apache-Coyote/1.1
 Content-Length: 0
 Date: Wed, 25 Apr 2007 19:36:37 GMT
-</pre>
+{% endhighlight %}
   </td>
 </tr>
 <tr>
   <td bgcolor="#D3EDFF">Insert a column</td>
 
   <td bgcolor="#FFE8D3">
-<pre>POST /fauxcel/finances/A HTTP/1.1
+{% highlight text %}POST /fauxcel/finances/A HTTP/1.1
 Host: 192.186.113.115:8080
-</pre>
+{% endhighlight %}
 </td>
   <td bgcolor="#F5FFD3">
-<pre>HTTP/1.1 200 OK
+{% highlight text %}HTTP/1.1 200 OK
 Server: Apache-Coyote/1.1
 Content-Length: 0
 Date: Wed, 25 Apr 2007 19:36:37 GMT
-</pre>
+{% endhighlight %}
   </td>
 </tr>
 <tr>
   <td bgcolor="#D3EDFF">Read a column</td>
 
   <td bgcolor="#FFE8D3">
-<pre>GET /fauxcel/finances/B HTTP/1.1
+{% highlight text %}GET /fauxcel/finances/B HTTP/1.1
 Host: 192.168.113.115:8080
-</pre>
+{% endhighlight %}
 </td>
   <td bgcolor="#F5FFD3">
-<pre>HTTP/1.1 200 OK
+{% highlight text %}HTTP/1.1 200 OK
 Server: Apache-Coyote/1.1
 Transfer-Encoding: chunked
 Date: Wed, 25 Apr 2007 19:39:38 GMT
@@ -82,23 +82,23 @@ Date: Wed, 25 Apr 2007 19:39:38 GMT
 53
 {"name":"finances","cells":[{"col":"B","row":"1","type":"value","value":"123.45"}]}
 0
-</pre>
+{% endhighlight %}
   </td>
 </tr>
 <tr>
   <td bgcolor="#D3EDFF">Delete a row</td>
 
   <td bgcolor="#FFE8D3">
-<pre><pre>DELETE /fauxcel/finances/1 HTTP/1.1
+{% highlight text %}{% highlight text %}DELETE /fauxcel/finances/1 HTTP/1.1
 Host: 192.168.113.115:8080
-</pre>
-</pre></td>
+{% endhighlight %}
+{% endhighlight %}</td>
   <td bgcolor="#F5FFD3">
-<pre>HTTP/1.1 200 OK
+{% highlight text %}HTTP/1.1 200 OK
 Server: Apache-Coyote/1.1
 Content-Length: 0
 Date: Wed, 25 Apr 2007 19:41:26 GMT
-</pre>
+{% endhighlight %}
   </td>
 </tr>
 </tbody></table>

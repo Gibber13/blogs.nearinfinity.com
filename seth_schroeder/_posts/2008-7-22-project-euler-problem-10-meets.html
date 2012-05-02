@@ -9,7 +9,7 @@ tags: Ruby
 
 </p><p>This process is to make a list of numbers from 2 through some limit. Start with the lowest number in the list, and remove all multiples from the list. Next time through, pick the next smallest number that hasn't been crossed off yet and eliminate its multiples. Stop when your current number meets the square root of the limit. After that, the remaining numbers are prime:</p>
 
-<pre class="prettyprint">def eratosthenes_sieve(ceiling)
+{% highlight text %}def eratosthenes_sieve(ceiling)
   vals = (0..ceiling).to_a
   vals[0..1] = [nil, nil]
 
@@ -23,17 +23,17 @@ tags: Ruby
   
   vals
 end
-</pre>
+{% endhighlight %}
 
 <p>A big hash like this is useful for O(1) checking for prime/not prime, but the solution requires the sum of the primes:
 
-</p><pre class="prettyprint">def primes_through(ceiling)
+</p>{% highlight text %}def primes_through(ceiling)
   eratosthenes_sieve(ceiling).compact
 end
 
 sum = 0
 primes_through(ARGV[0].to_i).each { |val| sum = sum + val }
 puts sum
-</pre>
+{% endhighlight %}
 
 <p>I'm sure there's a more Ruby-esque way to write that. I wanted to use Python for xrange goodness, but I'm still not at peace with its quirks. Groovy would have been nice, but the free editor support is still quite young. Ruby fit right in the gap.</p> 

@@ -6,7 +6,7 @@ date: 2008-01-24 13:18:07 -05:00
 tags: Java
 ---
 OK, this isn't a lot of code, but seriously, it took two days to write. The documentation on how to do an XSL style XInclude in Java is pretty much non existent. I've added a maven plugin that wraps this to our maven plugins project as well to replace Ant targets that use &lt;xcluder&gt; tags. 
-<pre>
+{% highlight text %}
 
 public class XIncluder implements EntityResolver
 {
@@ -58,4 +58,4 @@ public class XIncluder implements EntityResolver
     }
 	
 }
-</pre>
+{% endhighlight %}

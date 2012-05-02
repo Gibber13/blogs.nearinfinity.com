@@ -11,11 +11,11 @@ tags: Java
 <a href="http://processing.org/">Processing</a> is a basically a proprietary Java-like language compiled into Java bytecode and used for generating dynamic and interactive data visualizations. Though still in its infancy, it seems to be a very nice intuitive way to build visualizations of data into an application.  The download for Processing contains the compiler, library and an editor.  The file format for Processing files is .pde.  Inside of these files you can treat the language just like a scripting language.  For instance:
 </p>
 
-<pre class="prettyprint">size(400,400);
+{% highlight text %}size(400,400);
 background(192, 64, 0);
 stroke(255);
 line(150, 25, 270, 350);
-<br /></pre>
+<br />{% endhighlight %}
 
 <p>
 This block of code is from the book <a href="http://www.oreilly.com/catalog/9780596514556/toc.html">"Visualizing Data"</a> by Ben Fry and will just set the window size, set the background color, set the line color and draw a line. The output will look like:
@@ -25,7 +25,7 @@ This block of code is from the book <a href="http://www.oreilly.com/catalog/9780
 There are 2 methods that processing will look for to do initial setup and then the refreshing of the canvas.  Adding those methods and adding some mouse interaction we get the following code:
 </p>
 
-<pre class="prettyprint">void setup() {
+{% highlight text %}void setup() {
    size(400, 400);
    stroke(255);
    background(192, 64, 0);
@@ -33,7 +33,7 @@ There are 2 methods that processing will look for to do initial setup and then t
 void draw() {
    line(150, 25, mouseX, mouseY);
 }
-</pre>
+{% endhighlight %}
 
 The output from this block of code will look like:<br /><br />
 <img src="http://www.nearinfinity.com/chris_rohr/assets/processingImg2.png" title="Image 2" alt=" " /><br /><br />
@@ -45,7 +45,7 @@ There are a lot more convenient functions and properties available when using th
 Processing so nicely comes with a jar <tt>core.jar</tt>.  This jar then can be added to a project in the editor of your choosing.  Once you are in Java world there are couple of things that need to change with your Processing code.  Mainly you have to now adhere to Java programming rules.  Our code from above in the Java world would look like the following: 
 </p>
 
-<pre class="prettyprint">import processing.core.PApplet;<br /><br />
+{% highlight text %}import processing.core.PApplet;<br /><br />
 public class BlogExample extends PApplet {
     public void setup() {
         size(400, 400);
@@ -56,10 +56,10 @@ public class BlogExample extends PApplet {
         line(150, 25, mouseX, mouseY);
     }
 }
-</pre>
+{% endhighlight %}
 
 As you can see, the code becomes a little lengthier.  We need to add all of the modifiers on and the class definition and all of that, but we are at least in the IDE of our choice now and can just run this file and get the same output as the Processing editor.  Now lets say we we want to add boxes to our output.  We can add a class called Box to the project (Processing editor supports multiple classes as well).  The code for the Box class would be: 
-<pre class="prettyprint">public class Box {
+{% highlight text %}public class Box {
     private String title;
     private String boxText;
     private int width;
@@ -103,10 +103,10 @@ As you can see, the code becomes a little lengthier.  We need to add all of the 
         this.textColor = textColor;
     }
 }
-</pre>
+{% endhighlight %}
 
 Then we add some code to our main class to use the Box.
-<pre class="prettyprint">public class BlogExample extends PApplet {
+{% highlight text %}public class BlogExample extends PApplet {
     public void setup() {
         size(400, 400);
         stroke(255);
@@ -145,7 +145,7 @@ Then we add some code to our main class to use the Box.
         return boxes;
     }</box></box></box></strong>
 }
-</pre>
+{% endhighlight %}
 
 Now you can see we have added a lot of code to do some simple processing of boxes.  This isn't very script-like anymore.  I was thinking of how to get this code base a little smaller.  I then thought of what would happen if I added Groovy to it.<br /><br />
 
@@ -155,7 +155,7 @@ Now you can see we have added a lot of code to do some simple processing of boxe
 After adding the groovy jar, I could change my .java files to .groovy files and start shrinking the code base.  Here is what the above code became:
 </p>
 
-<pre class="prettyprint">class BlogExample extends PApplet {
+{% highlight text %}class BlogExample extends PApplet {
     void setup() {
         size(400, 400)
         stroke(255)
@@ -191,7 +191,7 @@ class Box {
     String textColor;
 }
 </box>
-</pre>
+{% endhighlight %}
 
 <p>
 Making the code a little Groovier has reduced the amount of lines that I need to write to get my visualization up and running.  So now I've got the simpler syntax of a scripting language and all the power of my IDE and all of my Java libraries.  I know that this example is very primitive and you don't necessarily get as much bang for your buck on something this small, however, as this application grows into something bigger the gains will become more apparent.</p> 

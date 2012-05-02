@@ -92,7 +92,7 @@ The idea here is to create a div element with a set size that has a nested div w
 Let's examine the nessessary CSS classes first:
 </p>
 
-<pre class='prettyprint'>
+{% highlight text %}
 
   .croppenscaler {
     display: inline-block;
@@ -104,7 +104,7 @@ Let's examine the nessessary CSS classes first:
     border: none;
   }
 
-</pre>
+{% endhighlight %}
 
 <p>
   The important attributes to note above are the use of overflow on the main croppenscaler, this ensures that the top frame has the intended size. The nested image is positioned relatively. All of the other CSS attributes are written in the style attribute because they have to be calculated when the frame is built.
@@ -116,7 +116,7 @@ Let's examine the nessessary CSS classes first:
   The javascript below uses the Prototype framework, but it could just as easily use JQuery or raw javascript to accomplish the same thing.
 </p>
 
-<pre class='prettyprint'>
+{% highlight text %}
 
 var imageData = {
   kittah: {  width:900, top:-175, left:-165, url: '/blogs/assets/jcato/images/Kittah.jpg' },
@@ -159,7 +159,7 @@ Croppenscaler.prototype = {
   },
 };
 
-</pre>
+{% endhighlight %}
 
 <p>
 The class has two functions. The constructor takes a hash of options for the resulting frame; the image key and the height and width of the frame. In this version the constructor references an imageData hash to get the details about the image to display, but they could be passed into the function as well. The important thing is that the constructor has access to the height and width of the frame, as well as the default width of the image and the top and left attributes that define where the upper left corner of the image should be when it's displayed at its default width.
@@ -173,7 +173,7 @@ The buildFrame() function takes the calculated sizes and uses them to construct 
 Then to use the class, create a new Croppenscaler with a hash that at least includes the image key, and an optional height and width, call the buildFrame() function and insert the resulting element onto the page.
 </p>
 
-<pre class='prettyprint'>
+{% highlight text %}
 var loadImages = function() {
   $('cats').insert(new Croppenscaler({image:'kittah'}).buildFrame());
   $('cats').insert(new Croppenscaler({image:'kittah',height:300}).buildFrame());
@@ -181,7 +181,7 @@ var loadImages = function() {
   $('cats').insert(new Croppenscaler({image:'kittah',width:200,height:300}).buildFrame());
   $('cats').insert(new Croppenscaler({image:'kittah',width:100,height:150}).buildFrame());
 }
-</pre>
+{% endhighlight %}
 
 <p>
 The above code will then produce the clowder of cats below.

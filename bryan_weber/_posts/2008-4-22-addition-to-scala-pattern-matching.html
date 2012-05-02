@@ -41,7 +41,7 @@ If the data type of the thing being matched cannot be applied to any case in the
 <p>
 What if the match was passed a string with a user/developer friendly error message?  It <b>might</b> look something like this:
 
-</p><pre class="prettyprint">  val user = "harry"
+</p>{% highlight text %}  val user = "harry"
   user match "Unable to match the name against the list of Weasley boys" {
     case "fred" =&gt;
       println("this would not be good")
@@ -52,7 +52,7 @@ What if the match was passed a string with a user/developer friendly error messa
     case "percy" =&gt;
       println("still not good")
   }
-</pre>
+{% endhighlight %}
 
 So instead of seeing:<br />
 
@@ -68,7 +68,7 @@ Caused by: scala.MatchError: Unable to match the name against the list of Weasle
 <br />
 Hmmm... it seems that we are still missing the value that wasn't matched, so what about a Function?<br />
 
-<pre class="prettyprint">  val user = "harry"
+{% highlight text %}  val user = "harry"
   user match (n) =&gt; "Unable to match the name " + n + " against the list of Weasley boys" {
     case "fred" =&gt;
       println("this would not be good")
@@ -79,7 +79,7 @@ Hmmm... it seems that we are still missing the value that wasn't matched, so wha
     case "percy" =&gt;
       println("still not good")
   }
-</pre>
+{% endhighlight %}
 
 <br />
 Or the ultimate version:<br />

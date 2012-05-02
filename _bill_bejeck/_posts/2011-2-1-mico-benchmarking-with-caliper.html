@@ -8,7 +8,7 @@ tags: General Java
  From time to time I think all developers have done some form of benchmarking.  I recently discovered <a href="http://code.google.com/p/caliper/" target="new">Caliper</a> which is according to the site -  "Caliper is Google's open-source framework for writing, running and viewing the results of Java Microbenchmarks".  I am aware that micro-benchmarking can be misleading depending on who is writing the tests, but sometimes they are very helpful in getting a feel for how your code is running.
 <h3>Background</h3>
 Micro benchmarks are dead simple to do.  Get the current time in milliseconds, execute your code, then get the time in milliseconds again and subtract the difference.  So why use a tool like Caliper?  To me Caliper is great because it has a very familiar JUnit type of structure and feel to it. Instead of trying to describe what Caliper does, it's probably easiest to look at a simple example I put together.  I decided to benchmark implementations of Heap Sort,Merge Sort,Quick Sort and the sort method of the java.lang.Arrays class.  Not a terribly original idea I admit, but it was quick to do and it makes the point. <b>NOTE: Package statement and imports left out intentionally for brevity</b>
-<pre class="prettyprint">
+{% highlight text %}
 public class SortingBenchmarks extends SimpleBenchmark {
 	
 	private static final int SIZE = 100000;
@@ -48,7 +48,7 @@ public class SortingBenchmarks extends SimpleBenchmark {
 		}
 	}
 }
-</pre>
+{% endhighlight %}
 <h3>Getting Started</h3>
 Here are the basic steps to writing benchmarks in Caliper:
 <ol>
@@ -70,7 +70,7 @@ To actually run your benchmarks there is a bash script included in the project t
 <li>I created a driver class that simply executes the main method of the com.google.caliper.Runner class.  I pass in the name of my benchmark class by setting up a run configuration in Eclipse for my driver class</li>
 </ol>
 Here is the code for my driver class:
-<pre class="prettyprint">
+{% highlight text %}
 package bbejeck.caliper;
 
 public class CaliperRunner {
@@ -80,10 +80,10 @@ public class CaliperRunner {
     }
 
 }
-</pre>
+{% endhighlight %}
 After running the driver this is the output received in the Eclipse console screen:
 <br/>
-<pre style="font-size:medium">
+{% highlight text %}
 0% Scenario{vm=java, trial=0, benchmark=HeapSort} 10889428.57 ns; ?=69810.62 ns @ 3 trials
 25% Scenario{vm=java, trial=0, benchmark=MergeSort} 9066618.18 ns; ?=44341.70 ns @ 3 trials
 50% Scenario{vm=java, trial=0, benchmark=QuickSort} 3312312.93 ns; ?=21028.91 ns @ 3 trials
@@ -97,6 +97,6 @@ ArraysSort  3.10 =
 
 vm: java
 trial:
-</pre>
+{% endhighlight %}
 <h3>Conclusion</h3>
 Caliper is fairly new and is still has some work to be done, but I think that it's a great tool that could be very useful. Another potentially useful feature is that Caliper can <a href="http://code.google.com/p/caliper/wiki/OnlineResults" target="new">automatically publish your benchmarks.</a>   Full source code for my examples can be found on <a href="https://github.com/bbejeck/CaliperBlog" target="new">github</a> 

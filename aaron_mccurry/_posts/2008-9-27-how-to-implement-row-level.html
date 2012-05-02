@@ -15,7 +15,7 @@ ACL_FIELD: The field used to determine what users have access to this document. 
 
 All you have to do is built the access control query for each user and submit your user's query unchanged.<br /><br />
 
-<pre class="prettyprint">public class TestIndexerSearcher {
+{% highlight text %}public class TestIndexerSearcher {
 
    public static void main(String[] args) throws Exception {
       Directory directory = new RAMDirectory();
@@ -62,11 +62,11 @@ All you have to do is built the access control query for each user and submit yo
    }	
 }
 
-</pre>
+{% endhighlight %}
 
 <br />After you run this code, you will get a single hit, not the two that you would normally get if the access control filter wasn't in place.<br /><br />
 
-<pre class="prettyprint">public class CachedQueryFilter extends Filter {
+{% highlight text %}public class CachedQueryFilter extends Filter {
    private static final long serialVersionUID = 6797293376134753695L;
    private Filter filter;
    private String key;
@@ -99,7 +99,7 @@ All you have to do is built the access control query for each user and submit yo
       SoftReference&lt;BitSet&gt; bitSet;
    }
 }
-</pre>
+{% endhighlight %}
 
 
 There are two additional features that this query filter doesn't implements that you may want to consider.<br /><br />

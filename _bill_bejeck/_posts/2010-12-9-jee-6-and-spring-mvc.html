@@ -15,7 +15,7 @@ For this blog I'm using:
 </ul>
 <h3>DispatcherServlet Code</h3>
 My first step was to extend Spring's DispatcherServlet.
-<pre class="prettyprint">@WebServlet(urlPatterns = {"/async/*"}, asyncSupported = true, name = "async")
+{% highlight text %}@WebServlet(urlPatterns = {"/async/*"}, asyncSupported = true, name = "async")
 public class AsyncDispatcherServlet extends DispatcherServlet {
     private ExecutorService executor;
     private static final int NUM_ASYNC_TASKS = 15;
@@ -54,7 +54,7 @@ public class AsyncDispatcherServlet extends DispatcherServlet {
 
         ac.addListener(new AsyncDispatcherServletListener(task));
         executor.execute(task);
-    }</pre>
+    }{% endhighlight %}
 The only methods overridden were init, destroy and doDispatch. I won't go into detail on init and destroy, what they do is obvious.  All the interesting work is done in doDispatch.  The doDispatch method starts the asynchronous request, then wraps the call to super.doDispatch in a runnable and passes that into an executor service. There are a few key points to consider here:
 <ol>
         <li>The @WebServlet annotation at the class definition level.  This is part of Servlet 3.0 specification, you can now declare servlets, filters etc via annotations, although you can still use web.xml.  To enable asynchronous support set the 'asyncSupported' attribute to true.</li>
@@ -64,7 +64,7 @@ The only methods overridden were init, destroy and doDispatch. I won't go into d
 </ol>
 <h3>Listener Code</h3>
 Getting the request to run asynchronously is only half the battle.  The other half is setting up hooks to handle different events during the life-cycle of the asynchronous request.  The Servlet 3.0 spec added the AsyncListener interface.  AsyncListener has 4 methods, onStartAsync, onComplete, onError and onTimeout. For the AsyncDispatcherServlet we have the inner class AsyncDispatcherServletListener  that takes a FutureTask object as a constructor argument.
-<pre class="prettyprint">private class AsyncDispatcherServletListener implements AsyncListener {
+{% highlight text %}private class AsyncDispatcherServletListener implements AsyncListener {
 
         private FutureTask futureTask;
 
@@ -113,12 +113,12 @@ Getting the request to run asynchronously is only half the battle.  The other ha
                 }
             }
         }
-    }</pre>
+    }{% endhighlight %}
 The onStartAsync and onComplete methods merely log a statement, but certainly could be used to open and close resources respectively.  The only methods that do any work are onTimeout and onError, delegating to the handleTimeoutOrError method, passing a message and the AsyncEvent object.  In handleTimeoutOrError we will call cancel on the futureTask object, write the message to the response stream, then mark the asyncContext as completed.  While we are writing the error directly to the response stream, we could have just as easily forwarded to an error page by using the commented out call to request.getRequestDispatcher().forward (obviously you would eliminate lines 38-40).
 <h3>Web Application Structure</h3>
 <p>
 This web application is very simple and has only two controllers - SimpleViewControler and SearchController.
-<pre class="prettyprint">
+{% highlight text %}
 
 @Controller
 public class SimpleViewController {
@@ -132,9 +132,9 @@ public class SimpleViewController {
     public String error(){
         return "error";
     }
-</pre>
+{% endhighlight %}
 
-<pre class="prettyprint">
+{% highlight text %}
 @Controller
 public class SearchController {
 
@@ -182,7 +182,7 @@ public class SearchController {
         
         return builder.toString();
     }
-</pre>
+{% endhighlight %}
 The latency and blowup parameters in SearchController are used to simulate different response times and errors respectively.  Although there is the doSearchAjax method which writes directly to the response stream, in the tests that are run, we will only be using the doSearch method.  There are the usual context files, which are very light due to the annotation configuration and a web.xml file (needed for the regular DispatcherServlet). </p>
 <p>
 

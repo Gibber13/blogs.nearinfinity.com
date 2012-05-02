@@ -17,7 +17,7 @@ tags: .NET
 	<tr>
 		<td>
 			1. Simple Concatenation
-			<pre class="prettyprint" style="width: 250px;">
+			{% highlight text %}
 .maxstack 3
 .locals init (
     [0] string s,
@@ -74,11 +74,11 @@ L_0061: ldloc.0
 L_0062: stloc.1 
 L_0063: br.s L_0065
 L_0065: ldloc.1 
-L_0066: ret</pre>
+L_0066: ret{% endhighlight %}
 			</td>
 			<td>
 				3. string.Concat
-				<pre class="prettyprint" style="width: 250px;">.maxstack 3
+				{% highlight text %}.maxstack 3
 .locals init (
     [0] string s,
     [1] string CS$1$0000,
@@ -134,14 +134,14 @@ L_0061: ldloc.0
 L_0062: stloc.1 
 L_0063: br.s L_0065
 L_0065: ldloc.1 
-L_0066: ret</pre>
+L_0066: ret{% endhighlight %}
 			</td>
 		</tr>
 	</table>
 </p>
 
 <p>	So now lets get to why I'm writing this post. Trying to micro-optimize code that is already micro-optimized. So lets start by looking at what string.Concat is doing inside.
-<pre class="prettyprint">public static string Concat(params string[] values)
+{% highlight text %}public static string Concat(params string[] values)
 {
     int totalLength = 0;
     if (values == null)
@@ -160,13 +160,13 @@ L_0066: ret</pre>
         }
     }
     return ConcatArray(strArray, totalLength);
-}</pre>
+}{% endhighlight %}
 Allocating a new array, that's got to take some time, and in fact it does, not much but it does take time. So do we have an alternative? Sure by using "string.Concat(string str0, string str1, string str2, string str3)". Looking at it's code it does essentially the same thing as "string.Concat(params string[] values)" but without the new array. So without further ado here is my over micro-optimized code.
-<pre class="prettyprint">string s =
+{% highlight text %}string s =
 string.Concat(
     string.Concat(@"&lt;div class=""user-action-time"">", st(), st()),
     string.Concat(@"&lt;/div>&lt;div class=""user-gravatar32"">", st(), @"&lt;/div>&lt;div class=""user-details"">", st()),
     string.Concat("&lt;br/>", st(), "&lt;/div>"));
-return s;</pre>
+return s;{% endhighlight %}
 This code makes sure to only use the string.Concat that takes 4 arguments instead of the variable number of arguments. This speeds up the code by a whopping 2-3% on my machine. Sure it makes the code even more unreadable but if you are doing this 10 trillion times that might be necessary.
 </p> 

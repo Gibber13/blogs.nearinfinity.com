@@ -12,7 +12,7 @@ Groovy was designed to be tightly integrated with Java.  JRuby was written to be
 
 <br />
 Program:
-<pre class="code">
+{% highlight text %}
 i = Integer.MAX_VALUE
 j = i + 1
 println j
@@ -22,18 +22,18 @@ k = 12345678901234567890
 l = k + 1
 println l
 println l.class
-</pre>
+{% endhighlight %}
 
 Output:
-<pre class="code">
+{% highlight text %}
 -2147483648 
 class java.lang.Integer 
 12345678901234567891 
 class java.math.BigInteger
-</pre>
+{% endhighlight %}
 
 JRuby code:
-<pre class="code">
+{% highlight text %}
 require "java"
 
 i = java.lang.Integer::MAX_VALUE
@@ -45,14 +45,14 @@ k = 12345678901234567890
 l = k + 1
 puts l
 puts l.class
-</pre>
+{% endhighlight %}
 
 JRuby output:
-<pre class="code">
+{% highlight text %}
 2147483648
 Fixnum
 12345678901234567891
 Bignum
-</pre>
+{% endhighlight %}
 
 I like Groovy a lot because of its tight integration with Java, but this is something that Groovy missed big time.  Breaking away from tight Java integration would have been perfectly fine in this case to provide results that any sane person would expect, ie the one that is mathematically correct.

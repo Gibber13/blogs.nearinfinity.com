@@ -7,10 +7,10 @@ tags: Java
 ---
 <p>A few days ago, some people in the office were debating the value of our time honored tradition of guarding debug log statements. If you're not sure what I'm talking about, a short code sample should clear things up quickly.</p>
 
-<pre class="prettyprint lang-java">if (log.isDebugEnabled()) {
+{% highlight text %}if (log.isDebugEnabled()) {
   log.debug("Log message number " + 1);
 }
-</pre>
+{% endhighlight %}
 
 <p>It's generally accepted that guarding your log statements with an if block will improve performance if your log statements involve some kind of string concatenation, such as the example above. But what kind of performance improvement are we really talking about here?</p>
 

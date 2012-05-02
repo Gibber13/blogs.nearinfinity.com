@@ -24,7 +24,7 @@ class. </span></font></font>
 <p align="LEFT" style="margin-bottom: 0in"><font size="3" style="font-size: 13pt"><font size="3"><span style="font-weight: normal">	</span></font><font size="3"><b>Implementation:
 </b></font></font>
 </p>
-<pre class="prettyprint">abstract class Document
+{% highlight text %}abstract class Document
 {
 	IDictionary<string, string=""> FormTextFields
 	{
@@ -81,7 +81,7 @@ class BigDocument : Document
 		}
 	}
 }
-</string,></string,></pre>
+</string,></string,>{% endhighlight %}
 <p align="LEFT" style="margin-bottom: 0in"><font size="3" style="font-size: 13pt"><font size="3"><b>	Benefits:
 </b></font><font size="3"><span style="font-weight: normal">As
 previously stated, the main purpose of the base class is to simplify
@@ -117,7 +117,7 @@ extensibility problem, but will increase the work to create a
 subclass, is to add an abstract method to the base that filters the
 dictionary before it is sent out.&nbsp;</span></font></font>
 </p> 
-<pre class="prettyprint">abstract class Document
+{% highlight text %}abstract class Document
 {
 	IDictionary<string, string=""> FormTextFields
 	{
@@ -150,4 +150,4 @@ class SmallDocument : Document
 		}
 	}
 }
-</string,string></string,></string,string></string,string></string,></string,></pre> 
+</string,string></string,></string,string></string,string></string,></string,>{% endhighlight %} 

@@ -11,7 +11,7 @@ If you have ever tried adding a SharePoint custom action to the actions menu and
 <p>
 First off in your element manifest file you need to use the "ControlAssembly" and "ControlClass" attributes off of CustomAction. MSDN doesn't say a whole lot about these attributes but essentially they allow you to specify a web control class in your assembly which can render the action. (If you need to create hierarchical menus check out this <a href="http://weblogs.asp.net/jan/archive/2008/05/08/creating-hierarchical-menus-with-a-customaction-in-sharepoint.aspx">article</a>.) Here is the XML to get you started:
 </p>
-<pre class="prettyprint">
+{% highlight text %}
 &lt;Elements xmlns="http://schemas.microsoft.com/sharepoint/"&gt;
   &lt;CustomAction
     Id="MyCustomAction"
@@ -23,11 +23,11 @@ First off in your element manifest file you need to use the "ControlAssembly" an
     ControlClass="MyNamespace.MyCustomAction"&gt;
   &lt;/CustomAction&gt;
 &lt;/Elements&gt;
-</pre>
+{% endhighlight %}
 <p>
 Next you will need to create a web control class which renders the menu item, as seen below:
 </p>
-<pre class="prettyprint">
+{% highlight text %}
 public class MyCustomAction : WebControl {
   private MenuItemTemplate _action;
 
@@ -44,11 +44,11 @@ public class MyCustomAction : WebControl {
     Controls.Add(_action);
   }
 }
-</pre>
+{% endhighlight %}
 <p>
 Compile and deploy your solution. Oh and make sure to add your assembly and namespace to the safe control list or you will end up pulling your hair out because once again SharePoint will silently not render your menu item. You should now see the "My Action" on every list in the site. We have now reproduced what a standard CustomAction element in your element manifest would do normally. Now we need to find a way to determine which list our control is being added to. The best way I found for doing that is to traverse the control hierarchy up the parent chain until I found the containing ListViewWebPart. The code is quite simple and looks like this:
 </p>
-<pre class="prettyprint">
+{% highlight text %}
 private ListViewWebPart GetParentListViewWebPart() {
   Control parent = Parent;
   while (parent != null) {
@@ -59,11 +59,11 @@ private ListViewWebPart GetParentListViewWebPart() {
   }
   return null;
 }
-</pre>
+{% endhighlight %}
 <p>
 You should know where I'm going with this now, but for completness I will show you the last piece of code below which restricts it to a single list instance:
 </p>
-<pre class="prettyprint">
+{% highlight text %}
 private Guid TARGET_LIST_ID = new Guid ("0D9B9302-8599-4CE5-8695-1B95FE7378F1");
 
 protected override void OnLoad(EventArgs e) {
@@ -80,7 +80,7 @@ protected override void OnLoad(EventArgs e) {
     }
   }
 }
-</pre>
+{% endhighlight %}
 <p>
 Now that we have the list Guid that our control is being rendered for I will leave it as an exercise to the reader to restrict it to a given content type.
 </p>

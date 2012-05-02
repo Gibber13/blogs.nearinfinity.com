@@ -30,11 +30,11 @@ d.) insert into jackson_square (name, pictures_taken) values ('seht', 10);
 Ideally the results would be me eating 9 beignets and taking 137 pictures (let's not mention the cafe au laits :)
 
 <h3>Method A: compare as-is</h3>
-<pre class="prettyprint">select name, sum(beignets), sum(pictures_taken)
+{% highlight text %}select name, sum(beignets), sum(pictures_taken)
 from cafe_du_monde as cdm, jackson_square as js
 where cdm.name = js.name
 group by name;
-</pre>
+{% endhighlight %}
 
 Bzzzt. Not good. Look at all those rows!
 
@@ -42,19 +42,19 @@ Selected: a, b, c, d
 
 <br />
 <h3>Method B: normalize case</h3>
-<pre class="prettyprint">select name, sum(beignets), sum(pictures_taken)
+{% highlight text %}select name, sum(beignets), sum(pictures_taken)
 from cafe_du_monde as cdm, jackson_square as js
 where lower(cdm.name) = lower(js.name)
 group by name;
-</pre>
+{% endhighlight %}
 
 Selected: a+c, b, d
 <h3>Method C: trim whitespace</h3>
-<pre class="prettyprint">select name, sum(beignets), sum(pictures_taken)
+{% highlight text %}select name, sum(beignets), sum(pictures_taken)
 from cafe_du_monde as cdm, jackson_square as js
 where trim(both from cdm.name) = trim(both from js.name)
 group by name;
-</pre>
+{% endhighlight %}
 
 Selected: a+b, c, d
 <h3>Methods B &amp; C</h3>
@@ -62,11 +62,11 @@ Selected: a+b, c, d
 
 Selected: a+b+c, d
 <h3>Method D: <a href="http://en.wikipedia.org/wiki/Soundex">soundex</a></h3>
-<pre class="prettyprint">select name, sum(beignets), sum(pictures_taken)
+{% highlight text %}select name, sum(beignets), sum(pictures_taken)
 from cafe_du_monde as cdm, jackson_square as js
 where soundex(cdm.name) = soundex(js.name)
 group by name;
-</pre>
+{% endhighlight %}
 Soundex value: S300
 
 Selected: a+b+c+d
@@ -76,22 +76,22 @@ Soundex works perfectly for this example. When I tried it with more realistic da
 <a href="http://www.nearinfinity.com/blogs/page/mwizeman">Matt</a> introduced me to the Levenshtein algorithm for counting the number of edits needed to convert one string into another. (ex: cat -> mat = 1, cat -> dot = 2, cat -> dog = 3, cat -> gold = 4)
 <br />
 <h3>Method E: Comparing edit distance</h3>
-<pre class="prettyprint">levenshtein('seth', 'seth') => 0
+{% highlight text %}levenshtein('seth', 'seth') => 0
 levenshtein('seth', 'Seth') => 1
 levenshtein('seth', 'seth ') => 1
 levenshtein('seth', 'seht') => 2
 damerau-levenshtein('seth', 'seht') => 1
-</pre>
+{% endhighlight %}
 
 The <a href="http://en.wikipedia.org/wiki/Levenshtein_distance">Levenshtein distance</a> algorithm treats the 'ht' in 'seht' as two substitions. The <a href="http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance">Damerau-Levenshtein</a> algorithm treats it as one swap. Otherwise it's the same, so Damerau-Levenshtein seems like the better method.
 
 Unhappily the initial edit distance results seem weaker than the case normalizing and whitespace trimming. Since the algorithms stumble over case and whitespace, so why not take care of those first?
 <h3>Method F: normalizing case, trimming whitespace, &amp; comparing edit distance</h3>
-<pre class="prettyprint">damerau-levenshtein(lower(trim('seth', 'seth'))) => 0
+{% highlight text %}damerau-levenshtein(lower(trim('seth', 'seth'))) => 0
 damerau-levenshtein(lower(trim('seth', 'Seth'))) => 0
 damerau-levenshtein(lower(trim('seth', 'seth '))) => 0
 damerau-levenshtein(lower(trim('seth', 'seht'))) => 1
-</pre>
+{% endhighlight %}
 
 I think this is better. An edit distance of 25% seems a little high, but the string is so short in this example. At this point I've got enough to start experimenting.
 

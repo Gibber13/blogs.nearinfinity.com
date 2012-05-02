@@ -25,9 +25,9 @@ tags: Java
     I found the <code>java.awt.Image.getScaledInstance</code> method. Piece of cake, just do something like:
 </p>
 
-<pre><code>
+{% highlight java %}
     Image scaledInstance = image.getScaledInstance(thumbWidth, thumbHeight, hint);
-</code></pre>
+{% endhighlight %}
 
 <p>
     This worked fine and I used it for a couple of weeks when one of my <a
@@ -38,7 +38,7 @@ tags: Java
     <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/awt/geom/AffineTransform.html">AffineTransform</a> for a better solution.
 </p>
 
-<pre><code>
+{% highlight java %}
 public static BufferedImage getThumbnail(BufferedImage image, 
                                          int maxThumbWidth, 
                                          int maxThumbHeight, 
@@ -88,9 +88,7 @@ private static double scaleToFit(double w1, double h1, double w2, double h2) {
         }
         return scale;
     }
-
-    </code>
-</pre>
+{% endhighlight %}
 
 <p>
     Using this code I was able to scale an image, i.e. create a thumbnail, and now I needed to save it.
@@ -107,9 +105,9 @@ private static double scaleToFit(double w1, double h1, double w2, double h2) {
     an easy way to create JPEG images and put the image in to an OutputStream:
 </p>
 
-<pre>
+{% highlight java %}
     ImageIO.write(myImage, "jpg", myOutputStream);
-</pre>
+{% endhighlight %}
 
 <p>
     I incorporated my changes in to the build and left for a week of training, everything seem to be working ok. Upon returning I found out that
@@ -149,13 +147,13 @@ package are not part of the core Java APIsÃ‰".</em>
 Since we werenÃ•t planning to upgrade the JDK any time soon we went with this approach for writing JPEGs.
 </p>
         
-<pre>
+{% highlight java %}
     JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(myByteArrayOutputStream);
     JPEGEncodeParam encodeParams = encoder.getDefaultJPEGEncodeParam(myImage);
     encodeParams.setQuality(0.8F, false);
     encoder.setJPEGEncodeParam(encodeParams);
     encoder.encode(myImage);
-</pre>
+{% endhighlight %}
 
 <p>
     Everyone was happy; we could create JPEG thumbnails by circumventing the ImageIO API and talking directly to the
@@ -184,9 +182,9 @@ Since we werenÃ•t planning to upgrade the JDK any time soon we went with this
     To read images from the file system, the images I would create thumbnails from, I was using the AWT tookit:
 </p>
 
-<pre>
+{% highlight java %}
     Image image = Toolkit.getDefaultToolkit().createImage(myFileBytes);
-</pre>
+{% endhighlight %}
 
 <p>
     Unlike Windows, the Solaris toolkit apparently didnÃ•t know how to handle images that were made up of multiple images (GIF89a). I
@@ -194,9 +192,9 @@ Since we werenÃ•t planning to upgrade the JDK any time soon we went with this
     method that can take an InputStream
 </p>
 
-<pre>
+{% highlight java %}
     image = ImageIO.read(new ByteArrayInputStream(myImageByteArray));
-</pre>
+{% endhighlight %}
 
 <p>
     However, I was a little leery of the ImageIO class due to the problems I had seen with the <code>write</code> method.

@@ -31,7 +31,7 @@ These traits are thoroughly discussed by the articles in the reference section. 
 <div>
 <h2>Code</h2>
 This tacky, easily improvable code was released to the public domain and promises nothing.
-<pre class="prettyprint"><a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc0"> 0: </a>class MediocreBloomFilter
+{% highlight text %}<a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc0"> 0: </a>class MediocreBloomFilter
 <a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc1"> 1: </a>  M = 16                # number of boolean fields in filter
 <a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc2"> 2: </a>  K = 3                 # number of hash functions to find boolean fields
 <a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc3"> 3: </a>
@@ -73,7 +73,7 @@ This tacky, easily improvable code was released to the public domain and promise
 <a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc39">39: </a>  HEX = [ "0", "1", "2", "3", "4", "5", "6", "7",
 <a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc40">40: </a>          "8", "9", "A", "B", "C", "D", "E", "F" ]
 <a href="https://76.161.103.180/mt-static/html/editor-content.html?cs=utf-8" name="loc41">41: </a>end
-      </pre>
+      {% endhighlight %}
 <ul>
 	<li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=a_whirlwind_tour_of_bloom#loc7">Line 7</a> sets the filter storage to 16 integers. It could have been two bytes if I wanted to do bitwise operations.</li>
 	<li><a href="http://www.nearinfinity.com/blogs/page/seths?entry=a_whirlwind_tour_of_bloom#loc24">Line 24</a> runs the hash functions against the target data. Since this is tacky sample code only one hash function is executed (<a href="http://www.nearinfinity.com/blogs/page/seths?entry=a_whirlwind_tour_of_bloom#loc30">line 30</a>), and multiple slices are taken from the value and converted into array indicies (at <a href="http://www.nearinfinity.com/blogs/page/seths?entry=a_whirlwind_tour_of_bloom#loc33">line 33</a>).</li>

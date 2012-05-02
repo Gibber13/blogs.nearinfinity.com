@@ -12,7 +12,7 @@ Simple Put and Get Example</font></font><br /><br /><b>
 Direct HBase API:</b><br />
 
 <br />
-<pre class="prettyprint">public class PutAndGet {
+{% highlight text %}public class PutAndGet {
    public static void main(String[] args) throws IOException {
       HTable hTable = new HTable("test");
 
@@ -28,8 +28,8 @@ Direct HBase API:</b><br />
       System.out.println(Bytes.toString(value));
    }
 }
-</pre><b>HBase-dsl API:</b><br /><br />
-<pre class="prettyprint">public class PutAndGetWithDsl { 
+{% endhighlight %}<b>HBase-dsl API:</b><br /><br />
+{% highlight text %}public class PutAndGetWithDsl { 
    public static void main(String[] args) throws IOException { 
       HBase&lt;QueryOps, String&gt; hBase = new HBase&lt;QueryOps&lt;String&gt;, String&gt;(String.class);
 
@@ -43,7 +43,7 @@ Direct HBase API:</b><br />
                value("col1", String.class)
       System.out.println(value);
    }
- }</pre>
+ }{% endhighlight %}
 
 Now this is where the dsl becomes more powerful!<div><br /><font class="Apple-style-span" style="font-size: 1.25em; "><font class="Apple-style-span" style="font-size: 1.25em; ">
 
@@ -51,7 +51,7 @@ Scanner Example</font></font><br /><br /><b>
 
 Direct HBase API:</b><br /><br />
 
-<pre class="prettyprint">public class Scanner {
+{% highlight text %}public class Scanner {
    public static void main(String[] args) throws IOException {
       byte[] famA = Bytes.toBytes("famA");
       byte[] col1 = Bytes.toBytes("col1");  
@@ -81,10 +81,10 @@ Direct HBase API:</b><br /><br />
          System.out.println(Bytes.toString(result.getValue(famA, col1)));
       }
    }
-}</pre>
+}{% endhighlight %}
 <b>HBase-dsl API:</b><br /><br />
 
-<pre class="prettyprint">public class ScannerWithDsl {
+{% highlight text %}public class ScannerWithDsl {
    public static void main(String[] args) throws IOException {
       HBase&lt;QueryOps, String&gt; hBase = new HBase&lt;QueryOps&lt;String&gt;, String&gt;(String.class);
 
@@ -102,5 +102,5 @@ Direct HBase API:</b><br /><br />
             }
          });
   }
-}</row></pre><br />
+}</row>{% endhighlight %}<br />
 See the unit tests, for more examples.<br /><br /></div></div> 

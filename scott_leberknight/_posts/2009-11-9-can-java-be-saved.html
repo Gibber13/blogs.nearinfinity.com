@@ -47,17 +47,17 @@ tags: Java
 
 <p>I specifically listed removing checked exceptions first, because to me it is the first step to being able to have a closure/block syntax that isn't totally horrendous. If you remove checked exceptions, then adding closures would seem to be much easier since you don't need to worry at all about what exceptions could possibly be thrown and there is obviously no need to declare exceptions. Closures/blocks would lead to better ability to handle collections, for example as in Groovy but in Java you would still have types (note I'm also using a literal property syntax here):</p>
 
-<pre class="prettyprint">
+{% highlight text %}
 // Find all people whose last name is "Smith"
 List&lt;Person&gt; peeps = people.findAll { Person person -> person.lastName.equals("Smith");   } 
-</pre>
+{% endhighlight %}
 
 or
 
-<pre class="prettyprint">
+{% highlight text %}
 // Create a list of names by projecting the name property of a bunch of Person objects
 List&lt;String&gt; names = people.collect { Person person -> person.name; }
-</pre>
+{% endhighlight %}
 
 <p>Not quite as clean as Groovy but still much better than the for loops that would traditionally be required (or trying to shoehorn functional-style into Java using the <a href="http://commons.apache.org/collections/">Jakarta Commons Collections</a>  or <a href="http://code.google.com/p/google-collections/">Google Collections</a>). Removal of checked exceptions would allow, as mentioned earlier, the block syntax to not have to deal with declaring exceptions all over the place. Having to declare checked exceptions in blocks makes the syntax worse instead of better, at least when I saw the various closure proposals for Java/JDK/whatever 7 which did not get included. Requiring types in the blocks is still annoying, especially once you get used to Ruby and Groovy, but it would be passable.</p>
 
@@ -65,11 +65,11 @@ List&lt;String&gt; names = people.collect { Person person -> person.name; }
 
 <p>The third change should do essentially what Groovy for properties does but should introduce a "property" keyword (i.e. don't rely on whether someone accidentally put an access modifier in there as Groovy does). The syntax could be very clean:</p>
 
-<pre class="prettyprint">
+{% highlight text %}
 property String firstName;
 property String lastName;
 property Date dateOfBirth;
-</pre>
+{% endhighlight %}
 
 <p>The compiler could automatically generate the appropriate getter/setter for you like Groovy does. This obviates the need to manually code the getter/setter. Like Groovy you should be able to override either or both. It de-clutters code enormously and removes a ton of lines of silly getter/setter code (plus JavaDocs if you are actually still writing them for every get/set method). Then you could reference properties as you would expect: person.name is the "getter" and person.name = "Fred" is the "setter." Much cleaner syntax, way less boilerplate code. By the way, if someone used the word "property" in their code, i.e. as a variable name, it is just not that difficult to rename refactor, especially with all the advanced <a href="http://www.jetbrains.com/idea/">IDEs</a> in the Java community that do this kind of thing in their sleep.</p>
 
@@ -95,21 +95,21 @@ property Date dateOfBirth;
 
 <p>Property/method <a href="http://blogs.sun.com/jrose/entry/method_handles_in_a_nutshell">handles</a> would allow you to reference a property or method directly. They would make code that now must use strings strongly typed and refactoring-safe (IDEs like IntelliJ already know how to search in text and strings but can never be perfect) much nicer. For example, a particular pet peeve of mine and I'm sure a lot of other developers is writing Criteria queries in Hibernate. You are forced to reference properties as simple strings. If the lastName property is changed to surname then you better make sure to catch all the places the String "lastName" is referenced. So you could replace code like this:</p>
 
-<pre class="prettyprint">
+{% highlight text %}
 session.createCriteria(Person.class)
 	.add(Restrictions.eq("lastName", "Smith")
 	.addOrder(Order.asc("firstName")
 	.list();
-</pre>
+{% endhighlight %}
 
 <p>with this using method/property handles:</p>
 
-<pre class="prettyprint">
+{% highlight text %}
 session.createCriteria(Person.class)
 	.add(Restrictions.eq(Person.lastName, "Smith")
 	.addOrder(Order.asc(Person.firstName)
 	.list();
-</pre>
+{% endhighlight %}
 
 <p>Now the code is strongly-typed and refactoring-safe. JPA 2.0 tries mightily to overcome having strings in the new criteria query API  with its metamodel. But I find it pretty much appalling to even look at, what with having to create or code-generate a separate "metamodel" class which you reference like "_Person.lastName" or some similar awful way. This metamodel class lives only to represent properties on your real model object for the sole purpose of making JPA 2.0 criteria queries strongly typed. It just isn't worth it and is total overkill. In fact, it reminds me of the bad-old days of rampant over-engineering in Java (which apparently is still alive and well in many circles but I try to avoid it as best I can). The right thing is to fix the language, not to invent something that adds yet more boilerplate and more complexity to an already overcomplicated ecosystem.</p>
 
@@ -119,33 +119,33 @@ session.createCriteria(Person.class)
 
 <p>String interpolation is like the sorbet that you get at fancy restaurants to cleanse your palate. This would seem to be a no-brainer to add. You could make code like:</p>
 
-<pre class="prettyprint">
+{% highlight text %}
 log.error("The object of type  ["
     + foo.getClass().getName()
     + "] and identifier ["
     + foo.getId()
     + "] does not exist.", cause);
-</pre>
+{% endhighlight %}
 
 <p>turn into this much more palatable version (using the native property syntax I mentioned earlier):</p>
 
-<pre class="prettyprint">
+{% highlight text %}
 log.error("The object of type [${foo.class.name}] and identifier [${foo.id}] does not exist.", cause);
-</pre>
+{% endhighlight %}
 
 <h4>Type Inference</h4>
 
 <p>I'd also suggest adding type inference, if only for local variables like C# does. Why do we have to repeat ourselves? Instead of writing:</p>
 
-<pre class="prettyprint">
+{% highlight text %}
 Person person = new Person();
-</pre>
+{% endhighlight %}
 
 <p>why can't we just write:</p>
 
-<pre class="prettyprint">
+{% highlight text %}
 var person = new Person();
-</pre>
+{% endhighlight %}
 
 <p>I have to believe the compiler and all the tools are smart enough to infer the type from the "new Person()". Especially since other strongly-typed JVM languages like Scala do exactly this kind of thing.</p>
 
@@ -153,13 +153,13 @@ var person = new Person();
 
 <p>Last but not least, and actually not the last thing I can think of but definitely the last I'm writing about here, let's get rid of the "new" keyword and either go with Ruby's new <i>method</i> or Python's constructor syntax, like so:</p>
 
-<pre class="prettyprint">
+{% highlight text %}
 // Ruby-like new method
 var person = Person.new()
 
 // or Python-like construction
 var person = Person()
-</pre>
+{% endhighlight %}
 
 <p>This one came to me recently after hearing <a href="http://en.wikipedia.org/wiki/Bruce_Eckel">Bruce Eckel</a> give an excellent talk on language evolution and archaeology. He had a ton of really interesting examples of why things are they way they are, and how Java and other languages like C++ evolved from C. One example was the reason for "new" in Java. In C++ you can allocate objects on the stack or the heap, so there is a stack-based constructor syntax that does not use "new" while the heap-based constructor syntax uses the "new" operator. Even though Java only has heap-based object allocation, it retained the "new" keyword which is not only boilerplate code but also makes the entire process of object construction pretty much immutable: you cannot change anything about it nor can you easily add hooks into the object creation process.</p>
 

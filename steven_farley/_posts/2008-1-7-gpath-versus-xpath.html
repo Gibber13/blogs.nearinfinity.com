@@ -17,7 +17,7 @@ tags: Java
 
 <p>The XML document searched is four nodes deep (the root element, two descendent element levels, and a text node).  Every element except for the root contains exactly the same attribute name and value.  For example:</p>
 
-<pre class="prettyprint">&lt;root&gt;
+{% highlight text %}&lt;root&gt;
   &lt;node1 aName='aValue'&gt;
     &lt;node1.1 aName='aValue'&gt;1.1&lt;/node1.1&gt;
     &lt;node1.2 aName='aValue'&gt;1.2&lt;/node1.2&gt;
@@ -38,7 +38,7 @@ tags: Java
     &lt;nodeN.N aName='aValue'&gt;N.N&lt;/nodeN.N&gt;
   &lt;/nodeN&gt;
 &lt;/root&gt;
-</pre>
+{% endhighlight %}
 
 <p>The total number of elements with the 'aName' attribute is N * N + N.  The test measures performance for increasingly larger values of N, from 1 to 340, so the node total ranges from 2 to 115940 (not counting the root node).  Each search is run 10 times for each of the three implementations.</p>
 
@@ -52,11 +52,11 @@ tags: Java
 
 <p>The <code>Selector</code> interface, through its <code>countNodesForAttribute()</code> method, exposes the purpose of this test: to find all elements that contain a specific attribute name and value.  Since the goal is to measure searching performance, matching elements are merely counted, not gathered and collected.  <code>countNodesForAttribute()</code> is the only method whose execution time is recorded by the test script.</p>
 
-<pre class="prettyprint">interface Selector {
+{% highlight text %}interface Selector {
   void setInputSource(org.xml.sax.InputSource xmlInput)
   Integer countNodesForAttribute(String attributeName, String attributeValue)
 }
-</pre>
+{% endhighlight %}
 
 <h2 id="javaxpathselectorjava">JavaXPathSelector.java</h2>
 
@@ -64,7 +64,7 @@ tags: Java
 
 <p>Note that the XPath expression string is assembled using <code>String.format()</code>.  Also notice that checked exceptions are caught and uncheck exceptions thrown instead.  These are pointed out for contrast with the Groovy implementation that follows.</p>
 
-<pre class="prettyprint">import org.w3c.dom.*;
+{% highlight text %}import org.w3c.dom.*;
 import javax.xml.xpath.*;
 import java.util.*;
 
@@ -108,7 +108,7 @@ public class JavaXPathSelector implements Selector {
     catch (XPathExpressionException e) { throw new RuntimeException(e); }
   }
 }
-</pre>
+{% endhighlight %}
 
 <h2 id="groovyxpathselectorgroovy">GroovyXPathSelector.groovy</h2>
 
@@ -116,7 +116,7 @@ public class JavaXPathSelector implements Selector {
 
 <p>I included this implementation because I was curious to know whether any overhead cost was incurred by using Groovy rather than Java.</p>
 
-<pre class="prettyprint">import org.w3c.dom.*
+{% highlight text %}import org.w3c.dom.*
 import javax.xml.xpath.*
 
 class GroovyXPathSelector implements Selector {
@@ -148,13 +148,13 @@ class GroovyXPathSelector implements Selector {
     return xpe
   }
 }
-</pre>
+{% endhighlight %}
 
 <h2 id="groovygpathselectorgroovy">GroovyGPathSelector.groovy</h2>
 
 <p>Finally, here is the GPath challenger.  Astute readers will notice that there is no real equivalent to an XPath expression to be compiled and executed.  GPath doesn't work that way.  Rather, GPath expressions are Groovy expressions.  The structure of the XML document is mapped to a graph of objects that provide dynamic access to the XML nodes through properties and special methods that take great advantage of closures.  The way the attributes are searched in this case is by calling <code>findAll()</code> on the iterator returned by <code>document.depthFirst()</code>, with a closure that evaluates a boolean GPath expression looking for an attribute name/value match. </p>
 
-<pre class="prettyprint">class GroovyGPathSelector implements Selector {
+{% highlight text %}class GroovyGPathSelector implements Selector {
 
   private groovy.util.slurpersupport.GPathResult document
 
@@ -168,7 +168,7 @@ class GroovyXPathSelector implements Selector {
     return document.depthFirst().findAll { it["@${attributeName}"] == attributeValue }.size
   }
 }
-</pre>
+{% endhighlight %}
 
 <h1 id="the_results">The Results</h1>
 

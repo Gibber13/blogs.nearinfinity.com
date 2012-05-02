@@ -10,9 +10,9 @@ So most developers, especially Java developers because of its verbose syntax, ha
 
 <br/>
 <h3>The most pathetic diagram you will ever see</h3>
-<pre class="code">
+{% highlight text %}
 Inputs -> Generator -> Generated
-</pre>
+{% endhighlight %}
 
 <br/>
 Some inputs, a template and some values for example, are passed into a generator and it generates some output.  This could really be anything; XML, source files, view components, etc.  One of the first rules of generators is do not modify the generated content.  Why you ask?  Playing devil's advocate, I could say that once the material is generated I won't ever need to generate again.  Any changes to the material I make will already be present so they will build on top of each other. In some, possibly even many, cases this is very true. However, there are times when you will want to regenerate something or to generate another object that may require many of the same changes that you already made to previously generated objects.  All of those changes have to be made to the generated material one at a time because the generator does not support them.
@@ -27,9 +27,9 @@ Let's introduce one additional component, some sort of runtime environment.
 
 <br/>
 <h3>Pathetic diagram + Runtime</h3>
-<pre class="code">
+{% highlight text %}
 Inputs -> Generator -> Generated  <= Runtime
-</pre>
+{% endhighlight %}
 <br/>
 
 <br/>

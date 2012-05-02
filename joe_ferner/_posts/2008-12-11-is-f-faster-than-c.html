@@ -46,7 +46,7 @@ tags: .NET
 	We initially wrote the code without using tail recursion which immediately ended with a stack
 	overflow. So we went back and wrote it doing it the functional way, with tail recursion.
 	Here is what we came up with.
-	</p><pre class="prettyprint"><span class="codeKeyword">module</span> FSharpLib
+	</p>{% highlight text %}<span class="codeKeyword">module</span> FSharpLib
 
 	<span class="codeKeyword">let</span> sumNum fromNum toNum =
 		<span class="codeKeyword">let</span> <span class="codeKeyword">rec</span> sumNumTail fromNum toNum result =
@@ -54,19 +54,19 @@ tags: .NET
 				result 
 			<span class="codeKeyword">else</span> 
 				sumNumTail (fromNum+1L) toNum (result+fromNum)
-		sumNumTail fromNum toNum 0L</pre>
+		sumNumTail fromNum toNum 0L{% endhighlight %}
 
 
 <h3>Using C# - Attempt 1</h3>
 <p>
 	You'll see later why I say attempt 1. But, this is the simplest C# code <b>I</b> could think of.
-	</p><pre class="prettyprint"><span class="codeKeyword">public</span> <span class="codeKeyword">static</span> <span class="codeKeyword">long</span> CSharpForLoop(<span class="codeKeyword">long</span> fromNumber, <span class="codeKeyword">long</span> toNumber) {
+	</p>{% highlight text %}<span class="codeKeyword">public</span> <span class="codeKeyword">static</span> <span class="codeKeyword">long</span> CSharpForLoop(<span class="codeKeyword">long</span> fromNumber, <span class="codeKeyword">long</span> toNumber) {
 	<span class="codeKeyword">long</span> result = 0;
 	<span class="codeKeyword">for</span> (<span class="codeKeyword">long</span> i = fromNumber; i &lt;= toNumber; i++) {
 		result += i;
 	}
 	<span class="codeKeyword">return</span> result;
-}</pre>
+}{% endhighlight %}
 
 
 <h3>The Results - Attempt 1</h3>
@@ -87,13 +87,13 @@ tags: .NET
 <p>
 	I turned to my good friend <a href="http://www.red-gate.com/products/reflector/">Reflector</a>
 	to see what was going on. Here is what the F# code looked like when viewing it as C# code.
-	</p><pre class="prettyprint"><span class="codeKeyword">public</span> <span class="codeKeyword">static</span> <span class="codeKeyword">long</span> sumNum(<span class="codeKeyword">long</span> fromNum, <span class="codeKeyword">long</span> toNum)
+	</p>{% highlight text %}<span class="codeKeyword">public</span> <span class="codeKeyword">static</span> <span class="codeKeyword">long</span> sumNum(<span class="codeKeyword">long</span> fromNum, <span class="codeKeyword">long</span> toNum)
 {
     FastFunc&lt;<span class="codeKeyword">long</span>, FastFunc&lt;<span class="codeKeyword">long</span>, FastFunc&lt;<span class="codeKeyword">long</span>, <span class="codeKeyword">long</span>&gt;&gt;&gt; sumNumTail = <span class="codeKeyword">new</span> clo@7();
     <span class="codeKeyword">return</span> FastFunc&lt;<span class="codeKeyword">long</span>, <span class="codeKeyword">long</span>&gt;.InvokeFast3&lt;<span class="codeKeyword">long</span>, <span class="codeKeyword">long</span>&gt;(sumNumTail, fromNum, toNum, 0L);
-}</pre>
+}{% endhighlight %}
 	and clo@7.Invoke looks like
-	<pre class="prettyprint"><span class="codeKeyword">public</span> <span class="codeKeyword">override</span> <span class="codeKeyword">long</span> Invoke(<span class="codeKeyword">long</span> fromNum, <span class="codeKeyword">long</span> toNum, <span class="codeKeyword">long</span> result)
+	{% highlight text %}<span class="codeKeyword">public</span> <span class="codeKeyword">override</span> <span class="codeKeyword">long</span> Invoke(<span class="codeKeyword">long</span> fromNum, <span class="codeKeyword">long</span> toNum, <span class="codeKeyword">long</span> result)
 {
 	<span class="codeKeyword">while</span> (fromNum &lt;= toNum)
 	{
@@ -102,13 +102,13 @@ tags: .NET
 		fromNum += 1L;
 	}
 	<span class="codeKeyword">return</span> result;
-}</pre>
+}{% endhighlight %}
 	They used a while loop instead of a for loop. OK, I can do that. But, what happened to <a href="http://books.google.com/books?id=50PhgS8vjhwC&amp;pg=PA511&amp;vq=tail&amp;dq=cil+instruction+reference+tail&amp;source=gbs_search_s&amp;cad=0">tail</a>, I thought that tail is why the CLR is so good at functional language implementations.
 
 
 <h3>C# - Attempt 2</h3>
 <p>
-	</p><pre class="prettyprint"><span class="codeKeyword">public</span> <span class="codeKeyword">static</span> <span class="codeKeyword">long</span> CSharpWhileLoop(<span class="codeKeyword">long</span> fromNumber, <span class="codeKeyword">long</span> toNumber) {
+	</p>{% highlight text %}<span class="codeKeyword">public</span> <span class="codeKeyword">static</span> <span class="codeKeyword">long</span> CSharpWhileLoop(<span class="codeKeyword">long</span> fromNumber, <span class="codeKeyword">long</span> toNumber) {
 	<span class="codeKeyword">long</span> result = 0;
 	<span class="codeKeyword">while</span> (fromNumber &lt;= toNumber)
 	{
@@ -117,7 +117,7 @@ tags: .NET
 		fromNumber += 1L;
 	}
 	<span class="codeKeyword">return</span> result;
-}</pre>
+}{% endhighlight %}
 
 	and the results (I've got you now F#)...
 	<br /><br />
@@ -133,7 +133,7 @@ tags: .NET
 <h3>To the IL code Batman</h3>
 <p>
 	This is the IL for the F# code.
-	</p><pre class="prettyprint">	L_0000: nop              <span class="codeComment">// while loop</span>
+	</p>{% highlight text %}	L_0000: nop              <span class="codeComment">// while loop</span>
 	L_0001: nop 
 	L_0002: ldarg.1          <span class="codeComment">// fromNum &lt;= toNum</span>
 	L_0003: ldarg.2 
@@ -153,9 +153,9 @@ tags: .NET
 	L_001b: starg.s toNum
 	L_001d: starg.s fromNum
 	L_001f: br.s L_0000      
-	</pre>
+	{% endhighlight %}
 	This is the IL for the C# while loop.
-	<pre class="prettyprint">	L_0000: nop                   <span class="codeComment">// long result = 0L</span>
+	{% highlight text %}	L_0000: nop                   <span class="codeComment">// long result = 0L</span>
 	L_0001: ldc.i4.0
 	L_0002: conv.i8 
 	L_0003: stloc.0               
@@ -184,7 +184,7 @@ tags: .NET
 	L_001f: br.s L_0021
 	L_0021: ldloc.1 
 	L_0022: ret 
-	</pre>
+	{% endhighlight %}
 
 
 <h3>What just happened.</h3>

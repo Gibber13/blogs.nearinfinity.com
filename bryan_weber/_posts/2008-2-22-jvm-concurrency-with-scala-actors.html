@@ -41,25 +41,25 @@ An actor is like a thread but without shared state.  I sometimes refer to it as 
 <h2>Immutable state and pattern matching</h2>
 <p>
 Immutable state is key to functional programming languages as they are intended to have no side effects and immutable state means that no function can change the value of something (a variable) and thus introduce a side effect. Pattern matching in Erlang is brilliant.  It matches the left side and the right side of the =.  Conceptually there are 3 things that can happen here.  If the left is unbound it will be bound with the value from the right side.  This looks like variable assignment from OOP.  If the left side is bound it must match the value from the right side or an exception will be thrown.  This is because variables are immutable and they cannot be "assigned" another value.  Finally, if the left side has a partial match it can assign values to unbound variables that match the pattern.  A tuple is the simple way of understanding this.  
-</p><pre class="prettyprint">A = "a",
+</p>{% highlight text %}A = "a",
 B = "b",
 {A,C} = {A,B}
-</pre>
+{% endhighlight %}
 This will match because the left side and right side are tuples of the same size and none of the matching values would change state.  Since A equals A we are OK.  And since C is unbound it will be assigned the value from B.  
 
-<pre class="prettyprint">A = "a",
+{% highlight text %}A = "a",
 B = "b",
 {A,B} = {A,C}
-</pre>
+{% endhighlight %}
 
 This would not match because C is unbound.
 
 Likewise, the following would not match because the values of B and C do not match:
-<pre class="prettyprint">A = "a",
+{% highlight text %}A = "a",
 B = "b",
 C = "c",
 {A,C} = {A,B}
-</pre>
+{% endhighlight %}
 
 <h2>Fault tolerance</h2>
 <p>
@@ -71,7 +71,7 @@ So now that I have given a very long winded ill-explained description of actors,
 
 </p><h2>Erlang</h2>
 
-<pre class="prettyprint">-module (blog).
+{% highlight text %}-module (blog).
 -compile(export_all).
 			
 client(Pid) -&gt;
@@ -104,11 +104,11 @@ foo() -&gt;
 	spawn(fun() -&gt; client(Pid) end),
 	exit.
 
-</pre>
+{% endhighlight %}
 
 <h2>Scala</h2>
 
-<pre class="prettyprint">import scala.actors.Actor
+{% highlight text %}import scala.actors.Actor
 import scala.actors.Actor._
 import scala.actors.OutputChannel
 
@@ -163,7 +163,7 @@ object Foo extends Application {
   println("exit")
 }
 
-</pre>
+{% endhighlight %}
 
 <h2>So what does it do?</h2>
 <p>
@@ -223,7 +223,7 @@ Resources:
 If you did not need the sleep function, you could use this shorthand notation to define the actors.  Notice that the server actor is assigned to a variable that the client actor uses.
 </p>
 
-<pre class="prettyprint">import scala.actors.Actor
+{% highlight text %}import scala.actors.Actor
 import scala.actors.Actor._
 
 case class Request(data:Any)
@@ -256,4 +256,4 @@ object Foo extends Application {
 
 }
 
-</pre> 
+{% endhighlight %} 

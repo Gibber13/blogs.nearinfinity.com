@@ -15,16 +15,16 @@ tags: General Testing
 
 <p>First a URL must be mapped to a handler script in the <a href="http://code.google.com/appengine/docs/configuringanapp.html"><code>app.yml</code></a> configuration file, where all of the application's handler are defined:</p>
 
-<pre class="prettyprint"># This should only work for testing through the SDK.
+{% highlight text %}# This should only work for testing through the SDK.
 - url: /test/?
   script: gaetest/handler.py
-</pre>
+{% endhighlight %}
 
 <p>Adding this mapping should make many developers justifiably squeamish.  After all, this will also be mapped in the production environment where users could invoke the tests, which could be very nasty.  The test script will have to self-destruct in production - more on that later.</p>
 
 <p>When I launch the GAE SDK server and visit <code>http://localhost:8080/test</code> in my browser, I want all of my tests to run, with the results displayed in the browser window (nothing fancy, text will do).  Here's the <code>handler.py</code> script, which is located in the <code>gaetest</code> directory under the application root:</p>
 
-<pre class="prettyprint">import google.appengine.tools # causes an exception in production, as desired
+{% highlight text %}import google.appengine.tools # causes an exception in production, as desired
 import unittest
 import sys
 import wsgiref.handlers
@@ -50,13 +50,13 @@ def main():
 
 if __name__ == '__main__':
   main()
-</pre>
+{% endhighlight %}
 
 <p>The handler looks for all modules in the <code>tests</code> package, which is a subdirectory under the application root.  Modules must be explicitly defined in <code>tests/__init__.py</code> as such:</p>
 
-<pre class="prettyprint"># List all modules here.
+{% highlight text %}# List all modules here.
 __all__ = ['model_test', 'another_test', 'no_tests_just_helpers']
-</pre>
+{% endhighlight %}
 
 <p>Then the handler loads all test classes (subclasses of <code>unittest.TestCase</code>) from modules that end in <code>_test</code>, and adds them to the test suite.  The tests are executed using the standard text-based test runner, and the output is rendered in the browser.</p>
 
@@ -64,7 +64,7 @@ __all__ = ['model_test', 'another_test', 'no_tests_just_helpers']
 
 <p>At this point, tests will run just fine in the environment provided by the GAE SDK server.  Here's an example test class:</p>
 
-<pre class="prettyprint">import unittest
+{% highlight text %}import unittest
 from google.appengine.ext import db
 
 class MyEntity(db.Model):
@@ -80,7 +80,7 @@ class MyEntityTest(unittest.TestCase):
     entity = MyEntity(name='Foo')
     key = entity.put()
     self.assertEqual('Foo', db.get(key).name)
-</pre>
+{% endhighlight %}
 
 <p>Can you spot the trouble with this test?  If it I run the test over and over again as I actively develop and manually test the application, without restarting the server, then many <code>MyEntity</code> instances will pile up in my local datastore, which is a file-based stub used by the GAE SDK to simulate the production datastore.  For this trivial example, that would simply be annoying.  But in a complex suite of tests, it is undesirable to leave persistent objects in the datastore between runs.  It is also nice to have a separate test datastore so development data doesn't get in the way of asserting on objects stored by the tests.  In other platforms, such as Ruby on Rails, not only do the tests get their own datastore, but the data is rolled back after each test by running them in a transaction.</p>
 
@@ -90,7 +90,7 @@ class MyEntityTest(unittest.TestCase):
 
 <p>In order to achieve this, I need to create a special base <code>TestCase</code> that installs the test datastore in <code>setUp()</code> and recovers the development datastore in <code>tearDown()</code>.  All test classes that create entities, or that test code that creates entities, will need to inherit from the <code>AppEngineTestCase</code>, located in <code>gaetest\base.py</code>:</p>
 
-<pre class="prettyprint">import unittest
+{% highlight text %}import unittest
 from google.appengine.api import apiproxy_stub_map  
 from google.appengine.api import datastore_file_stub
 
@@ -117,11 +117,11 @@ class AppEngineTestCase(unittest.TestCase):
 
     # Restore stubs for development.
     apiproxy_stub_map.apiproxy = self.original_apiproxy
-</pre>
+{% endhighlight %}
 
 <p>The sample unit test class now extends the new base:</p>
 
-<pre class="prettyprint">  import unittest
+{% highlight text %}  import unittest
   from google.appengine.ext import db
   import gaetest.base
 
@@ -153,7 +153,7 @@ class AppEngineTestCase(unittest.TestCase):
     def test_setup_entity(self):
       entity = db.get(self.setup_key)
       self.assertEqual('Bar', entity.name)
-</pre>
+{% endhighlight %}
 
 <p>When the above test is run, two entities are created (with names 'Foo' from <code>test_saved_enitity()</code> and 'Bar' from <code>test_setup_entity()</code>), but will not be present in the development datastore.</p>
 

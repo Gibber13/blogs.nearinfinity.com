@@ -11,7 +11,7 @@ Yesterday at work, a coworker called and asked for some ideas on how to read the
 <p>
 Thinking about how I would do this outside of Ant, my first answer was to have him run "svn info" and parse the output. As a reference for those who don't run it very often, if you were to open a terminal window and run this command in one of your sandboxes the output would look something like:
 </p>
-<pre class="prettyprint">  Path: .
+{% highlight text %}  Path: .
   URL: svn+ssh://username@my.dev.server/data/repository/project/trunk
   Repository Root: svn+ssh://username@my.dev.server/data/repository/project
   Repository UUID: 5853ccd8-1d1d-0410-918b-9390590c579a
@@ -21,16 +21,16 @@ Thinking about how I would do this outside of Ant, my first answer was to have h
   Last Changed Author: adeveloper
   Last Changed Rev: 668
   Last Changed Date: 2007-03-30 18:53:52 -0400 (Fri, 30 Mar 2007)
-</pre>
+{% endhighlight %}
 <p>
 It turns out that this matches the format for a properties file in Java, so parsing this is pretty straightforward in Ant. All we need to do is pipe this out to a file and ask Ant to read it in during the build. At that point, the sandbox revision number will be available in the build as a property named Revision (note the capital R). The build file snippet below shows how all of this is done in Ant using the exec and property tasks.
 </p>
-<pre class="prettyprint">  &lt;exec executable="svn" output="build/svn.properties">
+{% highlight text %}  &lt;exec executable="svn" output="build/svn.properties">
     &lt;arg value="info" />
   &lt;/exec>
   &lt;property prefix="svn" file="build/svn.properties"/>
   &lt;echo>Sandbox Revision: ${svn.Revision}&lt;/echo>
-</pre>
+{% endhighlight %}
 <p>
 When run, this prints the expected output of "Sandbox Revision: 668".
 </p>
@@ -40,7 +40,7 @@ This method works but has two problems. First, it counts on the fact that the sv
 <p>
 As luck would have it, there is. In addition to Subversion itself, the folks over at <a href="http://www.tigris.org/">Tigris</a> also have a library called <a href="http://subclipse.tigris.org/svnant.html">SvnAnt</a>, which is an Ant task that makes working with Subversion pretty easy. One of the commands, status, does exactly what we're after and sets an Ant property with the revision number of a given path. Using SvnAnt, our build snippet now looks like:
 </p>
-<pre class="prettyprint">  &lt;taskdef resource="org/tigris/Subversion/svnAnt/svnAntlib.xml">
+{% highlight text %}  &lt;taskdef resource="org/tigris/Subversion/svnAnt/svnAntlib.xml">
     &lt;classpath>
       &lt;fileset dir="${build.lib.dir}/svnAnt" includes="**/*.jar" />
     &lt;/classpath>
@@ -50,7 +50,7 @@ As luck would have it, there is. In addition to Subversion itself, the folks ove
     &lt;status path="${basedir}" revisionProperty="svn.revision" />
   &lt;/svn>
   &lt;echo>Sandbox Revision: ${svn.revision}&lt;/echo>
-</pre>
+{% endhighlight %}
 <p>
 This is much easier to read and I think solves the clarity problem of the first approach. As for the svn executable needing to be on the path, that may be solved too depending on the version of SvnAnt you are using. While the current stable release (1.0.0) of SvnAnt requires the svn executable or the javahl bindings, the latest development release (1.1.0-RC2) includes integration with <a href="http://www.svnkit.com/">SVNKit</a>, which is a pure Java Subversion library. This means that if the build file runs on a system that is missing the native resources for javahl, the pure Java implementation will be used and everything will still work. Nice!
 </p> 

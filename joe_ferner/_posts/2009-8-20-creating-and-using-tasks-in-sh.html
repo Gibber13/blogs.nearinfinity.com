@@ -53,13 +53,13 @@ This is about as simple as it gets. Start -> Manager Approve -> Done.</p>
   most users don't update percent complete when completing tasks you have to attach to the changed event
   and expose it to the workflow.
   </div>
-  <pre class="prettyprint">
+  {% highlight text %}
 public bool TaskComplete { get; set; }
   
 private void OnManagerReviewTaskChanged_Invoked(object sender, ExternalDataEventArgs e) {
   TaskComplete = AfterTaskProperties.ExtendedProperties[SPBuiltInFieldId.TaskStatus].ToString() == "Completed";
 }
-</pre>
+{% endhighlight %}
 </p>
 <style type="text/css">
 		    .gotcha {

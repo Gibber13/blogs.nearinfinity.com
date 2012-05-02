@@ -21,7 +21,7 @@ tags: General
 </p><p>Basic info: Groovy 1.5.5 binary release, Python 2.5.1 shipped with Leopard, GCC 4.0.1, Carbon Emacs Spring 2008
 </p><hr>
 <p>Python, iterative
-</p><pre class="prettyprint">import sys
+</p>{% highlight text %}import sys
 
 def multiple_checker(val):
     return lambda test: test and val and test % val == 0
@@ -35,10 +35,10 @@ for i in range(10 ** int(sys.argv[1])):
         sum = sum + i
 
 print sum
-</pre>
+{% endhighlight %}
 <hr>
 Python, set oriented
-<pre class="prettyprint">import sys
+{% highlight text %}import sys
 
 exp = int(sys.argv[1])
 sum = 0
@@ -47,10 +47,10 @@ for mof3or5 in set(range(3, 10**exp, 3)) | set(range(5, 10**exp, 5)):
     sum = sum + mof3or5
 
 print sum
-</pre>
+{% endhighlight %}
 <hr>
 Groovy, iterative
-<pre class="prettyprint">exp = Integer.parseInt(args[0])
+{% highlight text %}exp = Integer.parseInt(args[0])
 
 mof = { val, test -&gt; val &amp;&amp; test &amp;&amp; test % val == 0 }
 mof3 = mof.curry(3)
@@ -65,10 +65,10 @@ sum = 0 as BigDecimal
 }
 
 println sum
-</pre>
+{% endhighlight %}
 <hr>
 Emacs Lisp, iterative (be nice, I'm really weak here)
-<pre class="prettyprint">(defun multiple_of (a b)
+{% highlight text %}(defun multiple_of (a b)
   (= 0 (% a b))
 )
 
@@ -89,10 +89,10 @@ Emacs Lisp, iterative (be nice, I'm really weak here)
     sum
     )
   )
-</pre>
+{% endhighlight %}
 <hr>
 C, iterative. Not very much code here, would have probably taken more lines of Java!
-<pre class="prettyprint">#include &lt;stdio.h&gt;
+{% highlight text %}#include &lt;stdio.h&gt;
 #include &lt;math.h&gt;
 
 #define multiple_of(a, b) ((a == 0 || b == 0) ? 0 : a % b == 0)
@@ -111,4 +111,4 @@ int main(int argc, char** argv)
 
     return 0;
 }
-</pre> 
+{% endhighlight %} 

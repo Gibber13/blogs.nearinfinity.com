@@ -80,7 +80,7 @@ tags: Groovy Java Ruby
 </p><h2>Code</h2>
 <a name="lang_c"> </a>
 <h3>C</h3>
-<pre class="prettyprint">#include &lt;stdio.h>
+{% highlight text %}#include &lt;stdio.h>
 #include &lt;math.h>
 
 #define multiple_of(a, b) ((a == 0 || b == 0) ? 0 : a % b == 0)
@@ -100,10 +100,10 @@ int main(int argc, char** argv)
     return 0;
 }
 
-</pre>
+{% endhighlight %}
 <a name="lang_g"> </a>
 <h3>Groovy</h3>
-<a name="lang_g1"> </a><pre class="prettyprint">// first.groovy
+<a name="lang_g1"> </a>{% highlight text %}// first.groovy
 exp = Integer.parseInt(args[0])
 
 mof = { val, test -> val &amp;&amp; test &amp;&amp; test % val == 0 }
@@ -119,9 +119,9 @@ sum = 0 as BigDecimal
 }
 
 println sum
-</pre>
+{% endhighlight %}
 <hr>
-<a name="lang_g2"> </a><pre class="prettyprint">// second.groovy
+<a name="lang_g2"> </a>{% highlight text %}// second.groovy
 def exp = Integer.parseInt(args[0])
 
 def mof = { val, test -> val &amp;&amp; test &amp;&amp; test % val == 0 }
@@ -137,9 +137,9 @@ def sum = 0 as BigInteger
 }
 
 println sum
-</pre>
+{% endhighlight %}
 <hr>
-<a name="lang_g3"> </a><pre class="prettyprint">// third.groovy
+<a name="lang_g3"> </a>{% highlight text %}// third.groovy
 def exp = Integer.parseInt(args[0])
 
 def sum = 0 as BigInteger
@@ -149,10 +149,10 @@ for (int i = 3; i &lt; 10 ** exp; i++)
         sum += i
 
 println sum
-</pre>
+{% endhighlight %}
 <a name="lang_l"> </a>
 <h3>Lisp</h3>
-<pre class="prettyprint">; first.el
+{% highlight text %}; first.el
 (defun multiple_of (a b)
   (= 0 (% a b))
 )
@@ -176,10 +176,10 @@ println sum
   )
 
 (sum-of-3or5-multiples 7)
-</pre>
+{% endhighlight %}
 <a name="lang_pe"> </a>
 <h3>Perl</h3>
-<a name="lang_pl1"> </a><pre class="prettyprint">#!/usr/bin/env perl -w
+<a name="lang_pl1"> </a>{% highlight text %}#!/usr/bin/env perl -w
 # first.pl
 use strict;
 
@@ -198,9 +198,9 @@ for my $i (3 ... 10 ** $exp - 1) {
 }
 
 print "$sum\n"
-</pre>
+{% endhighlight %}
 <hr>
-<a name="lang_pl2"> </a><pre class="prettyprint">#!/usr/bin/env perl -w
+<a name="lang_pl2"> </a>{% highlight text %}#!/usr/bin/env perl -w
 # second.pl
 
 use strict;
@@ -215,10 +215,10 @@ for my $i (3 ... 10 ** $exp - 1) {
 }
 
 print "$sum\n"
-</pre>
+{% endhighlight %}
 <a name="lang_py"> </a>
 <h3>Python</h3>
-<a name="lang_py1"> </a><pre class="prettyprint"># first.py
+<a name="lang_py1"> </a>{% highlight text %}# first.py
 import sys
 
 def multiple_checker(val):
@@ -234,9 +234,9 @@ for i in range(10 ** int(sys.argv[1])):
         sum = sum + i
 
 print sum
-</pre>
+{% endhighlight %}
 <hr>
-<a name="lang_py2"> </a><pre class="prettyprint"># second.py
+<a name="lang_py2"> </a>{% highlight text %}# second.py
 import sys
 
 exp = int(sys.argv[1])
@@ -246,9 +246,9 @@ for mof3or5 in set(range(3, 10**exp, 3)) | set(range(5, 10**exp, 5)):
     sum = sum + mof3or5
 
 print sum
-</pre>
+{% endhighlight %}
 <hr>
-<a name="lang_py3"> </a><pre class="prettyprint"># third.py
+<a name="lang_py3"> </a>{% highlight text %}# third.py
 import sys
 
 exp = int(sys.argv[1])
@@ -258,19 +258,19 @@ for mof3or5 in set(xrange(3, 10**exp, 3)) | set(xrange(5, 10**exp, 5)):
     sum = sum + mof3or5
 
 print sum
-</pre>
+{% endhighlight %}
 <hr>
-<a name="lang_py4"> </a><pre class="prettyprint"># fourth.py
+<a name="lang_py4"> </a>{% highlight text %}# fourth.py
 import sys
 
 exp = int(sys.argv[1])
 total = sum(xrange(3, 10**exp, 3)) + sum(xrange(5, 10**exp, 5)) - sum(xrange(15, 10**exp, 15))
 
 print total
-</pre>
+{% endhighlight %}
 <a name="lang_r"> </a>
 <h3>Ruby</h3>
-<a name="lang_r1"> </a><pre class="prettyprint"># first.rb
+<a name="lang_r1"> </a>{% highlight text %}# first.rb
 exp = ARGV[0].to_i
 sum = 0
 
@@ -284,9 +284,9 @@ for i in 3..(10 ** exp - 1)
 end
 
 puts sum
-</pre>
+{% endhighlight %}
 <hr>
-<a name="lang_r2"> </a><pre class="prettyprint"># second.rb
+<a name="lang_r2"> </a>{% highlight text %}# second.rb
 exp = ARGV[0].to_i
 sum = 0
 
@@ -296,13 +296,13 @@ for i in 3..(10 ** exp - 1)
 end
 
 puts sum
-</pre>
+{% endhighlight %}
 <a href="http://www.nearinfinity.com/blogs/page/seths?entry=projecteuler_problem_1_in_c#toc">(top)</a>
 <p>
 <a name="facepalm"> </a>
 </p><h2>Big O(rly)?</h2>
 <p>Well... sigh... all of the code above works correctly but is slow and naïve. All of the approaches above take more time as the largest multiple increases. I was ignorantly, happily tweaking code down this road until fortunately <a href="http://www.nearinfinity.com/blogs/page/rdonaway">Bob</a> clued me in. The <b>best</b> approach takes the same amount of time as the largest multiple increases. Why? There's a simple equation for this, calculating an  <a href="http://en.wikipedia.org/wiki/Evaluating_sums#Arithmetic_series">arithmetic series</a>.
-<a name="lang_ri"> </a></p><pre class="prettyprint"># instant.rb
+<a name="lang_ri"> </a></p>{% highlight text %}# instant.rb
 ceil = 10 ** ARGV[0].to_i - 1
 
 def series_of_multiples(val, ceiling)
@@ -315,7 +315,7 @@ end
 def som(v, c) series_of_multiples(v, c).to_i end
 
 puts som(3, ceil) + som(5, ceil) - som(15, ceil)
-</pre>
+{% endhighlight %}
 
 <a name="wrapup"> </a>
 <h2>Wrap up</h2>
@@ -327,7 +327,7 @@ puts som(3, ceil) + som(5, ceil) - som(15, ceil)
 </li></ul>
 <h2>Extras</h2>
 <p>The Python test harness. Probably needs tweaking for Wintel boxes.
-</p><pre class="prettyprint">import sys
+</p>{% highlight text %}import sys
 import re
 from datetime import timedelta, datetime
 from os import system
@@ -396,4 +396,4 @@ for script in sys.argv[1:]:
 
     # see, isn't it strange how python leaves you hanging at the end
     # of the last scope in the file?
-</pre> 
+{% endhighlight %} 

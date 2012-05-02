@@ -65,18 +65,18 @@ tags: .NET
 
 I recently had a project where I needed to ingest large XML documents using C# so I was curious which XML reader technology would be the fastest. So I coded up a quick benchmark that would compare LINQ to XML, XmlDocument.Load, and XmlReader against each other.<br /><br /><h2>The Test Data</h2>
 I generated a very simple XML file before each run of a test. The id's were random and the number of "child" nodes varied based on the run. The following is an example of the test data I used.
-<pre class="csharpcode"><span class="kwrd">&lt;</span><span class="html">root</span><span class="kwrd">&gt;</span>
+{% highlight text %}<span class="kwrd">&lt;</span><span class="html">root</span><span class="kwrd">&gt;</span>
   <span class="kwrd">&lt;</span><span class="html">child</span> <span class="attr">id</span><span class="kwrd">='123'</span><span class="kwrd">/&gt;</span>
   <span class="kwrd">&lt;</span><span class="html">child</span> <span class="attr">id</span><span class="kwrd">='234'</span><span class="kwrd">/&gt;</span>
   ...
-<span class="kwrd">&lt;/</span><span class="html">root</span><span class="kwrd">&gt;</span></pre>
+<span class="kwrd">&lt;/</span><span class="html">root</span><span class="kwrd">&gt;</span>{% endhighlight %}
 <h2>The Test</h2>
 As I said before I wanted to compare LINQ to XML, XmlDocument.Load, and XmlReader against each other. I ran each of these technologies using 1, 10, 100, 1000, 10,000, 100,000 "child" nodes. I also ran each against a XML document using UTF-8, ASCII, and UTF-32 encodings. Each iteration was run 100 times to reduce anomalies. In each of the tests I call the method "ProcessId" which simulates the processing of the "id" attribute.<br /><br />
 
 <h2>XmlDocument.Load</h2>
 I thought the code for XmlDocument.Load was the cleanest and easiest to understand, although I must admit I like XPath. XmlDocument does have some security concerns but that's another post. Here is the code I used to load and search the document:
 
-<pre class="csharpcode"><span class="kwrd">private</span> <span class="kwrd">static</span> <span class="kwrd">void</span> XmlDocumentReader(<span class="kwrd">string</span> fileName) {
+{% highlight text %}<span class="kwrd">private</span> <span class="kwrd">static</span> <span class="kwrd">void</span> XmlDocumentReader(<span class="kwrd">string</span> fileName) {
     XmlDocument doc = <span class="kwrd">new</span> XmlDocument();
     doc.Load(fileName);
     XmlNodeList nodes = doc.SelectNodes(<span class="str">"//child"</span>);
@@ -88,11 +88,11 @@ I thought the code for XmlDocument.Load was the cleanest and easiest to understa
         ProcessId(id);
     }
 }
-</pre>
+{% endhighlight %}
 <h2>LINQ to XML</h2>
 LINQ to XML was also very easy to read and understand code. I did find that even though LINQ to XML is supposed to use XmlReaders under the covers calling XDocument.Load does read the whole document into memory before returning. So if you are looking for data at the top of middle of a very large document this could be a concern. Here is the code I used to load and search the document:
 
-<pre class="csharpcode"><span class="kwrd">private</span> <span class="kwrd">static</span> <span class="kwrd">void</span> XDocumentReader(<span class="kwrd">string</span> fileName) {
+{% highlight text %}<span class="kwrd">private</span> <span class="kwrd">static</span> <span class="kwrd">void</span> XDocumentReader(<span class="kwrd">string</span> fileName) {
     XDocument doc = XDocument.Load(fileName);
     <span class="kwrd">if</span> (doc == <span class="kwrd">null</span> | doc.Root == <span class="kwrd">null</span>) {
         <span class="kwrd">throw</span> <span class="kwrd">new</span> ApplicationException(<span class="str">"invalid data"</span>);
@@ -105,11 +105,11 @@ LINQ to XML was also very easy to read and understand code. I did find that even
         <span class="kwrd">string</span> id = attr.Value;
         ProcessId(id);
     }
-}</pre>
+}{% endhighlight %}
 <h2>XmlReader</h2>
 XmlReader, specifically XmlTextReader was the hardest to write and understand. With it's quirks of being a forward only reader you need to take what you need while you have it because you can't rewind.
 
-<pre class="csharpcode"><span class="kwrd">private</span> <span class="kwrd">static</span> <span class="kwrd">void</span> XmlReaderReader(<span class="kwrd">string</span> fileName) {
+{% highlight text %}<span class="kwrd">private</span> <span class="kwrd">static</span> <span class="kwrd">void</span> XmlReaderReader(<span class="kwrd">string</span> fileName) {
     <span class="kwrd">using</span> (XmlReader reader = <span class="kwrd">new</span> XmlTextReader(fileName)) {
         <span class="kwrd">while</span> (reader.Read()) {
             <span class="kwrd">if</span> (reader.NodeType == XmlNodeType.Element) {
@@ -121,7 +121,7 @@ XmlReader, specifically XmlTextReader was the hardest to write and understand. W
             }
         }
     }
-}</pre>
+}{% endhighlight %}
 <h2>The Results</h2>
 The following results are in milliseconds for each run. I took the total time to run and divided it by 100.<br />
 <br />

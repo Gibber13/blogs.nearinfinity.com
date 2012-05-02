@@ -17,7 +17,7 @@ tags: SQL
   Number 4 is the strongest argument. It is the Don't Repeat Yourself argument for data. Duplicate code <a href="http://martinfowler.com/bliki/CodeSmell.html">stinks</a>! The fix is defining and calling <cite>"a single, unambiguous, authoritative representation within a system"</cite> (<a href="http://www.pragmaticprogrammer.com/ppbook/extracts/rule_list.html">src</a>). So why not treat data that well? Here's a silly example (in PostgreSQLish):
 <p>
 
-</p><pre class="prettyprint">CREATE TABLE pantry (food TEXT, course TEXT, expiry DATE);
+</p>{% highlight text %}CREATE TABLE pantry (food TEXT, course TEXT, expiry DATE);
 INSERT INTO pantry (food, course, expiry)
     VALUES ('crumpets', 'breakfast', now() + interval '2 weeks');
 INSERT INTO pantry (food, course, expiry)
@@ -26,7 +26,7 @@ INSERT INTO pantry (food, course, expiry)
     VALUES ('instant noodles', 'dinner', now() + interval '2 years');
 INSERT INTO pantry (food, course, expiry)
     VALUES ('fruitcake', 'snack', now() + interval '2000 years');
-</pre>
+{% endhighlight %}
 <p>Imagine these meal planning queries:
 </p><ul>
   <li><code class="prettyprint">SELECT food FROM pantry WHERE course = 'breakfast' AND expiry > now();</code>
@@ -35,17 +35,17 @@ INSERT INTO pantry (food, course, expiry)
   </li><li><code class="prettyprint">SELECT food FROM pantry WHERE course = 'snack' AND expiry > now();</code>
 </li></ul>
 <p>Well, that's pretty gory. No abstraction at all -- <a href="http://www.webpagesthatsuck.com/mysterymeatnavigation.html">mystery meat</a> queries which need unnecessary work to be understood. Two things need to be abstracted:  course and expiry. No one wants stale food, so build that logic first:
-</p><pre class="prettyprint">CREATE VIEW fresh_food AS
+</p>{% highlight text %}CREATE VIEW fresh_food AS
     SELECT *
     FROM pantry
     WHERE expiry &lt; now();
-</pre>
+{% endhighlight %}
 <p>Voici! The per-course queries look like: <code class="prettyprint">SELECT food FROM fresh_food where course = 'foo'</code>. But, why stop abstracting now? Why not this?
-</p><pre class="prettyprint">CREATE VIEW breakfast_menu AS
+</p>{% highlight text %}CREATE VIEW breakfast_menu AS
     SELECT *
     FROM fresh_food
     WHERE course = 'breakfast';
-</pre>
+{% endhighlight %}
 <p>This example is almost too silly, but one more good point can be squeezed out yet. A key benefit of centralized logic is having one place to make bug fixes. For example, the typo in <code class="prettyprint">fresh_food</code> which returns <i>stale</i> food. Fix the view DML and all client code immediately benefits without change.
 </p><p>Unfortunately in practice performance can easily suffer when using (and especially layering) views. 
 </p><p>Coming soon -- part 2: Views made my queries SLOW!</p> 

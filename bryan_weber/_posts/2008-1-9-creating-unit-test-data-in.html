@@ -37,7 +37,7 @@ So, what does this code look like?  We'll get to it shortly.  But first, let's t
 </p><h2>Data Builders</h2>
 First, there is the data builder which is our tree of data. This is a groovy file that contains our actual data values. An example:
 
-<pre class="prettyprint">    def getData() {
+{% highlight text %}    def getData() {
         new NodeBuilder().users {
             user(user_id: "123", first_name: "Joe", last_name: "Smith") {
                 address(address_type: "home", street: "123 Main St.", city: "Springfield", state: "MA", zip: "12345")
@@ -47,12 +47,12 @@ First, there is the data builder which is our tree of data. This is a groovy fil
             user(user_id: "789", first_name: "Jane", last_name: "Doe")
         }
     }
-</pre>
+{% endhighlight %}
 
 <h2> Data Persisters</h2>
 Then there is our persister, which in our case uses GPath (similar to XPath, but walks Groovy objects) to pull data out of the builder and persist it.  In my case that means populating Hibernate objects and then saving the hibernate objects.  
 
-<pre class="prettyprint">    def persist(tree) {
+{% highlight text %}    def persist(tree) {
         tree.grep() { 
           User user = new User()
           user.userId = it.@user_id
@@ -70,7 +70,7 @@ Then there is our persister, which in our case uses GPath (similar to XPath, but
           userDao.save(user)
         }
     }
-</pre>
+{% endhighlight %}
 
 <p>
 We separate these objects so that multiple data sets can be used depending on the environment or test suite.  In other words, it is good to keep the data separate from the code that will manipulate the data.
@@ -81,16 +81,16 @@ We separate these objects so that multiple data sets can be used depending on th
 As an example, let's suppose we want to add some users to our database.  Let's assume that there are 3 users and the first user has  2 addresses.  The tree might look something like this in csv format:
 </p>
 
-<pre class="prettyprint">users
+{% highlight text %}users
 ,user,user_id,123,first_name,Joe,last_name,Smith
 ,,address,address_type,home,street,123 Main St.,city,Springfield,state,MA,zip,12345
 ,,address,address_type,work,street,456 South St.,city,Boston,state,MA,zip,98765
 ,user,user_id,456,first_name,John,last_name,Doe
 ,user,user_id,789,first_name,Jane,last_name,Doe
-</pre>
+{% endhighlight %}
 
 What might this data look like in xml?
-<pre class="prettyprint">  &lt;users&gt;
+{% highlight text %}  &lt;users&gt;
     &lt;user user_id="123" first_name="Joe" last_name="Smith"&gt;
       &lt;address address_type="home" street="123 Main St." city="Springfield" state="MA" zip="12345" /&gt;
       &lt;address address_type="work" street="456 South St." city="Boston" state="MA" zip="98765" /&gt;
@@ -98,10 +98,10 @@ What might this data look like in xml?
     &lt;user user_id="456" first_name="John" last_name="Doe" /&gt;
     &lt;user user_id="789" first_name="Jane" last_name="Doe" /&gt;
   &lt;/users&gt;
-</pre>
+{% endhighlight %}
 
 And in groovy?
-<pre class="prettyprint">users {
+{% highlight text %}users {
   user(user_id:"123",first_name:"Joe",last_name:"Smith") {
     address(address_type:"home",street:"123 Main St.",city:"Springfield",state:"MA",zip:"12345") 
     address(address_type:"work",street:"456 South St.",city:"Boston",state:"MA",zip:"98765")
@@ -109,23 +109,23 @@ And in groovy?
   user(user_id:"456",first_name:"John",last_name:"Doe")
   user(user_id:"789",first_name:"Jane",last_name:"Doe")
 }
-</pre>
+{% endhighlight %}
 
 <p>
 Which do you find to be the most readable?  Some will say xml, most will say groovy.  But more importantly, the impedance is zero for groovy because it is already groovy code and no transformation is necessary.  Whereas, if we have xml some transformation is necessary.   
 </p>
 
 Let's suppose that we also have a Role table for security
-<pre class="prettyprint">roles
+{% highlight text %}roles
 ,role,role_type,admin,description,System Administrator
 ,role,role_type,data_entry,description,Data Entry
-</pre>
+{% endhighlight %}
 
 What if we wanted to have a reference from a user to a role or vice versa?  Imagine something like this snippet:
-<pre class="prettyprint">user,user_id,123,first_name,Joe,last_name,Smith
+{% highlight text %}user,user_id,123,first_name,Joe,last_name,Smith
 ,role,admin
 ,role,data_entry
-</pre>
+{% endhighlight %}
 
 <p>
 Getting back to an earlier point, seeing this should probably scare you a little.  The string (think symbol if you like ruby or atom if you like many other programming languages) 'data_entry' is entered in two places so if it is modified in one place our structure breaks down.  Well, with foreign key constraints in your db this should be solved for MOST (but not all) cases.  
@@ -136,7 +136,7 @@ Getting back to an earlier point, seeing this should probably scare you a little
 <p>
 Code to convert a Builder to csv:
 </p>
-<pre class="prettyprint">    def print_csv(node,indent) {
+{% highlight text %}    def print_csv(node,indent) {
         def result = ""
         result += "," * indent
         result += "${node.name()},"
@@ -150,12 +150,12 @@ Code to convert a Builder to csv:
         }
         result
     }
-</pre>
+{% endhighlight %}
 
 <p>
 Code to convert csv to a Builder:
 </p>
-<pre class="prettyprint">    def static read_csv(str) {
+{% highlight text %}    def static read_csv(str) {
         def lasts = []
         def root
         str.split('\n').each {line -&gt;
@@ -193,7 +193,7 @@ Code to convert csv to a Builder:
         }
         root
     }    
-</pre>
+{% endhighlight %}
 
 <h1>Conclusion</h1>
 <p>

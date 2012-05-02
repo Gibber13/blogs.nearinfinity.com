@@ -35,7 +35,7 @@ Or sometimes I just wanted to run a series of commands on one host, verifying th
 <p>
 For instance: given that we have host-A, host-B, host-C, and I want to run commands doA, doB, and doC by default Capistrano will run:
 </p>
-<pre>    HostA &gt; doA
+{% highlight text %}    HostA &gt; doA
     HostB &gt; doA
     HostC &gt; doA
     HostA &gt; doB
@@ -45,9 +45,9 @@ For instance: given that we have host-A, host-B, host-C, and I want to run comma
     HostB &gt; doC
     HostC &gt; doC
 
-</pre>
+{% endhighlight %}
 <p>But what I needed it to do was:</p>
-<pre>    HostA &gt; doA
+{% highlight text %}    HostA &gt; doA
     HostA &gt; doB
     HostA &gt; doC
     HostB &gt; doA
@@ -57,7 +57,7 @@ For instance: given that we have host-A, host-B, host-C, and I want to run comma
     HostC &gt; doB
     HostC &gt; doC
 
-</pre>
+{% endhighlight %}
 <p>
 By using the roles that we already have configured for our deploy tasks with Capistrano we were able to create a few support methods that issue commands in the order that we want.
 </p>
@@ -66,7 +66,7 @@ By using the roles that we already have configured for our deploy tasks with Cap
 <p>
 The each_host method is used to iterate through our configured hosts. The method prints out the hostname (which is important for the look of the script's output) sets the current host, then yields the block that was passed into it.
 </p>
-<pre class="prettyprint">  def each_host
+{% highlight text %}  def each_host
     roles[:web].each do |host|
       print_hostname host
       set(:current_host, host.host)
@@ -74,53 +74,53 @@ The each_host method is used to iterate through our configured hosts. The method
     end
   end
 
-</pre>
+{% endhighlight %}
 <br />
 <h4>run_serial</h4>
 <p>
 The run_serial method runs the given command, but only on the current host, yielding the output of the command and the name of the output stream (:out or :err). The ssh channel we don't have much use for.
 </p>
-<pre class="prettyprint">  def run_serial(command)
+{% highlight text %}  def run_serial(command)
     run command, :hosts =&gt; fetch(:current_host) do |chan, stream, data|
       yield stream, data
     end
   end
 
-</pre>
+{% endhighlight %}
 <br />
 <h4>run_primary</h4>
 <p>
 We also have a primary server set in our configuration. We can create a few more support methods that take advantage of the primary host, for issuing command on one host only.
 </p>
-<pre class="prettyprint">  def run_primary(command)
+{% highlight text %}  def run_primary(command)
     run command, :hosts =&gt; fetch(:primary) do |chan, stream, data|
       set_current_host channel
       yield stream, data
     end
   end
 
-</pre>
+{% endhighlight %}
 <br />
 <h4>currently_primary?</h4>
 <p>
 Having a method that tells us if we're currently on the primary host is helpful as well.
 </p>
-<pre class="prettyprint">  def currently_primary?
+{% highlight text %}  def currently_primary?
     fetch(:current_host) == fetch(:primary).host
   end
 
-</pre>
+{% endhighlight %}
 <br />
 <h4>set_current_host</h4>
 <p>
 The current host can also be set from the ssh channel. This method is called from the run_primary method, but this needs to be called when we call the default run method.
 </p>
-<pre class="prettyprint">  def set_current_host(channel)
+{% highlight text %}  def set_current_host(channel)
     host = channel.properties[:host]
     print_hostname host
     set(:current_host, host)
   end
-</pre>
+{% endhighlight %}
 <p>
 Now we can write tasks that execute in in command order, execute tasks just on the primary host, and as we're preforming checks we print out the current host, so we're able to keep track of where we are. <br /></p><p><br /></p><p><br /></p>
 
@@ -133,29 +133,29 @@ Because printing the script output out to the command line is an important part 
 <p>
 This is the print_hostname method that was mentioned above. Everytime we move to a different host this method prints out the hostname.
 </p>
-<pre class="prettyprint">  def print_hostname(name)
+{% highlight text %}  def print_hostname(name)
     puts "    Host: #{grey(name)} &gt;"
   end
 
-</pre>
+{% endhighlight %}
 <br />
 <h4>step</h4>
 <p>
 Also at the beginning of every task I wanted to print the task name and the number of the task.
 </p>
-<pre class="prettyprint">  def step(name)
+{% highlight text %}  def step(name)
     step = fetch(:step)
     puts "\n[#{step}] #{name}"
     set(:step, step+1)
   end
 
-</pre>
+{% endhighlight %}
 <br />
 <h4>failure</h4>
 <p>
 The failure method is called when a check fails. It prints the failure message, and stores it under the current hostname so that it can be printed again after all the checks have been done. If the expected or actual parameters are included it prints those along with the message, otherwise just the message is printed.
 </p>
-<pre class="prettyprint">  def failure(message, expected=nil, actual=nil)
+{% highlight text %}  def failure(message, expected=nil, actual=nil)
     host = fetch(:current_host)
     complete = (expected || actual) ?
       "#{message} Expected: #{grey(expected)} Actual: #{grey(actual)}" :
@@ -168,23 +168,23 @@ The failure method is called when a check fails. It prints the failure message, 
     log_item(complete, :fail)
   end
 
-</pre>
+{% endhighlight %}
 <br />
 <h4>pass</h4>
 <p>
 The pass method is called when a check passes.
 </p>
-<pre class="prettyprint">  def pass(message)
+{% highlight text %}  def pass(message)
     log_item(message, :pass)
   end
 
-</pre>
+{% endhighlight %}
 <br />
 <h4>log_item</h4>
 <p>
 The log_item method is called by the pass and failure methods. The method includes a warn and empty status which can also be used by the tasks when printing their status.
 </p>
-<pre class="prettyprint">  def log_item(message, flag=nil)
+{% highlight text %}  def log_item(message, flag=nil)
     status = case flag
       when :pass : "      [#{green("PASS")}] "
       when :fail : "      [#{red("FAIL")}] "
@@ -194,13 +194,13 @@ The log_item method is called by the pass and failure methods. The method includ
     puts "#{status}#{message}"
   end
 
-</pre>
+{% endhighlight %}
 <br />
 <h4>colorize</h4>
 <p>
 The methods below handle the coloring of the text as it's printed to the command line. This was actually pretty fun figuring out. Every script should have fancy colorized output. (and now every script of mine will, muaha ha ha)
 </p>
-<pre class="prettyprint">  def red(text)
+{% highlight text %}  def red(text)
     colorize(text, 31)
   end
 
@@ -220,7 +220,7 @@ The methods below handle the coloring of the text as it's printed to the command
     "\e[#{color_code}m#{text}\e[0m"
   end
 
-</pre>
+{% endhighlight %}
 
 
 
@@ -230,7 +230,7 @@ Now that all that's taken care of we can start writing some actual Capistrano ta
 </p>
 <br />These server check tasks all share common startup and finish tasks that need to be run before and after any one of the tasks are run, or when the entire suite is run. This is defined using Capistrano's :start and :finish callbacks, but should only be run for the check tasks.
 
-<pre class="prettyprint">  TASK_LIST = [
+{% highlight text %}  TASK_LIST = [
     "check:all",
     "check:environment_variables",
     "check:middleware_versions",
@@ -239,26 +239,26 @@ Now that all that's taken care of we can start writing some actual Capistrano ta
   on :start, 'check:setup', :only =&gt; TASK_LIST
   on :finish, 'check:print_errors', :only =&gt; TASK_LIST
 
-</pre><h4>setup</h4>
+{% endhighlight %}<h4>setup</h4>
 
   
 <p>
 The setup task handles whatever specific setup needs to be done, but at the very least the step and errors variables need to be defined. They're used by the printing methods. Also, all of the tasks below are inside of the check namespace.
 </p>
-<pre class="prettyprint">  namespace :check do
+{% highlight text %}  namespace :check do
 
     task :setup do
       set :step, 1
       set :errors, {}
     end
 
-</pre>
+{% endhighlight %}
 <br />
 <h4>print_errors</h4>
 <p>
 The print errors method is run after all the checks have been run to print a convenient list of errors grouped by host. This keeps errors from being lost in the output.
 </p>
-<pre class="prettyprint">  task :print_errors do
+{% highlight text %}  task :print_errors do
     errors = fetch(:errors)
     if (errors.size() &gt; 0)
       print "\n ==== #{red 'Errors'} ===="
@@ -269,7 +269,7 @@ The print errors method is run after all the checks have been run to print a con
     end
   end
 
-</pre>
+{% endhighlight %}
 
 
 
@@ -282,7 +282,7 @@ The meat of the script are in the validation tasks. Out current script has fifte
 <p>
 This task executes one command on each server and validates the output from a list of expected results. This form is used by our script to check environment variables, commands on the sudo list, and programs in the cron, all of which can be read and verified with one command. I'm just including the validateVariable, and getVariable methods here to show the pass and failure methods.
 </p>
-<pre class="prettyprint">  VARIABLES = [
+{% highlight text %}  VARIABLES = [
     { :key =&gt; 'KEY', :value =&gt; /Expected Value/ },
     { :key =&gt; 'KEY', :value =&gt; /Expected Value/ },
     { :key =&gt; 'KEY', :value =&gt; /Expected Value/ }]
@@ -313,13 +313,13 @@ This task executes one command on each server and validates the output from a li
     result[1]
   end
 
-</pre>
+{% endhighlight %}
 <br />
 <h4>Tasks that run multiple commands on the same host</h4>
 <p>
 Most of the tasks in our validation script run multiple commands on the same host, using the each_host and run_serial methods. This allows us to read files and act on the values in those files. It's alse used because the script output looks better organized when running tasks in host order. The task below itterates through a list of standard directories, then a list of configured directories. For each directory a run_serial command is executed to see if the directory exists, then once the lists have been gone through it's done again on the next host.
 </p>
-<pre class="prettyprint">  task :serial_example do
+{% highlight text %}  task :serial_example do
     step "Run multiple commands on a host"
     each_host do
       DIRECTORIES.each do |dir|
@@ -349,13 +349,13 @@ Most of the tasks in our validation script run multiple commands on the same hos
     end
   end
 
-</pre>
+{% endhighlight %}
 <br />
 <h4>Tasks using different server combinations</h4>
 <p>
 Here's a command that runs on the primary host, reads a file, then acts across multiple hosts. We do something like this to verify that the Apache configuration is correct. We know the httpd.conf is the same across hosts, but we want to verify that the files and directories that are in the configuration are actually on the host in question.
 </p>
-<pre class="prettyprint">  task :primary_example do
+{% highlight text %}  task :primary_example do
     step "Verifying Certificates"
     path = fetch(:path_to_httpd_conf)
       certs = {}
@@ -387,12 +387,12 @@ Here's a command that runs on the primary host, reads a file, then acts across m
       end
     end
 
-</pre>
+{% endhighlight %}
 <br />
 <p>
 And finally we need a task that runs the whole suite of validation tasks. The all task does nothing itself, it just runs all of the other tasks.
 </p>
-<pre class="prettyprint">  desc "Run all of the validation tasks"
+{% highlight text %}  desc "Run all of the validation tasks"
   after "check:all",
     "check:environment_variables",
     "check:middleware_versions",
@@ -401,12 +401,12 @@ And finally we need a task that runs the whole suite of validation tasks. The al
   task :all do
   end
 
-</pre>
+{% endhighlight %}
 <p>
 Then to execute the cap task you would type is:
 </p>
-<pre>cap -q production check:all
-</pre>
+{% highlight text %}cap -q production check:all
+{% endhighlight %}
 <p>
 And watch as all the beautiful passes and fails scroll by, though hopefully more of the former.
 </p>

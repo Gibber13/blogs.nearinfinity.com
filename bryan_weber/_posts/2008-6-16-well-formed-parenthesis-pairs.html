@@ -102,7 +102,7 @@ Note 2: The algorithm takes a long time for large numbers because there are many
 <p>
 And finally, the ruby code!
 
-</p><pre class="prettyprint">class DirectedBinaryGraphNode
+</p>{% highlight text %}class DirectedBinaryGraphNode
   attr_accessor :last_lower, :last_higher, :next_lower, :next_higher, :x, :y
   def initialize(x,y)
     @x = x; @y = y
@@ -171,5 +171,5 @@ create_data_structure(n)
 walk_data_structure("",@nodes[[n,0]])
 puts "Total number: #{@cnt}"
 
-</pre>
+{% endhighlight %}
  

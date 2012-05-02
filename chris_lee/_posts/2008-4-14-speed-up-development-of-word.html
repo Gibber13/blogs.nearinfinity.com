@@ -23,8 +23,8 @@ tags: Java
 
 <p>First off, you need a template engine. In our simple case, create a Word document and place the following text in it. But in the real world, this would be a complicated table, picture, and everything-else-Word-has-to-offer filled document that you don't want to build back from scratch in iText. </p>
 
-<pre class="prettyprint">Hello World, My name is ${firstName} and I work for ${company}.
-</pre>
+{% highlight text %}Hello World, My name is ${firstName} and I work for ${company}.
+{% endhighlight %}
 
 <p>Save the document as whatever named you'd like (i.e. simplecase) and save it as a Word XML document.</p>
 
@@ -32,7 +32,7 @@ tags: Java
 
 <p>Here is a snippet of code that shows the creation of a Velocity Processor (the engine), a context (what will be put into the template to create the document), and the processing of the template into a document.</p>
 
-<pre class="prettyprint">    
+{% highlight text %}    
     VelocityProcessor vcp = new VelocityProcessor();
     VelocityContext vc = new VelocityContext();
 
@@ -42,33 +42,33 @@ tags: Java
     vc.put("company", "Near Infinity");
 
     ByteArrayInputStream bias = (ByteArrayInputStream) vcp.mergeData(vc);
-</pre>
+{% endhighlight %}
 
 <p>Let's take a look at the code and discuss, briefly, what it does.</p>
 
 <p>This block of code creates the Velocity processor and Velocity context. The processor will consume the template and the context, process the template, and output the processed document. The third line creates a Velocity context which will be used store key/value pairs of data. In the next snippet of code, you will see how this used.</p>
  
-<pre class="prettyprint">     VelocityProcessor vcp = new VelocityProcessor();
+{% highlight text %}     VelocityProcessor vcp = new VelocityProcessor();
      VelocityContext vc = new VelocityContext();
-</pre>
+{% endhighlight %}
 
 <p>This block of code tells the processor (vcp) which template file to process via setTemplateFile(..). And the last two lines tell the context what to replace ${firstName} and ${company} with when processing the template file.</p>
 
-<pre class="prettyprint">     vcp.setTemplateFile("simplecase.xml");
+{% highlight text %}     vcp.setTemplateFile("simplecase.xml");
      
      vc.put("firstName", "Chris");
      vc.put("company", "Near Infinity");
-</pre>
+{% endhighlight %}
 
 <p>This last block of code is the actual processing directive. Calling mergeData(..) on the processor, passing in the context to process with, sends the processor on its way to merging in the context to the template file. The output of this call is a byte array stream.</p>
 
-<pre class="prettyprint">     ByteArrayInputStream bias = (ByteArrayInputStream) vcp.mergeData(vc);
-</pre>
+{% highlight text %}     ByteArrayInputStream bias = (ByteArrayInputStream) vcp.mergeData(vc);
+{% endhighlight %}
 
 <p> And that's it! Now we have created a byte array stream with the new document, processed with the context. Simply write this stream out to a file and open it with Word. You will see the contents of the document are:</p>
 
-<pre class="prettyprint">    Hello World, My name is Chris and I work for Near Infinity.
-</pre>
+{% highlight text %}    Hello World, My name is Chris and I work for Near Infinity.
+{% endhighlight %}
 
 <p> Now how did this benefit me in ways that iText could not? Well, in this example, even though it's pretty simple, I turned probably 10-15 lines of iText code into 6, adding in the file output code would bring it to a shade over 10. But more importantly, had this document been more complicated with tables, tables inside of tables, pictures, graphics, different fonts and the like, it could have been created inside of Word by one of your design department persons, and then given to you and retrofitted with VTL. Then, you would pass the context and template file to Velocity and voila, a Word export. And that's a lot simpler than coding <b>hundreds</b> of lines of iText code to create a document that, more likely not, will not be the same as the intended Word document.</p>
 

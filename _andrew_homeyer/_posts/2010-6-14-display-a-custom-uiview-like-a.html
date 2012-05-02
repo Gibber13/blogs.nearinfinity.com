@@ -7,8 +7,8 @@ tags: iPhone
 ---
 <div>Have you ever tried to use a UIActionSheet to display more than just buttons? It doesn't work, as you have probably figured out. The common solution is to create a custom UIViewController and display it using UIViewController's <a href="http://developer.apple.com/iphone/library/documentation/uikit/reference/UIViewController_Class/Reference/Reference.html#//apple_ref/doc/uid/TP40006926-CH3-SW29">presentModalViewController</a>, which can give you a nice slide up transition, much like how a UIActionSheet appears.</div><div><br /></div><div>But that solution is missing something. A UIActionSheet slides up, but not all the way, leaving a semi-transparent covering over the parent view. Let's try to display a custom view with this same effect.</div><div><br /></div><div>Full sample code can be found on <a href="http://github.com/homeyer/CustomUIActionSheet">github</a>.</div><div><br /></div><div>Let's start fresh by creating a new project in Xcode and choosing "Navigation-based Application." This gives us a RootViewController and an AppDelegate.</div><div><br /></div><div><font class="Apple-style-span" style="font-size: 1.25em; ">1. Create our custom action sheet</font></div><div><br /></div><div>Create a new UIViewController subclass with XIB (right click on Classes -&gt; Add -&gt; New File). I'm naming it CustomUIActionSheetViewController.</div><div>Add an outlet in the parent view controller (RootViewController) for our action sheet and synthesize it.</div><div><br /></div><div>
 
-<pre class="prettyprint">@property(nonatomic, retain) IBOutlet
-CustomUIActionSheetViewController *customUIActionSheetViewController;</pre><div><br />
+{% highlight text %}@property(nonatomic, retain) IBOutlet
+CustomUIActionSheetViewController *customUIActionSheetViewController;{% endhighlight %}<div><br />
 
 </div></div><div>Open the RootViewController.xib in Interface Builder, drag a View Controller onto the document window. Tell it to be the CustomUIActionSheetViewController we just created by changing the Class property in the Identity Inspector, and the NIB Name in the Attributes Inspector.&nbsp;</div><div><br /></div><div>Connect the outlet we created from the File's Owner to the controller.</div><div><br /></div><div>At this point we've created our action sheet view controller and given the RootViewController a reference to it. You won't see anything different from a new project when you build and run.</div><div><br /></div>
 
@@ -17,20 +17,20 @@ CustomUIActionSheetViewController *customUIActionSheetViewController;</pre><div>
 
 <div><div>
 
-<pre class="prettyprint">- (void)showCustomView {   
+{% highlight text %}- (void)showCustomView {   
     [self.navigationController.view
         addSubview:self.customUIActionSheetViewController.view];
 
     [self.customUIActionSheetViewController viewWillAppear:NO];
 }
-</pre>
+{% endhighlight %}
 
 </div></div><div><br /></div>
 
 
 <div>We're simply adding the view as a subview, we'll do the work to slide up the content in our custom view controller. Note that we need to <a href="http://stackoverflow.com/questions/131062/iphone-viewwillappear-not-firing">call viewWillAppear ourselves</a>, it's called for you when using presentModalViewController.</div><div><br /></div><div>Add a button when the RootViewController first loads to show our custom action sheet.</div><div><br /></div>
 
-<pre class="prettyprint">- (void)viewDidLoad {
+{% highlight text %}- (void)viewDidLoad {
     [super viewDidLoad];
     self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] 
         initWithBarButtonSystemItem:UIBarButtonSystemItemAction 
@@ -38,23 +38,23 @@ CustomUIActionSheetViewController *customUIActionSheetViewController;</pre><div>
         action:@selector(showCustomView)] autorelease];
 }
 
-</pre>
+{% endhighlight %}
 
 <div>
 At this point, when you click the button in the navigation bar, you should see the custom view immediately appear without any transition.</div><div><br /></div><div><font class="Apple-style-span" style="font-size: 1.25em; ">3. Make background semi-transparent</font></div><div><br /></div><div>When the custom view loads, we want the parent view to be covered by a semi-transparent view.</div><div><br /></div><div>Open our custom action sheet NIB (CustomUIActionSheetViewController.xib) in Interface Builder.&nbsp;</div><div>In the Attributes Inspector for the UIView (there should only be one right now), click the background field. Change it's color to black (or the darkTextColor property), and change the Opacity to 50%.</div><div><br /></div><div><img alt="view_background_properties.png" src="http://www.nearinfinity.com/andrew_homeyer/assets/view_background_properties.png" width="228" height="383" class="mt-image-none" style="" /></div><div><br /></div><div>When you build and run and click the right navigation button you should now see the semi-transparent view cover the parent view.</div><div><br /></div><div><font class="Apple-style-span" style="font-size: 1.25em; ">4. Add a view to hold our custom fields</font></div><div><br /></div><div>Drag a new UIView onto the NIB and attach it to a new outlet in View Controller. I'm calling it the actionSheetView.</div><div><br /></div>
 
-<pre class="prettyprint">@property(nonatomic, retain) IBOutlet UIView *actionSheetView;
-</pre>
+{% highlight text %}@property(nonatomic, retain) IBOutlet UIView *actionSheetView;
+{% endhighlight %}
 
 
 <div>Adjust the height of the view to be less than 480, but keep the width at 320. This will determine how far up we'll slide the view.</div><div><br /></div><div>Next, let's add a navigation bar and a 'done' button that will dismiss the dialog.</div><div><br /></div><div>Drag a Navigation Bar onto the view, and then a Navigation Item onto the Navigation Bar. Change the Navigation Item's title to 'Done' and&nbsp;change the Navigation Bar's title to whatever you want.</div><div><br /></div><div>Let's go ahead and add a stub in the the CustomUIActionSheetViewController's header for 'slideOut', make it a UIAction, and connect the done button to it in IB.</div><div><br /></div>
 
-<pre class="prettyprint">- (IBAction) slideOut;
-</pre>
+{% highlight text %}- (IBAction) slideOut;
+{% endhighlight %}
 
 <div><br /></div><div>At this point, when you click the right nav button, you won't see the view we just created because we haven't added it as a subview yet.</div><div><br /></div><div><font class="Apple-style-span" style="font-size: 1.25em; ">5. Add the slide up transition</font></div><div><br /></div><div>Create a new method to slide up the actionSheetView, and call it from the viewWillAppear method.</div><div><br /></div>
 
-<pre class="prettyprint">- (void)viewWillAppear:(BOOL)animated {
+{% highlight text %}- (void)viewWillAppear:(BOOL)animated {
     [self slideIn];	
 }
 
@@ -73,12 +73,12 @@ At this point, when you click the button in the navigation bar, you should see t
     self.actionSheetView.frame = frame;
     [UIView commitAnimations];
 }
-</pre>
+{% endhighlight %}
 
 
 <div>To do this, we change the frame of the actionSheetView so that its top is at the bottom of the screen, and then start an animation block. In the animation we change the frame again, this time setting it's top to be the height of the actionSheetView. When we commit the animation, the view will transition from it's current position (at the bottom) to the position defined in the animation block.</div><div><br /></div><div>When you build and run you should see the actionSheetView slide up when you click the right nav button.</div><div><br /></div><div><font class="Apple-style-span" style="font-size: 1.25em; ">6. Add the slide out transition</font></div><div><br /></div><div>To slide out the custom view when 'done' is clicked we need to implement the stub we created earlier.</div><div><br /></div>
 
-<pre class="prettyprint">- (void) slideOut {
+{% highlight text %}- (void) slideOut {
     [UIView beginAnimations:@"removeFromSuperviewWithAnimation" context:nil];
 	
     // Set delegate and selector to remove from superview when animation completes
@@ -98,6 +98,6 @@ At this point, when you click the button in the navigation bar, you should see t
         [self.view removeFromSuperview];
     }
 }
-</pre>
+{% endhighlight %}
 
 <div><br /></div><div>Like before, we're going to change the origin of the frame wrapped in an animation block to slide out the view. We're doing a little extra work with setAnimationDidStopSelector. When the animation finishes, we want to remove our entire view (including the semi-transparent view), to go back to the state we were in before it was slid in. In the callback selector we simply use removeFromSuperview to do this.</div><div><br /></div><div>That's it! The actionSheetView should slide in when you click the right navigation button, and the done button should slide it out.</div><div><br /></div><div>Thanks to <a href="http://stackoverflow.com/questions/587681/how-to-use-presentmodalviewcontroller-to-create-a-transparent-view">this answer on Stack Overflow</a> for getting me started.</div><div><br /></div><div>Download or fork the sample code from&nbsp;<a href="http://github.com/homeyer/CustomUIActionSheet" style="text-decoration: underline; ">github</a>.</div><div><br /></div>  

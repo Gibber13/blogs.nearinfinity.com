@@ -21,7 +21,7 @@ tags: Java
 
 <p>In order to allow the Hibernate event-based validation to be bypassed, you need to create your own validation event listener and provide a way to disable validation temporarily. Since the actual validation logic doesn't change, and the only extra logic we need is to allow clients to turn validation off and then back on, we can extend Hibernate's <code>ValidateEventListener</code>. The following class is all you need (some lengthy JavaDocs have been omitted for brevity):</p>
 
-<pre class="prettyprint">package com.nearinfinity.common.hibernate.validator.event;
+{% highlight text %}package com.nearinfinity.common.hibernate.validator.event;
 
 import org.hibernate.event.PreInsertEvent;
 import org.hibernate.event.PreUpdateEvent;
@@ -82,7 +82,7 @@ public class OptionalValidateEventListener extends ValidateEventListener {
         return OptionalValidateEventListener.shouldValidateThreadLocal.get();
     }
 }
-</pre>
+{% endhighlight %}
 
 <p>The most important things about the above class are:</p>
 
@@ -102,7 +102,7 @@ public class OptionalValidateEventListener extends ValidateEventListener {
 
 <p>Once that's done you only need to figure out where you need to bypass validation and use code like the following, which is taken from one of our base Spring MVC web controller classes in my current project:</p>
 
-<pre class="prettyprint"> if (shouldPerformHibernateValidation()) {
+{% highlight text %} if (shouldPerformHibernateValidation()) {
      return onSubmitInternal(request, response, command, errors);
  }
  else {
@@ -115,7 +115,7 @@ public class OptionalValidateEventListener extends ValidateEventListener {
          OptionalValidateEventListener.turnValidationOn();
      }
  }
-</pre>
+{% endhighlight %}
 
 <p>In the above, the most important thing is that we use a <code>finally</code> block to ensure validation is turned back on regardless of what happened inside the <code>onSubmitInternal()</code> method. We essentially hid this code in a "framework" class so that it is not littered in all the places where we need to bypass validation. The implementation of <code>shouldPerformHibernateValidation()</code> method could be implemented any number of ways, but the point is that you need some way to decide to perform validation or bypass it. Once that decision is made it is easy to turn validation off, execute the code where the bypass occurs, and finally (pun intended) turn validation back on.</p>
 

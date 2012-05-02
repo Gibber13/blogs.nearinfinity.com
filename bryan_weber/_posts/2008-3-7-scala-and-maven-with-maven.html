@@ -7,7 +7,7 @@ tags: General
 ---
 Ok, so the documentation for maven-scala-plugin isn't quite perfect.  To save you some time, here is a fully functional pom.xml file that works as of March 6, 2008.
 
-<pre class="prettyprint">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+{% highlight text %}&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"&gt;
 
@@ -84,7 +84,7 @@ Ok, so the documentation for maven-scala-plugin isn't quite perfect.  To save yo
  
 &lt;/project&gt;
 
-</pre>
+{% endhighlight %}
 
 <h2>Some points of interest</h2>
 
@@ -103,19 +103,19 @@ The sourceDirectory and testSourceDirectory do not have to be specified if you d
 <p>
 So, you need to put your scala code in src/main/scala and your tests in src/test/scala.  The typical HelloWorld example could be saved to src/main/scala/HelloWorld.scala which looks like:
 </p>
-<pre class="prettyprint">package org.example {
+{% highlight text %}package org.example {
   object HelloWorld extends Application {
     println "hello"
   }
 }
-</pre>
+{% endhighlight %}
 
 Then from the command line run:
 
-<pre class="prettyprint">mvn clean compile
-</pre>
+{% highlight text %}mvn clean compile
+{% endhighlight %}
 
-<pre class="prettyprint">mvn scala:run
-</pre>
+{% highlight text %}mvn scala:run
+{% endhighlight %}
 
 And voila, you should see "hello" print to the console. 

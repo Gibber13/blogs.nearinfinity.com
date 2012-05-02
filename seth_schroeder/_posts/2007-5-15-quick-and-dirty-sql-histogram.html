@@ -16,16 +16,16 @@ tags: SQL
 
 </p><p>A basic statistical query returns:
 
-</p><pre class="prettyprint">+-----+-----+-----+--------+
+</p>{% highlight text %}+-----+-----+-----+--------+
 | max | min | avg | stddev |
 +-----+-----+--------------+
 | 456 |  83 | 203 |   90   |
 +-----+-----+-----+--------+
-</pre>
+{% endhighlight %}
 
 <p>The standard deviation seems awfully large. Maybe not many of the scores are close to the mean score of 203? What if another query could show the distribution?
 
-</p><pre id="dual" class="prettyprint">+--------+----------+--------+----------+         +--------+----------+--------+----------+
+</p>{% highlight text %}+--------+----------+--------+----------+         +--------+----------+--------+----------+
 | bucket | contents | _floor | _ceiling |         | bucket | contents | _floor | _ceiling |
 +--------+----------+--------+----------+         +--------+----------+--------+----------+
 |      1 |        8 |     83 |      157 |         |      1 |        4 |     83 |      119 |
@@ -39,9 +39,9 @@ tags: SQL
                                                   |      9 |        0 |    379 |      415 |
                                                   |     10 |        1 |    416 |      452 |
                                                   +--------+----------+--------+----------+
-</pre>
+{% endhighlight %}
 <p>The histogram on the left has fewer, larger buckets. This is a lot more informative than the mean &amp; stddev. The histogram on the right uses more, smaller buckets. Maybe this is too verbose? What if you wanted seven buckets?
-</p><pre class="prettyprint">        update dhg.bucket_count set num_buckets = 7;
+</p>{% highlight text %}        update dhg.bucket_count set num_buckets = 7;
         select * from dhg.results;
 
         +--------+----------+--------+----------+
@@ -55,16 +55,16 @@ tags: SQL
         |      6 |        0 |    348 |      400 |
         |      7 |        1 |    401 |      453 |
         +--------+----------+--------+----------+
-</pre>
+{% endhighlight %}
 
 <p>Instructions:
 </p><ol>
 <li>Insert numbers to be analyzed:</li>
-<pre class="prettyprint">class="prettyprint"INSERT INTO dhg.source SELECT foo FROM bar;</pre>
+{% highlight text %}class="prettyprint"INSERT INTO dhg.source SELECT foo FROM bar;{% endhighlight %}
 <li>Choose how many buckets in the histogram</li>
-<pre class="prettyprint">UPDATE dhg.bucket_count SET num_buckets = 10;</pre>
+{% highlight text %}UPDATE dhg.bucket_count SET num_buckets = 10;{% endhighlight %}
 <li>Read the results!</li>
-<pre class="prettyprint">SELECT * FROM dhg.results_full;</pre>
+{% highlight text %}SELECT * FROM dhg.results_full;{% endhighlight %}
 </ol>
 
 <h2>Materials:</h2>

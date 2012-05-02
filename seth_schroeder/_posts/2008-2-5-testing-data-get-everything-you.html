@@ -30,15 +30,15 @@ tags: General
   </li><li>licensed with the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2</a> license
 </li></ul>
 <p>And putting the cart before the horse, here are the results of the code:
-</p><pre>--Output from test1--
+</p>{% highlight text %}--Output from test1--
 --Output from test2--
 a: wanted A, got B
 --Output from test3--
 caught exception java.lang.Exception: c!?!?
 c was ignored!
-</pre>
+{% endhighlight %}
 <p>Enough, here's the code:</p>
-<pre><a name="1"> 1:</a> class TestStuff extends GroovyTestCase {
+{% highlight text %}<a name="1"> 1:</a> class TestStuff extends GroovyTestCase {
 <a name="2"> 2:</a>
 <a name="3"> 3:</a>     def inputOutput = [:]
 <a name="4"> 4:</a>  
@@ -102,9 +102,9 @@ c was ignored!
 <a name="62">62:</a>         a.each { key, val -&gt; if (a[key] != b[key]) diff[key] = val }
 <a name="63">63:</a>         return diff
 <a name="64">64:</a>     }
-</pre>
+{% endhighlight %}
 <p>Wait wait wait -- real programs are built with classes!</p>
-<pre>// ... imagine Ahhbject.groovy (say it with a Boston accent :)
+{% highlight text %}// ... imagine Ahhbject.groovy (say it with a Boston accent :)
 class Ahhbject {
     Object val
     String toString() { "${this.class.name}@${hashCode()} ${val}" }
@@ -124,9 +124,9 @@ class Ahhbject {
 a: wanted Ahhbject@3260319 A, got Ahhbject@1806345 A
 b: wanted Ahhbject@9259311 B, got Ahhbject@12565457 B
 c: wanted Ahhbject@12823094 C, got Ahhbject@14416801 C
-    </pre>
+    {% endhighlight %}
     <p>Curses! It doesn't just work. The cause is one of my pet peeves -- a class which can't identify distinct but equivalent instances. Grails makes this easy to fix by bundling the Apache <a href="http://commons.apache.org/lang/api/org/apache/commons/lang/builder/package-summary.html">commons lang</a> library. HashCodeBuilder and EqualsBuilder make quick work of implementing hashCode and equals:
-</p><pre>    int hashCode() { HashCodeBuilder.reflectionHashCode(this) }
+</p>{% highlight text %}    int hashCode() { HashCodeBuilder.reflectionHashCode(this) }
     boolean equals(Object obj) { EqualsBuilder.reflectionEquals(this, obj) }
-</pre>
+{% endhighlight %}
 <p>Add those two lines and <i>ta-da</i>! Fit for data testing!</p> 

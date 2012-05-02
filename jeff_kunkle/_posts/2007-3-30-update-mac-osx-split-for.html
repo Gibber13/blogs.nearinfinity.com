@@ -11,7 +11,7 @@ tags: Mac OS X
 
 <p>The short script is shown below. Please note that it is currently hard-coded for version 1.21 of split. You may want to check and see if there is a newer version before running the script.</p>
 
-<pre class="prettyprint lang-bsh">#!/bin/bash
+{% highlight text %}#!/bin/bash
 curl -o split.c "http://cvsweb.netbsd.org/bsdweb.cgi/~checkout~/src/usr.bin/split/split.c?rev=1.21&amp;content-type=text/plain"
 perl -p -i -e 's/#include <sys\/cdefs.h>/#include <sys\/stat.h>\n#include <sys\/cdefs.h>/' split.c
 cc -Os -o split split.c
@@ -21,4 +21,4 @@ sudo chmod ugo-w /usr/bin/split
 sudo chmod ugo+rx /usr/bin/split
 sudo chown root:wheel /usr/bin/split
 echo "Upgrade Complete."
-</sys\/cdefs.h></sys\/stat.h></sys\/cdefs.h></pre> 
+</sys\/cdefs.h></sys\/stat.h></sys\/cdefs.h>{% endhighlight %} 

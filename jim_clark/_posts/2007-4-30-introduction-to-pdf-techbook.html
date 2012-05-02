@@ -46,17 +46,17 @@ lists.&nbsp; We'll start with a basic example.&nbsp;
 <p>
 Headers, similar to the &lt;H1-5&gt; tags in HTML, are supported up to five
 headers by using the somewhat awkward format <code>#&lt;heading-text&gt;</code>, e.g.
-</p><pre>    1&lt;Level 1&gt;
+</p>{% highlight text %}    1&lt;Level 1&gt;
     2&lt;Level 2&gt;
     3&lt;Level 3&gt;
     4&lt;Level 4&gt;
-</pre>
+{% endhighlight %}
 produces...<br /><br />
 <form mt:asset-id="217" class="mt-enclosure mt-enclosure-image" style="display: inline;" contenteditable="false"><img alt="headings.JPG" src="http://www.nearinfinity.com/blogs/headings.JPG" class="mt-image-none" style="" height="112" width="692" /></form><br /><br />
 
 With TechBook you can create bulleted lists using "discs" or standard bullets.&nbsp;
 Here's an example showing how to create a bulleted list using the disc bullets.&nbsp; (To create standard bullets replace "disc" with "bullet")
-<pre>    .blist disc
+{% highlight text %}    .blist disc
     Line item 1 with disc
     .endblist
     .blist disc
@@ -65,39 +65,39 @@ Here's an example showing how to create a bulleted list using the disc bullets.&
     .blist disc
     Line item 3 with disc
     .endblist
-</pre>
+{% endhighlight %}
 produces...<br /><br />
 <form mt:asset-id="218" class="mt-enclosure mt-enclosure-image" style="display: inline;" contenteditable="false"><img alt="disc.JPG" src="http://www.nearinfinity.com/blogs/disc.JPG" class="mt-image-none" style="" height="71" width="190" /></form>
 
 
 <p>
 In addition to headings and lists, TechBook allows you to preformat text and identify code sections.&nbsp;&nbsp; E.g.
-    </p><pre>    .pre
+    </p>{% highlight text %}    .pre
            Pre line 1
            Pre line 2
     .endpre
-    </pre>
+    {% endhighlight %}
 
 produces...<br /><br />
 <form mt:asset-id="219" class="mt-enclosure mt-enclosure-image" style="display: inline;" contenteditable="false"><img alt="pre.JPG" src="http://www.nearinfinity.com/blogs/pre.JPG" class="mt-image-none" style="" height="51" width="115" /></form>&nbsp;<br /><br />
 and
-    <pre>    .code
+    {% highlight text %}    .code
     pdf = PDF::Writer.new
     pdf.select_font "Times-Roman"
     pdf.text "Hello Ruby", :font =&gt;14, :justification =&gt; :left
     pdf.save_as("e:/hello_ruby.pdf")
     .endcode
-    </pre>
+    {% endhighlight %}
 
 produces...<br /><br />
 <form mt:asset-id="220" class="mt-enclosure mt-enclosure-image" style="display: inline;" contenteditable="false"><img alt="code.jpg" src="http://www.nearinfinity.com/blogs/code.jpg" class="mt-image-none" style="" height="73" width="524" /></form>&nbsp;<br /><br />
 After you've created your content using the TechBook markup, it's easy to create a new instance of the PDF::TechBook class
 and produce the PDF file.  The following is an example, where "my_content" is your marked-up content<br /><br />
-    <pre>    pdf = PDF::TechBook.new
+    {% highlight text %}    pdf = PDF::TechBook.new
     pdf.select_font "Times-Roman"
     pdf.techbook_parse <span style="color: blue;">my_content</span>
     pdf.save_as("c:/temp/hello_ruby.pdf")
-    </pre>
+    {% endhighlight %}
 
 
 <p>

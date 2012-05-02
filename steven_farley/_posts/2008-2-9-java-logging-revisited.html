@@ -9,7 +9,7 @@ tags: Java
 
 <p>So let's assume that you have chosen to use Java Logging, but you are not totally sold on the API.  You could choose to use Commons Logging if you don't mind the extra dependency.  But with a minimal amount of effort, it's not so difficult to write a thin wrapper around Java Logging that makes it more convenient to use than even the Apache offerings:</p>
 
-<pre class="prettyprint">public final class Log {
+{% highlight text %}public final class Log {
   private Log() { }
 
   private static final Map&lt;String, Logger&gt; loggers = new HashMap&lt;String, Logger&gt;();
@@ -70,7 +70,7 @@ tags: Java
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 <p>This particular implementation provides the following advantages:</p>
 

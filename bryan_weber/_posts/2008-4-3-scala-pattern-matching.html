@@ -11,8 +11,8 @@ Scala has pattern matching... so what's the big deal?  If you are a Java develop
 <h2>Tuples</h2>
 A tuple is a fixed size data structure that allows data to be of different types.  Scala has a convenient syntax for tuples that looks like this:  
 
-<pre class="prettyprint">(1, 2.0, "three")
-</pre>
+{% highlight text %}(1, 2.0, "three")
+{% endhighlight %}
 
 Tuples are typically used instead of Lists or Arrays when the data types of the objects are not all the same.
 
@@ -20,74 +20,74 @@ Tuples are typically used instead of Lists or Arrays when the data types of the 
 <h2>Case Classes</h2> 
 In scala a case class is a special type of class (with some restrictions) that "exports its constructor parameters".  So what does that mean?  It means that you conveniently create and compare instances of the class.  Pattern matching will even allow for some of the values to be compared and others to be set in one operation!
 
-<pre class="prettyprint">case class Foo(firstData:Int, secondData:Int)
-</pre>
+{% highlight text %}case class Foo(firstData:Int, secondData:Int)
+{% endhighlight %}
 
 <h2>Pattern Matching</h2>
 
 <h3>First, pattern matching is a glorified switch statement.</h3>
-<pre class="prettyprint">x match {
+{% highlight text %}x match {
   case 1 =&gt;
     println("x is 1")
   case _ =&gt;
     println("x is not 1")
 }
-</pre>
+{% endhighlight %}
 
-<pre class="prettyprint">val x = Foo(3,5)
+{% highlight text %}val x = Foo(3,5)
 x match {
   case Foo(z,5) =&gt;
     println(z)
   case _ =&gt;
     println("we didn't have a match")
 }
-</pre>
+{% endhighlight %}
 
 This says try to match the value of x and when you find a case that is true, execute the code block associated with that case.  Don't forget that _ in Scala is like a wildcard character so it is like a set of all values except for the values from the previous case blocks because they were executed earlier. Scala's only advantage over Java here is that you can use objects and not just primitives or Enums for comparison.
 
 <h3>Second, pattern matching is like built in assertions (well, sort of).</h3>
 
-<pre class="prettyprint">x match {
+{% highlight text %}x match {
   case 0 =&gt;
     println("x is 0")
   case 1 =&gt; 
     println("x is 1")
 }
-</pre>
+{% endhighlight %}
 
 So in this contrived binary checker, we check x for a value that is either 0 or 1.  So what would happen if x contained a value that was NOT 0 or 1?  A scala.MatchError exception would be thrown!  This allows for a clean form of defensive programming in that the developer does not have to handle all of the possible error conditions right here in the code.  The developer can code the "sucess cases" and let exceptions be thrown for the exception cases and those exceptions can be handled by an error handling layer someone else in the code.
 
 <h3>Third, pattern matching is useful for variable assignment</h3> 
 (assigning multiple variables on one line, assigning only certain variables, etc)  This is where tuples enter the picture again.
 
-<pre class="prettyprint">val a = (1,2.0,"three")
+{% highlight text %}val a = (1,2.0,"three")
 val (d,e,f) = a
 println(d)
 println(e)
 println(f)
-</pre>
+{% endhighlight %}
 
 This will produce the following results:
 
-<pre class="prettyprint">1
+{% highlight text %}1
 2.0
 three
-</pre>
+{% endhighlight %}
 
 Additionally, you could do:
 
-<pre class="prettyprint">val a = (1,2.0,"three")
+{% highlight text %}val a = (1,2.0,"three")
 val (b,2.0,"three") = a
 println(b)
-</pre>
+{% endhighlight %}
 
 This will print out 1 as expected.  But NOTE that if the values in the second and third positions of the tuple did NOT match then an exception would have been thrown!  So you could NOT do:
 
 <h3>The following example would throw an exception!</h3>
-<pre class="prettyprint">val a = (1,2.0,"three")
+{% highlight text %}val a = (1,2.0,"three")
 val (b,2.0,"3") = a
 println(b)
-</pre>
+{% endhighlight %}
 
 <br /><br />
 Many people like to think of pattern matching in this way. 

@@ -15,7 +15,7 @@ All of the code for this blog can be found in some shape or form in my node proj
 <p>
 The first thing you will need to do is initialize epan.
 
-<pre class="prettyprint">
+{% highlight text %}
 #include &lt;config.h&gt;
 #include &lt;epan/epan.h&gt;
 
@@ -101,13 +101,13 @@ void writeFailureMessage(
     filename,
     g_strerror(err));
 }
-</pre>
+{% endhighlight %}
 </p>
 
 <p>
 After initialization you probably want to open a scope for your packets. Scoping your packets allows Wireshark to do dissection, such as HTTP, across packets. In Wireshark the scope is called a capture file. Here is how we initialize it.
 
-<pre class="prettyprint">
+{% highlight text %}
 capture_file cfile;
 guint32 cum_bytes;
 gint64 data_offset;
@@ -155,14 +155,14 @@ nstime_t prev_cap_ts;
 nstime_set_unset(&first_ts);
 nstime_set_unset(&prev_dis_ts);
 nstime_set_unset(&prev_cap_ts);
-</pre>
+{% endhighlight %}
 
 </p>
 
 <p>
 Now we can dissect packets. To do this we initialize a frame, run the packet through epan, and cleanup.
 
-<pre class="prettyprint">
+{% highlight text %}
 struct wtap_pkthdr whdr;
 whdr.pkt_encap = encap;
 whdr.ts.secs = 0;
@@ -211,14 +211,14 @@ data_offset += whdr.caplen;
 // clean up
 epan_dissect_cleanup(&edt);
 frame_data_cleanup(&fdata);
-</pre>
+{% endhighlight %}
 
 </p>
 
 <p>
 This isn't all that useful unless we do something with the packet data. Wireshark returns the data, pretty much just like you see it in the Wireshark GUI, as a tree. Here are some of the things you can do with the data.
 
-<pre class="prettyprint">
+{% highlight text %}
 // iterate the current nodes children
 void iteratorFunction(proto_node *node, gpointer data) {
   // node = child node
@@ -257,6 +257,6 @@ proto_node *node = edt.tree; // grab the top level tree node
 // data can be anything you want it just gets
 // forwarded on to your iterator function.
 proto_tree_children_foreach(node, iteratorFunction, &data);
-</pre>
+{% endhighlight %}
 
 </p> 
