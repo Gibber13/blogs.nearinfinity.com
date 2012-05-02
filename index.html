@@ -1,0 +1,10 @@
+---
+layout: blogs
+title: Blogs
+max_blogs: 20
+---
+
+{% for blog in site.categories.blogs limit:page.max_blogs %}
+<h1><a href="{{ blog.url }}">{{ blog.title }}</a></h1>
+{% endfor %}
+
