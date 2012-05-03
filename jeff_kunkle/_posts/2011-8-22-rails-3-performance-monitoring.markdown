@@ -11,4 +11,4 @@ System Metrics is not intended to be a replacement for performance monitoring so
 
 You can find more information about System Metrics on the [System Metrics site](http://nearinfinity.github.com/system-metrics). Please kick the tires and let us know what you think.
 
-![System Metrics Detail View](/blogs/2011/08/22/system-metrics/smdetails.png) 
+![System Metrics Detail View](assets/smdetails.png) 
