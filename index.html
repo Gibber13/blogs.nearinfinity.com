@@ -1,10 +1,14 @@
 ---
-layout: blogs
-title: Blogs
+layout: allblogs
+title: Recent Blogs
 max_blogs: 20
 ---
 
-{% for blog in site.categories.blogs limit:page.max_blogs %}
-<h1><a href="{{ blog.url }}">{{ blog.title }}</a></h1>
+{% for post in site.categories.blogs limit:page.max_blogs %}
+<article>
+  <img src="/assets/images/users/{{ post.categories[1] }}.png"/>
+  <div class="blog-info">{% include post-list-item.html %}</div>
+</article>
 {% endfor %}
+<a href='/blogs/all/index.html' class='more'>View all Blogs...</a>
 
