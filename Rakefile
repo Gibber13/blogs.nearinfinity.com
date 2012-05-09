@@ -1,4 +1,4 @@
-task :default => ['blogs:create_blog_post']
+task :default => ['blogs:create']
 
 namespace :blog do
   desc "Create a Blank Blog Post (Run in the root of your blog directory)"
@@ -17,7 +17,7 @@ namespace :blog do
 
     # Ask the user if .markdown is ok
     STDOUT.puts "\nThe default blog type is markdown, if yes press enter otherwise enter a different extension (i.e. html):"
-    new_extension = STDIN.gets
+    new_extension = STDIN.gets.strip
     file_extension = '.' + new_extension if new_extension.length > 1
 
     # Standard Blog Layout
@@ -28,11 +28,11 @@ namespace :blog do
 
     # Query for Title
     STDOUT.puts "\nPlease enter the TITLE for your new blog post:"
-    yaml_data['title'] = STDIN.gets
+    yaml_data['title'] = STDIN.gets.strip
 
     # Query For Tags
     STDOUT.puts "\nPlease enter the relevant TAGS (space delimited) for your new blog post:"
-    yaml_data['tags'] = STDIN.gets.downcase
+    yaml_data['tags'] = STDIN.gets.strip.downcase
 
     #Get the current
     yaml_data['date'] = Time.now.to_s
@@ -63,7 +63,43 @@ namespace :blog do
     end
   end
 
-  desc "Create a Blank Blog Post (Run in the root of your blog directory)"
-  task :create_directory do
+  desc "Create a new user's blog directory structure (Run in the root of the repository)"
+  task :directory do
+    # Grab their first name
+    STDOUT.puts "\nPlease enter your first name:"
+    first_name = STDIN.gets.strip
+
+    # Grab their last name
+    STDOUT.puts "\nPlease enter your last name:"
+    last_name = STDIN.gets.strip
+
+    #Create and cd to your folder
+    folder_name = first_name.downcase + '_' + last_name.downcase
+    Dir.mkdir folder_name
+    Dir.chdir folder_name
+
+    #Create the posts and assets folders
+    Dir.mkdir '_posts'
+    Dir.mkdir 'assets'
+
+    # Index page information
+    index_info = {
+      'layout' => 'person',
+      'name' => first_name + ' ' + last_name,
+      'user' => folder_name,
+    }
+
+    #Create the shell index folder
+    # Open the blog file and write the data to the file
+    File.open('index.html', 'w') do |bio_page|  
+      bio_page.puts '---'
+      index_info.each do |key, value|
+        bio_page.puts key + ': ' + value
+      end
+      bio_page.puts 'social:'
+      bio_page.puts "\t twitter: (Your twitter url)"
+      bio_page.puts '---'
+      bio_page.puts '(Insert Bio Information)' 
+    end
   end
 end
