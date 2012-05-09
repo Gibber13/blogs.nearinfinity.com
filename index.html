@@ -6,7 +6,7 @@ max_blogs: 20
 
 {% for post in site.categories.blogs limit:page.max_blogs %}
 <article>
-  <img src="/assets/images/users/{{ post.categories[1] }}.png"/>
+  <img class='blog-img' src="/assets/images/users/{{ post.categories[1] }}.png"/>
   <div class="blog-info">{% include post-list-item-with-tags.html %}</div>
 </article>
 {% endfor %}
