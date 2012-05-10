@@ -85,8 +85,7 @@ namespace :blog do
     # Index page information
     index_info = {
       'layout' => 'person',
-      'name' => first_name + ' ' + last_name,
-      'user' => folder_name,
+      'user' => folder_name
     }
 
     #Create the shell index folder
