@@ -2,11 +2,10 @@
 layout: allblogs
 title: All Blogs
 ---
-<h1 class='no-articles hidden'>No Blogs Found</h1>
 {% for post in site.categories.blogs %}
-<article class='condensed'>
-  <div class="blog-info">{% include post-list-item-with-tags.html %}</div>
-</article>
+  <article class='condensed'>
+    <div class="blog-info">{% include post-list-item-with-tags.html %}</div>
+  </article>
 {% endfor %}
 
 
