@@ -7,7 +7,7 @@ type: blogs
 <a href='/blogs/all/index.html' class='more'>View all Blogs...</a>
 {% for post in site.categories.blogs limit:page.max_blogs %}
   <article>
-    <a href="/blogs/{{ post.categories[1]}}"><img class='blog-img' src="{{ post.categories[1] | user_image }}"/></a>
+    <a class='portrait-link' href="/blogs/{{ post.categories[1]}}"><img class='blog-img' src="{{ post.categories[1] | user_image }}"/></a>
     <div class="blog-info">{% include post-list-item-with-tags.html %}</div>
   </article>
 {% endfor %}
