@@ -5,11 +5,19 @@ title: "\"The Daily\" Image Carousel using Core Animation"
 date: 2011-02-08 07:00:00 -05:00
 tags: iPhone
 ---
+
+
 <p><i><a href="http://thedaily.com">The Daily</a><span class="Apple-style-span" style="font-style: normal;">,&nbsp;a newspaper published exclusively for the iPad,</span></i>&nbsp;has been a hot topic since it's launch last week. The experience, however, is less than spectacular. The app may eventually live up to the hype, but there are too many performance problems for me to even open it anymore.</p>
 
 The most&nbsp;excruciating&nbsp;is the carousel of articles. It looks like a twist on CoverFlow, but the scrolling is an agonizing experience. I'm <a href="http://blog.thedaily.com/post/3149162790/were-listening#comment-141665609">not the only one</a>&nbsp;to wonder why performance is so terrible. I wasn't the <a href="http://twitter.com/lorenb/status/33409769964306432">first</a> to try and improve it either. See for yourself how terrible it is...<div><br /></div>
-<iframe src="http://player.vimeo.com/video/19688051?color=ff9933" width="580" height="435" frameborder="0"></iframe><p style="text-align: center;"><a href="http://vimeo.com/19688051"><i>The Daily</i> Carousel Performance</a></p>
+
+{% video_tag :vimeo => 19688051 %}
+
+<p style="text-align: center;"><a href="http://vimeo.com/19688051"><i>The Daily</i> Carousel Performance</a></p>
 
 <p></p><div><br /></div><div>I spent some free time over the weekend implementing my own iPad image carousel using CoreAnimation: CALayer, CATransformLayer, and CATransform3D  with perspective transformations. <a href="http://forums.cnet.com/7723-10152_102-151057.html">Scrolls like butter</a>.</div><div><br /></div>
-<iframe src="http://player.vimeo.com/video/19688360?color=ff9933" width="580" height="435" frameborder="0"></iframe><p style="text-align: center;"><a href="http://vimeo.com/19688360"><i>The Daily</i> Carousel Reimplemented</a></p>
+
+{% video_tag :vimeo => 19688360 %}
+
+<p style="text-align: center;"><a href="http://vimeo.com/19688360"><i>The Daily</i> Carousel Reimplemented</a></p>
 <p></p><div><br /></div><div>The Xcode project can be downloaded here:&nbsp;<a href="http://www.nearinfinity.com/blogs/2011/02/07/DailyCarousel.zip">DailyCarousel.zip</a></div> <i>(Warning: prototype quality code)</i><div><br /></div><p></p> 
