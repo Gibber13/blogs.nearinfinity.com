@@ -1,0 +1,14 @@
+---
+permalink: /blogs/scott_leberknight/rails_without_a_database.html
+layout: blogs
+title: !binary |-
+  UmFpbHMgV2l0aG91dCBhIERhdGFiYXNl
+date: 2007-04-07 23:37:43.000000000 -04:00
+tags: !binary |-
+  UnVieQ==
+---
+{% raw %}
+<p>Last week I needed to write a simple web application that would allow others on my team to control a process on my workstation when I wasn't around. Essentially I wanted to allow people to start, stop, restart, get process information about, and view the log of, a process running on my workstation. Since I wanted it to be simple, and because I didn't want it to take more than a few hours, I chose to write in in Rails. This turned out to be ridiculously simple, as I ended up with two controllers  - an authentication controller and the process controlling controller - along with a few views. But, since all I was doing was calling system commands from the process controlling controller, there is <i>no database</i> in this application. (The "authentication" was just a hardcoded user name and password that I shared with my team so no database stuff there!)</p>
+
+<p>So what happens when you have a Rails application with no database? Well, it works functionally, i.e when you are hacking your controllers and such, but the tests all fail! This is because Rails assumes you always have a database. A quick Google search led to an excellent resource, <a href="http://www.pragmaticprogrammer.com/titles/fr_rr/">Rails Recipes</a>, by the <a href="http://www.pragmaticprogrammer.com/">Pragmatic Progammers</a> for writing and testing Rails apps with no database. One of the recipes is, conveniently enough, <a href="http://media.pragprog.com/titles/fr_rr/NoDatabase.pdf">Rails without a Database</a>! Basically, it describes how you can modify the Rails <code>test_helper.rb</code> file to remove all the database-specific setup and teardown code and then you can run your tests with no database to speak about. Cool.</p> 
+{% endraw %}

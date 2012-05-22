@@ -1,0 +1,77 @@
+---
+permalink: /blogs/scott_leberknight/validating_domain_objects_in_hibernate3.html
+layout: blogs
+title: !binary |-
+  VmFsaWRhdGluZyBEb21haW4gT2JqZWN0cyBpbiBIaWJlcm5hdGUgUGFydCA0
+  OiBATm90TnVsbCBhbmQgQE5vdEVtcHR5
+date: 2007-10-05 13:22:34.000000000 -04:00
+tags: !binary |-
+  SmF2YQ==
+---
+{% raw %}
+<p>This is the fourth in a series of short blogs describing how the Hibernate Validator allows you to define validation rules directly on domain objects where it belongs. In the <a href="http://www.nearinfinity.com/blogs/page/sleberkn?entry=validating_domain_objects_in_hibernate2">third article</a> I showed how to create your own validators. In this article I'll explain the statement I made in the last article that I don't use the <code>@NotNull</code> and <code>@NotEmpty</code> validations in practice, even though at first glance they would seem to be some very useful validators.</p>
+
+<p>First the <code>@NotEmpty</code> validator. Actually this annotation is fine assuming you want to validate "that a String is not empty (not null and length > 0) or that a Collection (or array) is not empty (not null and length > 0)." That is the description in the JavaDoc for the <a href="http://www.hibernate.org/hib_docs/validator/api/org/hibernate/validator/NotNull.html">@NotEmpty</a> validator. My only problem with this is that <code>@NotEmpty</code> only applies to strings and collections or arrays. There are lots of times when you want to ensure that dates, numbers, or custom types are required, and <code>@NotEmpty</code> can't help you out. That's pretty much why I don't use it.</p>
+
+<p>Now on to the <code>@NotNull</code> validation annotation. There is a major problem with this validator, which is that it simply doesn't behave the way other validators behave. If you try to save an object having a property annotated with <code>@NotNull</code>, and that property's value is actually <code>null</code>, you would expect to receive an <code>InvalidStateException</code>, which is what happens with other validators. What you <i>actually</i> receive is a <code>PropertyValueException</code> which is the result of Hibernate enforcing a nullability check on the property annotated with <code>@NotNull</code>. I have gone through what happens line-by-line in a debugger and, other than the fact that it is extremely complicated, eventually you arrive at the <code>checkNullability()</code> method in the <code>Nullability</code> class which checks "nullability of the class persister properties" according to the JavaDocs and throws a <code>PropertyValueException</code> with the message "not-null property references a null or transient value." This behavior happens even if the actual column in the database allows nulls!</p>
+
+<style type="text/css">
+.tip {
+  border: 1px solid #ccc;
+  background-color: #FFFFCC;
+  font-size: small;
+  padding: 5px;
+}
+</style>
+
+<p>For example, I have a simple <code>User</code> entity with an <code>active</code> property annotated with <code>@NotNull</code> defined as follows:</p>
+
+<pre class="prettyprint"> @Type(type = "yes_no")
+ @NotNull
+ public Boolean getActive() {
+     return active;
+ }
+</pre>
+
+<p>The <code>user</code> table is defined like this (to show that the <code>active</code> column allows null values):</p>
+
+<pre class="prettyprint">mysql> desc user;
++------------+--------------+------+-----+---------+----------------+
+| Field      | Type         | Null | Key | Default | Extra          |
++------------+--------------+------+-----+---------+----------------+
+| id         | bigint(20)   | NO   | PRI | NULL    | auto_increment | 
+| version    | bigint(20)   | YES  |     | NULL    |                | 
+| active     | char(1)      | YES  |     | NULL    |                | 
+| first_name | varchar(255) | YES  |     | NULL    |                | 
+| last_name  | varchar(255) | YES  |     | NULL    |                | 
+| user_name  | varchar(255) | YES  |     | NULL    |                | 
++------------+--------------+------+-----+---------+----------------+
+6 rows in set (0.02 sec)
+</pre>
+
+<p>Finally, I have a test that shows that a <code>PropertyValueException</code> is thrown instead of an <code>InvalidStateException</code>:</p>
+
+<pre class="prettyprint">@Test(expected = PropertyValueException.class)
+public void testNotNullAnnotationPreemptsNormalValidation() {
+    // Explicitly set property annotated with @NotNull to null
+    user.setActive(null);
+    session.save(user);
+}
+</pre>
+
+<p>This test passes, meaning that you get a <code>PropertyValueException</code> where with other validators you get an <code>InvalidStateException</code>. For example, here is another test that tests the validation on the <code>username</code> property which is annotated with <code>@Email</code>:</p>
+
+<pre class="prettyprint">@Test(expected = InvalidStateException.class)
+public void testNormalValidationErrorIfNotNullPropertyIsValid() {
+    //  Active property is OK here as it gets the default value 'true' in the User class
+
+    // But...make username invalid
+    user.setUserName("bob");
+    session.save(user);
+}
+</pre>
+
+<p>The above test passes meaning that an <code>InvalidStateException</code> was thrown. So, the point of all this long-windedness is that <code>@NotNull</code> behaves differently than other validators and results in a completely different exception being thrown. That is the reason I don't use it and why I created the <code>@Required</code> annotation I showed in the last article.</p>
+
+<p>In the next article, I'll show a technique to <i>bypass</i> validation to allow objects to be saved without the normal validation occurring (and explain a use case where bypassing validation makes sense).</p> 
+{% endraw %}

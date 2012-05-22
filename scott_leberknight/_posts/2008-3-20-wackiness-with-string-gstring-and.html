@@ -1,0 +1,87 @@
+---
+permalink: /blogs/scott_leberknight/wackiness_with_string_gstring_and.html
+layout: blogs
+title: !binary |-
+  V2Fja2luZXNzIFdpdGggU3RyaW5nLCBHU3RyaW5nLCBhbmQgRXF1YWxpdHkg
+  aW4gR3Jvb3Z5
+date: 2008-03-20 14:44:18.000000000 -04:00
+tags: !binary |-
+  R3Jvb3Z5
+---
+{% raw %}
+<p>We ran into this one today while writing a Groovy unit test. Check out the following GroovyShell session:</p>
+
+<pre class="prettyprint">groovy:000> test = []
+===> []
+groovy:000> (1..10).each { test &lt;&lt; "Item $it" }
+===> 1..10
+groovy:000> test                               
+===> [Item 1, Item 2, Item 3, Item 4, Item 5, Item 6, Item 7, Item 8, Item 9, Item 10]
+groovy:000> test.contains("Item 1")
+===> false
+</pre>
+
+<p>Um...what? We started by adding items to a list, e.g. "Item 1", "Item 2", and so on. Then we simply ask whether the list contains an item we know (or think) is there. But no, it prints false! How can <code>test</code> possibly not contain "Item 1?" First, what's going on here? Look at this second example:</p>
+
+<pre class="prettyprint">groovy:000> test = []
+===> []
+groovy:000> (1..10).each { test &lt;&lt; "Item $it" }
+===> 1..10
+groovy:000> test
+===> [Item 1, Item 2, Item 3, Item 4, Item 5, Item 6, Item 7, Item 8, Item 9, Item 10]
+groovy:000> println test[0].class 
+class org.codehaus.groovy.runtime.GStringImpl
+===> null</pre>
+
+<p>Ah ha! The items in the list aren't strings. So what? Look at this code:</p>
+
+<pre class="prettyprint">groovy:000> a = "Item 2"
+===> Item 2
+groovy:000> a.class
+===> class java.lang.String
+groovy:000> n = 2
+===> 2
+groovy:000> b = "Item $n"
+===> Item 2
+groovy:000> b.class
+===> class org.codehaus.groovy.runtime.GStringImpl
+groovy:000> a == b
+===> true
+groovy:000> b == a
+===> true
+groovy:000> a.equals(b)
+===> false
+groovy:000> b.equals(a)
+===> false
+</pre>
+
+<p><code>a</code> is a normal Java String, whereas <code>b</code> is a Groovy GString. Even more interesting (or perhaps confusing), a <code>==</code> comparison yields true, but a comparison using <code>equals()</code> is false! So back in the original example where we checked if the 'test' list contained 'Item 1', the <code>contains()</code> method (which comes from Java not Groovy) uses <code>equals()</code> to compare the values and responds that in fact, no, the list does not contain the <i>String</i> "Item 1." Without getting too much more detailed, how to fix this? Look at this example:</p>
+
+<pre class="prettyprint">groovy:000> test = []
+===> []
+groovy:000> (1..10).each { test &lt;&lt; "Item $it".toString() }
+===> 1..10
+groovy:000> test
+===> [Item 1, Item 2, Item 3, Item 4, Item 5, Item 6, Item 7, Item 8, Item 9, Item 10]
+groovy:000> test.contains('Item 1')
+===> true
+</pre>
+
+<p>Now it returns true, since in the above example we explicitly forced evaluation of the GStrings in the list by calling <code>toString()</code>. The Groovy web site <a href="http://groovy.codehaus.org/Strings#Strings-GStrings">explains</a> about GString lazy evaluation stating that "GString uses lazy evaluation so its not until the toString() method is invoked that the GString is evaluated."</p>
+
+<p>Ok, so we now understand <i>why</i> the observed behavior happens. The second question is whether or not this is something likely to confuse the You-Know-What out of developers and whether it should behave differently. To me, this could easily lead to some subtle and difficult to find bugs and I think it should work like a developer expects without requiring an understanding of whether GStrings are lazily-evaluated or not. Lazy evaluation always seems to come at a price, for example in ORM frameworks it can easily result in the "n + 1 selects" problem.</p>
+
+<p>For comparison, let's take a look at similar Ruby example in an irb session:</p>
+
+<pre class="prettyprint">>> test = []
+=> []
+>> (1..10).each { |n| test &lt;&lt; "Item #{n}" }
+=> 1..10
+>> test
+=> ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9", "Item 10"]
+>> test.include? "Item 1"
+=> true
+</pre>
+
+<p>Ruby "does the right thing" from just looking at the code. Ruby 1, Groovy 0 on this one. I don't actually know whether Ruby strings evaluate the expressions immediately or not, and should not need to care. Code that looks simple should not require understanding the implementation strategy of a particular feature. Otherwise it is broken in my opinion.</p> 
+{% endraw %}

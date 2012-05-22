@@ -1,0 +1,48 @@
+---
+permalink: /blogs/scott_leberknight/iphone_bootcamp_day_5.html
+layout: blogs
+title: !binary |-
+  aVBob25lIEJvb3RjYW1wIERheSA1
+date: 2008-12-05 16:19:59.000000000 -05:00
+tags: !binary |-
+  aVBob25lIE1hYyBPUyBY
+---
+{% raw %}
+<p>Today is Day 5 &mdash; the final day &mdash; of the iPhone bootcamp at <a href="http://www.bignerdranch.com/">Big Nerd Ranch</a>, taught by Joe Conway. The last day of Big Nerd Ranch bootcamps are half-days so you have breakfast, have class until lunch, have lunch, and then shuttle back to the airport. Unfortunately for me my flight isn't until 7pm so I have a lot of time to write this entry!</p>
+
+<p>See <a href="/blogs/scott_leberknight/iphone_bootcamp_blogs.html">here</a> for a list of each day's blog entries.</p>
+
+<h3>Preferences</h3>
+
+<p>First up on this last day of iPhone bootcamp is preferences, which allow an app to keep user settings in a centralized location. While you can store user settings yourself using a custom UI, the easiest way is to use the iPhone's built-in Settings app. The Settings app is the central location where apps can store user settings. It is also where all the other common iPhone settings are, which is convenient.</p>
+
+<p>You work with the <code>NSUserDefaults</code> object to store app settings based on the app's bundle ID, for example <code>com.acme.MyKillerApp</code>. You'll also want to ensure you provide "factory default" settings using  the <code>registerDefaults</code> method; these settings will be used if the user has not changed anything. <code>NSUserDefaults</code> is basically a dictionary of key-value pairs, and you obtain the standard user defaults using the <code>standardUserDefaults</code> method. From that point you can write user settings using methods like <code>setObject:forKey</code>, <code>setInteger:forKey</code>, and so on, and you can remove settings using <code>removeObjectForKey</code>. Similarly, you read settings using methods like <code>objectForKey</code>, <code>integerForKey</code>, and so forth.</p>
+
+<p>As mentioned earlier, the Settings app is a uniform way of setting preferences for all apps. Users know where to look for setting preferences for apps there. In addition, managing the settings separately from your application also saves screen real estate, which is important since the screen isn't all that big. You define the settings for your application using the Settings Bundle. This is a standard Property List. You use special property keys, such as <code>PSToggleSwitchSpecifier</code>, to define the settings for your application. The Settings app uses the Settings bundle and property list to create the settings UI for your app. For example, if you define settings for a <code>PSToggleSwitchSpecifier</code>, a <code>PSTextFieldSpecifier</code>, and a <code>PSMultiValueSpecifier</code>, the user will see a toggle switch, a text field, and a slider when she goes to edit your app's settings.</p>
+
+<p>For the lab exercise, we modified our Random Number app (from Day 4 during the Web Services section) to have user settings for how the random numbers are generated &mdash; for example minimum number and the range of numbers. It is quite easy to add user settings to your app in the iPhone using the Settings app and bundle.</p>
+
+<h3>Instruments</h3>
+
+<p>Joe briefly talked about using the Instruments app to do powerful debugging, for example to detect memory leaks in your app. He then demonstrated using the Leaks tool within Instruments to track a memory leak &mdash; which he had previously introduced intentionally &mdash; in the Tile Game app. Leaks was able to pinpoint the exact line of code where a leaked object (i.e. it was not released) was allocated. This is pretty cool.</p>
+
+<p>Joe also showed what leaks look like when they come from C code versus Objective-C code. C-code allocation leaks (i.e. allocated using <code>malloc</code>) show up in Instruments as just 'General Block' and from what I gather are probably not that fun to track down the exact cause. Leaks in Objective-C code are easier, and as I just mentioned, Leaks can show you the exact line of code where a leaked object was allocated.</p>
+
+<h3>Networking</h3>
+
+<p>By this time, it is getting closer to lunch, and the end of the class. Sad, I know. Anyway, probably one of the hardest and broadest topics was saved for last, given that you could spend an entire course on nothing but network programming. Anyway, on the iPhone a key concept when doing network programming is "reachability." Reachability does <i>not</i> mean that a network resource is definitely available; rather it means the resource is "not impossible" to reach. Another important thing on the iPhone is figuring out what type of connection you have, for example EDGE or 3G or Wi-Fi. You might choose to do different things based on the type of connection.</p>
+
+<p>With the SystemConfiguration framework you can determine if the outside world is reachable, again with the caveat the "reachable" means "not impossible to reach." When coding you work with "reachability references" and "reachability flags" which describe the type of connection, for example reachable, connection required, is wide-area network, and so on.</p>
+
+<p>We then learned a bit about <a href="http://developer.apple.com/documentation/Cocoa/Conceptual/NetServices/Introduction.html">Bonjour</a>, which is basically a zero-configuration network service discovery mechanism that works on all platforms, has implementations in many languages, and is easy to use. For example, Bonjour makes it ridiculously easy to find printers on a network, as opposed to the way you have to do it in other operating systems. You can use Bonjour on the iPhone to discover and resolve Bonjour services. You use <code>NSNetServices</code> and <code>NSNetServiceBrowser</code> to accomplish this, and you specify a delegate to receive notifications when services appear and disappear.</p>
+
+<p>In addition to Bonjour, you can also send and receive data over the network as you would expect. To send and receive data you can either use a C-based Core Foundation interface or use a stream-based interface with <code>CFStream</code>. You register read and write callbacks with the main iPhone run loop, which calls your functions when network events occur.</p>
+
+<p>Network programming is really hard, since there are so many things that can go wrong and you need to deal with many if not all of them. Joe recommended that before jumping right into hardcore networking, developers should become familiar with the concepts and recommended the <a href="http://beej.us/guide/bgnet/">Beej's guide to network programming</a> as a good primer. Given that I've really only done simple socket programming in higher-level APIs like Java's, and have not really done much of it, I'll need to check that out. And so this concludes this episode of iPhone bootcamp blog, since it is now time for lunch and, sadly, the course is over!</p>
+
+<h3>Random Thoughts</h3>
+
+<p>This week has been a really intensive introduction to iPhone programming. We've gone from a very simple app on Day 1 and covered all kinds of things like form-based UIs and text manipulation; Core Location; Core Graphics; view transitions and Core Animation; using the iPhone camera and accelerometer; retrieving web-based data; manipulating Address Book data; setting user preferences, and finally networking and debugging using Instruments. We've basically covered an entire book's worth of content and written about 10 iPhone applications ranging from simple to not-so-simple. If you are interested in programming the iPhone, I definitely recommend checking out the <a href="http://www.bignerdranch.com/classes/iphone.shtml">iPhone bootcamp</a> at <a href="http://www.bignerdranch.com/">Big Nerd Ranch</a>. Because the OpenGL stuff we did on the iPhone was so cool, I'm thinking my next course to take might be the <a href="http://www.bignerdranch.com/classes/opengl.shtml">OpenGL bootcamp</a> but that probably won't happen until next year sometime! With my new knowledge I plan to go home and try my hand at creating a snowflake or snowstorm application that my daughters can play with. If I actually get it working maybe I'll write something about it.</p>
+
+  
+{% endraw %}

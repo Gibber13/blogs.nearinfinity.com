@@ -1,0 +1,30 @@
+---
+permalink: /blogs/scott_leberknight/loggerisnotstaticfinal.html
+layout: blogs
+title: !binary |-
+  TG9nZ2VySXNOb3RTdGF0aWNGaW5hbA==
+date: 2007-03-27 23:01:28.000000000 -04:00
+tags: !binary |-
+  SmF2YQ==
+---
+{% raw %}
+<p>For anyone who uses <a href="http://pmd.sourceforge.net/">PMD</a>, the title of this blog appears in their list of PMD errors if they don't declare their loggers static and final. Specifically, the <code>LoggerIsNotStaticFinal</code> rule simply says that a log should be declared static and final. I also like to make sure they are private as well. For example:</p>
+
+<pre class="prettyprint">// Jakarta Commons Logging
+private static final Log log = LogFactory.getLog(MyClass.class);
+</pre>
+
+<p>The above code also shows another good practice, which is to pass the <code>Class</code> object to the <code>getLog()</code> method, instead of a string. Why the <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/logging/Logger.html#getLogger(java.lang.String)">java.util.logging.Logger</a> class doesn't even provide a method accepting a <code>Class</code> object is simply beyond me. Why did the people who developed the <code>java.util.logging</code> package base their API on <a href="http://logging.apache.org/log4j/docs/">Log4j</a> yet omit some of the most useful parts of it? Oh well.</p>
+
+<p>Now to the point. Why it is good practice to declare loggers private, static, and final? A logger is an internal implementation detail, so it should be private. You only need one logger for all instances of a class, hence static. And a logger should not be able to be replaced, thus final. So if this is good, what's not so good (at least in my opinion)? Simple - any logger that is not private, static, final, and which doesn't pass in a <code>Class</code> object to <code>getLog()</code>! For example, consider this common bit of code, declared in some base class:</p>
+
+<pre class="prettyprint">// Not so good logger declaration
+protected final Log log = LogFactory.getLog(getClass());
+</pre>
+
+<p>Why is this bad? Well, it isn't static for one thing. For another, it uses <code>getClass()</code> to obtain the log. At first this seems efficient since now all subclasses automatically inherit a ready-made log of the correct runtime type. So what's the issue here? The biggest problem with loggers declared in this manner is that you now get <i>all</i> the logging from the superclass mixed in with the logging from the subclass, and it is impossible in the log output to discern which messages came from which class unless you look at the source. This is really annoying if the superclass has a lot of logging that you don't want to see, since you cannot filter it out.</p>
+
+<p>Another problem is that your ability to set log levels differently goes away, for example if a subclass resides in a different package than the superclass. In that case, if you try to filter out logging from the superclass, you can't because the actual runtime class was used to obtain the logger.</p>
+
+<p>Last, having a <code>protected</code> logger just seems to violate basic object-oriented principles. Why in the world should subclasses know about an internal implementation detail from a superclass that is a cross-cutting concern, no less? Anyway, though this is a silly little rant it really is annoying when you extend a superclass that declares a protected logger like this.</p> 
+{% endraw %}

@@ -1,0 +1,235 @@
+---
+permalink: /blogs/michael_bevels/dynamic_trees_in_jsf.html
+layout: blogs
+title: !binary |-
+  RHluYW1pYyBUcmVlcyBpbiBKU0Y=
+date: 2008-04-22 14:15:23.000000000 -04:00
+tags: !binary |-
+  R2VuZXJhbA==
+---
+{% raw %}
+<p>
+A JSF project that I've been working on required a dynamic tree.  Not just a tree that loads dynamically, but a tree that a user can perform CRUD operations on and instantly see the changes they've made.  I'm going to walk through an example of how to accomplish this.
+</p>
+
+<p>
+The basic setup:
+</p>
+
+<ul>
+<li>
+A "'tree" structure that is made up of "node" objects.  Each node has a parent node as well as a list of child nodes.  Root nodes have a null parent.  The tree object takes a list of root nodes.  (see code below)
+</li>
+<li>
+A JSF Tree.  I used the RichFaces tree because RichFaces was already being used throughout the application, but this can be applied to other JSF trees as well. (see code below)
+</li>
+<li>
+A JSF managed backing bean with ActionListeners and DAO access.  ActionListeners are used for the CRUD operations on nodes.  DAO access is used for directly updating the objects in the database. (see code below)
+</li>
+</ul>
+
+<p>The node:</p>
+
+<pre class="prettyprint">import javax.persistence.*;
+import java.util.List;
+import org.hibernate.annotations.GenericGenerator;
+
+@Entity
+@GenericGenerator(
+        name = "hibernate-uuid", strategy = "uuid"
+)
+public class Node {
+    @Id
+    @GeneratedValue(generator = "hibernate-uuid")
+    private String id;
+
+    @Column(nullable = false)
+    private String label;
+
+    @OneToMany(mappedBy = "parent", cascade = {CascadeType.ALL})
+    private List<node> children;
+
+    @ManyToOne
+    @JoinColumn(name = "fk_parent_id")
+    private Node parent;
+
+   // Getters and Setters...
+}</node></pre>
+
+<p>The tree:</p>
+<pre class="prettyprint">&lt;rich:tree id="tree" ajaxSubmitSelection="true" switchType="client" onselected="return false;"&gt;
+    &lt;rich:recursiveTreeNodesAdaptor var="node" roots="#{treeCreator.rootNodes}" nodes="#{node.getChildren}"&gt;
+        &lt;rich:treeNode data="#{node.id}"&gt;
+            &lt;!--Node Name--&gt;
+            &lt;h:outputText value="#{node.label}" /&gt;
+
+            &lt;!-- Control Buttons --&gt;
+            &lt;!--Button used to toggle addNode Div --&gt;
+            &lt;input type="image" value="Add Child" title="Add Child"
+                   onclick="toggleLayer('addNode#{node.id}');return false;"
+                   src="resources/images/controls_addlevel.gif"/&gt;
+            &lt;!--Button used to toggle editNode Div --&gt;
+            &lt;input type="image" value="Edit Node" title="Edit Node"
+                   onclick="toggleLayer('editNode#{node.id}');return false;"
+                   src="resources/images/controls_edit.gif"/&gt;
+            &lt;!--Button for Deleting node --&gt;
+            &lt;a4j:commandButton actionListener="#{treeCreator.deleteNode}"
+                               data="#{node.id}" value="Delete Node" reRender="tree"
+                               image="/resources/images/controls_delete.gif"
+                               title="Delete Node"
+                               onclick="if(!confirm('Delete Node?')){ return; };"/&gt;
+
+
+            &lt;!-- Divs for name entry/edit--&gt;
+            &lt;div id="addNode#{node.id}" style="display:none;"&gt;
+                &lt;h:outputText value="Node Name: "/&gt;
+                &lt;h:inputText binding="#{treeCreator.nodeAdd}"/&gt;
+                &lt;a4j:commandButton value="Save and Create" title="Save and Create"
+                                   actionListener="#{treeCreator.addNode}"
+                                   data="#{node.id}"
+                                   onclick="toggleLayer('addNode#{node.id}');"
+                                   image="/resources/images/icon_small_save.gif"
+                                   reRender="tree"/&gt;
+                &lt;input type="image" src="resources/images/icon_small_cancel.gif" value="Cancel"
+                       onclick="toggleLayer('addNode#{node.id}');return false;" title="Cancel"/&gt;
+            &lt;/div&gt;
+
+            &lt;!--Div for Editing an Org --&gt;
+            &lt;div id="editNode#{node.id}" style="display:none;"&gt;
+                &lt;h:outputText value="New Node Name: "/&gt;
+                &lt;h:inputText binding="#{treeCreator.editNode}"/&gt;
+                &lt;a4j:commandButton value="Save Changes" title="Save Changes"
+                                   actionListener="#{treeCreator.editNode}"
+                                   data="#{node.id}"
+                                   onclick="toggleLayer('editNode#{node.id}');"
+                                   image="/resources/images/icon_small_save.gif"
+                                   reRender="tree"/&gt;
+                &lt;input type="image" src="resources/images/icon_small_cancel.gif" value="Cancel"
+                       onclick="toggleLayer('editNode#{node.id}');return false;" title="Cancel"/&gt;
+            &lt;/div&gt;
+        &lt;/rich:treeNode&gt;
+    &lt;/rich:recursiveTreeNodesAdaptor&gt;
+&lt;/rich:tree&gt;
+</pre>
+
+<p>
+*Note that toggleLayer() is a javascript function that hides/unhides the contents of a given div tag.
+</p>
+<p>
+*Note that the inputText fields have bindings to the backing bean.
+</p>
+
+<p>The ActionListeners: </p>
+<pre class="prettyprint"> public void addNode(ActionEvent event) {
+        //get the button that fired the event   
+        HtmlAjaxCommandButton button = (HtmlAjaxCommandButton) event.getComponent();
+        //get ID of the parent Node - it's stored in the data attribute of the add button
+        String parentNodeId = (String) button.getData();
+        //get parent node object
+        Node parentNode = nodeDao.getById(parentNodeId);
+        //create new node object and set label, parent, children, etc
+        Node nodeToAdd = new Node();
+        nodeToAdd.setLabel((String) addNode.getValue());
+        nodeToAdd.setParent(parentNode);
+        nodeToAdd.setChildren(new HashSet<node>());
+        parentNode.getChildren().add(nodeToAdd);
+        //save node to DB
+        nodeDao.saveOrUpdate(parentNode);
+    }
+
+    public void editNode(ActionEvent event) {
+        //get the button that fired the event
+        HtmlAjaxCommandButton button = (HtmlAjaxCommandButton) event.getComponent();
+        //get ID of Node to edit - it's stored in the data attribute of the edit button
+        String nodeId = (String) button.getData();
+        //load node from DB
+        Node nodeToEdit = nodeDao.getById(nodeId);
+        //update node label from UI input
+        nodeToEdit.setLabel((String) editNode.getValue());
+        //update node label in DB
+        nodeDao.update(nodeToEdit);
+    }
+
+    public void deleteNode(ActionEvent event) {
+        //get ID of Node to delete - it's stored in the data attribute of the delete button
+        HtmlAjaxCommandButton button = (HtmlAjaxCommandButton) event.getComponent();
+        String nodeId = (String) button.getData();
+        //get node object via Dao
+        Node nodeToDelete = nodeDao.getById(nodeId);
+
+        //set reference from parent to null
+        Node parentNode = nodeToDelete.getParent();
+
+        //don't delete the Root Node
+        if (parentNode != null) {
+            Set<node> childNodes = parentNode.getChildren();
+            childNodes.remove(nodeToDelete);
+            //put updated list of childNodes on parentNode
+            parentNode.setChildren(childNodes);
+            //save parentNode to DB
+            nodeDao.save(parentNode);
+            //set parent to null
+            nodeToDelete.setParent(null);
+            //delete the node from the DB
+            nodeDao.delete(nodeToDelete);
+        }
+    }
+</node></node></pre>
+
+<p>The managed bean within faces config: </p>
+<pre class="prettyprint">    &lt;managed-bean&gt;
+        &lt;description&gt;
+            Backing bean for the tree
+        &lt;/description&gt;
+        &lt;managed-bean-name&gt;treeCreator&lt;/managed-bean-name&gt;
+        &lt;managed-bean-class&gt;path.to.the.TreeCreator&lt;/managed-bean-class&gt;
+        &lt;managed-bean-scope&gt;request&lt;/managed-bean-scope&gt;
+        &lt;managed-property&gt;
+            &lt;property-name&gt;nodeDao&lt;/property-name&gt;
+            &lt;value&gt;#{nodeDao}&lt;/value&gt;
+        &lt;/managed-property&gt;
+    &lt;/managed-bean&gt;</pre>
+
+<p>
+Here's how it all fits together using the Ã'Add ChildÃ" operation as an example:
+</p>
+<p>
+
+</p><ol type="1">
+<li>A user visits the tree page and sees the tree with a single root node:
+<img src="http://www.nearinfinity.com/blogs/resources/mbevels/jsfTreePic1.jpg" />
+</li>
+<li>The user clicks the Ã'Add ChildÃ" button on the root node:
+<img src="http://www.nearinfinity.com/blogs/resources/mbevels/jsfTreePic2.jpg" />
+</li>
+<ol type="A">
+<li>
+The Ã'addNode<nodeid>Ã" div is unhidden (via javascript) which displays an input text box, a save button, and a cancel button to the right of the root node.
+</nodeid></li>
+</ol>
+<li>The user types in a name for the node and clicks the save button.  Note that the save button has a few attributes including actionListener=Ã"treeCreator.addNodeÃ" and data=Ã"#{node.id}Ã". 
+</li>
+<ol type="A">
+<li>
+The Ã'addNode<nodeid>Ã" div is hidden again (via javascript).
+</nodeid></li>
+<li>
+The addNode ActionListener is called.  See the addNode ActionListener.
+</li>
+<ol type="i">
+<li>
+The save button is retrieved from the ActionEvent that was passed to this ActionListener.  The Ã'dataÃ" attribute stored on this save button is retrieved which contains the ID of the soon-to-be-parent node.  The parent node object is loaded via dao access.  A new node (with user specified name which is retrieved via binding of the inputText box to backing beans) is added to the parent's children list.  The parent node is saved which also saves the new child object to the database.
+</li>
+</ol>
+</ol>
+<li>The tree is refreshed and the new node appears.  Note that the tree "switchType" can be set to client, server, or ajax.  This will effect how the page refreshes and the tree loads.
+<img src="http://www.nearinfinity.com/blogs/resources/mbevels/jsfTreePic3.jpg" />
+</li>
+</ol>
+
+
+
+<p>
+Edit and delete follow a similar process with slightly different implementations in their ActionListeners.
+</p> 
+{% endraw %}

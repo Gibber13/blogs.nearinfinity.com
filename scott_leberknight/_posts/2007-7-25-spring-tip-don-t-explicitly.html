@@ -1,0 +1,57 @@
+---
+permalink: /blogs/scott_leberknight/spring_tip_don_t_explicitly.html
+layout: blogs
+title: !binary |-
+  U3ByaW5nIFRpcDogRG9uJ3QgRXhwbGljaXRseSBDYWxsIFNldHRlciBNZXRo
+  b2Rz
+date: 2007-07-25 01:25:58.000000000 -04:00
+tags: !binary |-
+  SmF2YQ==
+---
+{% raw %}
+<p>Spring has many setter methods in its classes. For example, take a look at the Hibernate support class <a href="http://www.springframework.org/docs/api/org/springframework/orm/hibernate3/HibernateTemplate.html">HibernateTemplate</a> and the Spring MVC base controller <a href="http://www.springframework.org/docs/api/org/springframework/web/servlet/mvc/BaseCommandController.html">BaseCommandController</a>. This tip is very simple:</p>
+
+<style type="text/css">
+.tip {
+  border: 1px solid #ccc;
+  background-color: #FFFFCC;
+  font-size: small;
+  padding: 5px;
+  
+}
+</style>
+
+<p class="tip">Setter methods in Spring are for bean configuration only.</p>
+
+<p>For example, say you are implementing a DAO and have extended the Spring support class <code>HibernateDaoSupport</code> which provides a <code>HibernateTemplate</code> for use in data access methods. You might have a method to search for blog entries like this:</p>
+
+<pre class="prettyprint">public List<blogentry> findBlogEntriesByTitle(String title) {
+    return getHibernateTemplate().findByNamedParam(
+        "from BlogEntry e where e.title like :theTitle", "theTitle", "%" + title + "%");
+}
+</blogentry></pre>
+
+<p>Now let's say you have a really popular blog and want to limit the number of search results to 100. You check the <code>HibernateTemplate</code> JavaDocs and find there is a <a href="http://www.springframework.org/docs/api/org/springframework/orm/hibernate3/HibernateTemplate.html#setMaxResults(int)">setMaxResults()</a> method that looks promising. So you change your method to this:</p>
+
+<pre class="prettyprint">public List<blogentry> findBlogEntriesByTitle(String title) {
+    getHibernateTemplate().setMaxResults(100);  // Don't do this!
+    return getHibernateTemplate().findByNamedParam(
+        "from BlogEntry e where e.title like :theTitle", "theTitle", "%" + title + "%");
+}
+</blogentry></pre>
+
+<p>The above innocent-looking code has an insidious side-effect, which occurs because <code>HibernateTemplate</code>, like many Spring classes, is intended to be used in a thread-safe manner. In the example, calling <code>setMaxResults</code> sets the maximum number of results for <i>all threads</i> flowing through the <code>HibernateTemplate</code> after this method has been called, instead of just for the current Hibernate Session. While setting the maximum query results may not be a big deal, what if instead you did this:</p>
+
+<pre class="prettyprint">public void updateAccountProfile(AccountProfile profile) {
+    HibernateTemplate ht = getHibernateTemplate();
+    int originalFlushMode = ht.getFlushMode();
+    ht.setFlushMode(FlushMode.FLUSH_EAGER);  // Don't do this!
+    ht.update(profile);
+    ht.setFlushMode(originalFlushMode);
+}
+</pre>
+
+<p>This is <i>much</i> worse as now the Hibernate flush mode is changed for every thread using the <code>HibernateTemplate</code> and causes non-deterministic flushing behavior. I have seen a project encounter this very bug and it was initially difficult to track down since most of the time everything worked just fine. As an aside, you should rarely if ever need to explicitly flush a Hibernate Session in application code.</p>
+
+<p>In general, setter methods in Spring classes are intended for initial bean configuration, and should not be called at runtime as they are generally not thread-safe. So, if you want to call a setter method, your best bet is to look for an alternate, thread-safe solution. In the above example, the solution could be to use a <code>HibernateCallback</code> which passes you a Hibernate Session on which you can set the flush mode only for that particular Session. In any case, making sure your team understands this could save some headaches down the road, especially for developers who are new to Spring and who are used to using setter methods to change object properties at runtime, not just as an initial configuration mechanism.</p> 
+{% endraw %}

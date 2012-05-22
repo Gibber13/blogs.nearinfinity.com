@@ -1,0 +1,123 @@
+---
+permalink: /blogs/scott_leberknight/building_subversion_svn_1_4.html
+layout: blogs
+title: !binary |-
+  QnVpbGRpbmcgU3VidmVyc2lvbiAoU1ZOKSAxLjQuMiBvbiBNYWMgT1MgWA==
+date: 2006-11-30 19:03:37.000000000 -05:00
+tags: !binary |-
+  TWFjIE9TIFg=
+---
+{% raw %}
+<p>Today I needed to install Subversion on my Macbook running OS X and was following <a href="http://hivelogic.com/about">Dan Benjamin's</a> excellent <a href="http://hivelogic.com/articles/2006/04/19/svn_on_os_x">instructions</a> for accomplishing this task. The main difference was that I wanted to install the latest and greatest (as of today) version of Subversion, which is 1.4.2. Dan's instructions covered 1.3.1 and a co-worker was able to install SVN just fine using those instructions and the older version. I started following the instructions, substituting 1.4.2 for 1.3.1. Everything was going nicely until the <code>configure</code>, at which point I received an error stating "no suitable apr found". The following is the full output.</p>
+
+<pre class="prettyprint">configure: Configuring Subversion 1.4.2
+configure: creating config.nice
+checking for gcc... gcc
+checking for C compiler default output file name... a.out
+checking whether the C compiler works... yes
+checking whether we are cross compiling... no
+checking for suffix of executables... 
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether gcc accepts -g... yes
+checking for gcc option to accept ANSI C... none needed
+checking how to run the C preprocessor... gcc -E
+checking build system type... i386-apple-darwin8.8.1
+checking host system type... i386-apple-darwin8.8.1
+checking target system type... i386-apple-darwin8.8.1
+checking for egrep... grep -E
+checking whether ln -s works... yes
+checking for a BSD-compatible install... /usr/bin/install -c
+checking for static Apache module support... no
+checking for Apache module support via DSO through APXS... no - Unable to locate /usr/include/httpd/mod_dav.h
+==================================================================
+WARNING: skipping the build of mod_dav_svn
+         --with-apxs or --with-apache must be used
+==================================================================
+configure: Apache Portable Runtime (APR) library configuration
+checking for APR... no
+configure: WARNING: APR not found
+The Apache Portable Runtime (APR) library cannot be found.
+Please install APR on this system and supply the appropriate
+--with-apr option to 'configure'
+
+or
+
+get it with SVN and put it in a subdirectory of this source:
+
+   svn co \
+    http://svn.apache.org/repos/asf/apr/apr/branches/0.9.x \
+    apr
+
+Run that right here in the top level of the Subversion tree,
+then run autogen.sh again.
+
+Whichever of the above you do, you probably need to do
+something similar for apr-util, either providing both
+--with-apr and --with-apr-util to 'configure', or
+getting both from SVN with:
+
+   svn co \
+    http://svn.apache.org/repos/asf/apr/apr-util/branches/0.9.x \
+    apr-util
+
+configure: error: no suitable apr found
+</pre>
+
+<p>Oops.</p>
+
+<p>I searched around Google a bit to see if anyone else had encountered (and solved) this problem. Didn't find much so I decided to go ahead and follow the suggestion to install Apache Portable Runtime and then try the configuration again. In case you run into the same problem, here are the modified instructions I used to build SVN 1.4.2 for OS X. Thanks to Dan for the original instructions, and I hope the modified ones will help you out too. Admittedly I did not think too much about exactly why I needed <code>apr</code> and was interested in just getting it to work. So if I've done something stupid by installing <code>apr</code> please feel free to post a comment and let me know!</p>
+
+<p>One last note is that the following commands contain my username, <code>sleberkn</code>, so of course you'll need to substitute your username, or follow <a href="http://www.nearinfinity.com/blogs/page/jharwig">Jason's</a> suggestion to use <code>$HOME</code> instead. Before just trying these commands, first read Dan's entire <a href="http://hivelogic.com/articles/2006/04/19/svn_on_os_x">post</a> so you have all the prerequisites, such as setting your <code>PATH</code> correctly!</p>
+
+<pre class="prettyprint">cd ~/Desktop
+mkdir src
+cd src
+curl -O http://subversion.tigris.org/downloads/subversion-1.4.2.tar.gz
+tar xzvf subversion-1.4.2.tar.gz
+curl -O http://mirrors.24-7-solutions.net/pub/apache/apr/apr-1.2.7.tar.gz
+tar xvzf apr-1.2.7.tar.gz
+curl -O http://mirrors.24-7-solutions.net/pub/apache/apr/apr-util-1.2.7.tar.gz
+tar xvzf apr-util-1.2.7.tar.gz
+cd apr-1.2.7
+./configure --prefix=/Users/sleberkn/Desktop/src/subversion-1.4.2
+make
+make install
+cd ..
+cd apr-util-1.2.7
+./configure --prefix=/Users/sleberkn/Desktop/src/subversion-1.4.2 --with-apr=/Users/sleberkn/Desktop/src/subversion-1.4.2
+make
+make install
+cd ..
+cd subversion-1.4.2
+./configure --prefix=/usr/local --with-openssl --with-ssl --with-zlib --with-apr=/Users/sleberkn/Desktop/src/subversion-1.4.2 --with-apr-util=/Users/sleberkn/Desktop/src/subversion-1.4.2
+make
+sudo make install
+</pre>
+
+<p>Assuming all that worked, verify your installation.</p>
+
+<pre class="prettyprint">which svn
+svn --version
+</pre>
+
+<p>The output from the above commands should show the Subversion is installed in  <code>/usr/local/bin</code>. My output looked like this.</p>
+
+<pre class="prettyprint">nic-sleberkn:~/Desktop/src/subversion-1.4.2 sleberkn$ which svn
+/usr/local/bin/svn
+nic-sleberkn:~/Desktop/src/subversion-1.4.2 sleberkn$ svn --version
+svn, version 1.4.2 (r22196)
+   compiled Nov 30 2006, 17:47:45
+
+Copyright (C) 2000-2006 CollabNet.
+Subversion is open source software, see http://subversion.tigris.org/
+This product includes software developed by CollabNet (http://www.Collab.Net/).
+
+The following repository access (RA) modules are available:
+
+* ra_svn : Module for accessing a repository using the svn network protocol.
+  - handles 'svn' scheme
+* ra_local : Module for accessing a repository on local disk.
+  - handles 'file' scheme
+</pre> 
+{% endraw %}

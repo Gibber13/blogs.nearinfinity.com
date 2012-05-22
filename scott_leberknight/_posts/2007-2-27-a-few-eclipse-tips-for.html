@@ -1,0 +1,43 @@
+---
+permalink: /blogs/scott_leberknight/a_few_eclipse_tips_for.html
+layout: blogs
+title: !binary |-
+  QSBGZXcgRWNsaXBzZSBUaXBzIEZvciBLZWVwaW5nIFlvdXIgSGFuZHMgb24g
+  VGhlIEtleWJvYXJk
+date: 2007-02-27 18:46:10.000000000 -05:00
+tags: !binary |-
+  SmF2YQ==
+---
+{% raw %}
+<p>I now use mainly Eclipse when coding in Java and hate when I have to use the mouse to perform some task as it normally slows me down. Some of the things I used to use the mouse for included moving between editors and moving between the various task panes, like Package Explorer, Navigator, and Console. One day recently I decided to learn a few new shortcut keys for navigation and some miscellaneous things in Eclipse. Now, these shortcuts are on the Mac but I think the equivalents are a relatively straightforward mapping on Windows, e.g. Ctrl instead of Command/Apple/Clover.</p>
+
+<h3>Navigating Between Editors</h3>
+
+<p>To navigate between open editors, I've found two options. First, you can use Ctrl + Tab to get into select mode. You then use the right and left arrow keys to move between the open editor tabs. Once you find the one you want, hit Ctrl + Tab again to get out of select mode and back into edit mode.</p>
+
+<p>The second way is using Apple + F6. Repeatedly hitting this keystroke switches between the two most recent editor tabs. If instead you hit Apple + F6 and keep the Apple key down, a small popup window appears with a list of open editors. You can then use the up and down arrow keys to select which editor you want to open. Using either of these key combinations, you never need to use the mouse again to switch editors.</p>
+
+<h3>Navigating Between Windows</h3>
+
+<p>Many times I want to switch from an editor to Package Explorer, Console or any other view and then back again. I used to use the mouse but now I can switch easily using Apple + F7. This key combination behaves in the same way that Apple + F6 does for switching editors. The difference is now you can select any view in Eclipse. So, if you are editing a Java file and want to go to JUnit view, you can hit Apple + F7, keep holding the Apple key down, and use the up and down arrows to select the view you want. Nice.</p>
+
+<h3>Moving and Copying Lines of Code</h3>
+
+<p>Now of course no one copies code and pastes it somewhere else anymore, but if you do you might find these key combinations useful. Let's say you need to move one or more lines of code up or down in a source file, any source file. For example maybe you want to move one method below another method, or move a variable declaration. In Eclipse you can highlight one or more lines in an editor and then use Alt + up/down to move those lines of code up or down, respectively. You must continue to hold Alt down while you are moving the code.</p>
+
+<p>If you need to duplicate one or more lines of code (you don't ever do that do you?) you can use the Alt + Apple + up/down key combination to duplicate several lines of code above or below the current location. Once you've duplicated the code, you can release the Apple key and then use the up and down arrow keys to move the code where you want it.</p>
+
+<h3>"Quick" Windows</h3>
+
+<p>These keyboard shortcuts are really useful while editing Java files. The first is Apple + O (the letter "oh" not a zero). This brings up the Quick Outline view and allows you to quickly find any member in the class. You simply start typing the first few letters of the member name, e.g. "get", and Eclipse will filter out only members whose name begins with "get." You can then select the member you want to navigate to and hit Enter. You can also use the up and down arrows in the Quick Outline view to navigate between members.</p>
+
+<p>The second tip is Apple + T. This keystroke shows the Quick Type Hierarchy view. You select the name of a class, for example <code>Set</code> and hit Apple + T, you will get a popup showing the entire hierarchy of the <code>Set</code> interface. This is really useful if you code to interfaces instead of concrete classes, for example the way you would when building a Spring-based web application. Since everything is defined in terms of interfaces, you can use Apple + T to quickly find an implementation class and go to it. Or, when in a subclass you might want to see the class hierarchy or navigate to a superclass. Apple + T works well in this case as well.</p>
+
+<h3>Run in Background</h3>
+
+<p>Many times in Eclipse you want something to run in the background, for example when synchronizing with your source code repository. By default Eclipse pops up a dialog that shows the task status. You can always click the "Run in Background" button on the dialog and continue working, but that gets repetitive. So, edit your Eclipse preferences and in the General section, make sure the "Always run in background" check box is checked. That way tasks that require background processing execute in the background without requiring you to dismiss the dialog.</p>
+
+<h3>Show Heap Status</h3>
+
+<p>IntelliJ has long shown a display of the memory it is currently consuming, and allows you to suggest to the JVM to run the garbage collector. You can do this in Eclipse too, by ensuring that the "Show Heap Status" check box is checked in the General section of the Eclipse preferences. You'll now have a display in the lower right corner of Eclipse that contains the current memory consumption, allocated memory, and a little garbage can icon which allows you to ask Java to collect the trash if you click it.</p> 
+{% endraw %}

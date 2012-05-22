@@ -1,0 +1,49 @@
+---
+permalink: /blogs/scott_leberknight/where_s_that_class_coming.html
+layout: blogs
+title: !binary |-
+  V2hlcmUncyBUaGF0IENsYXNzIENvbWluZyBGcm9tPw==
+date: 2007-03-02 18:27:58.000000000 -05:00
+tags: !binary |-
+  SmF2YQ==
+---
+{% raw %}
+<p>Fun things happen in Java when you have the same class in two different places in your CLASSPATH. For example, maybe your application server has decided to bundle an open source package in their product but has not repackaged it, which can cause hours of fun debugging the problem. Another common example is, or at least used to be, XML parsers. Anyway, if you ever need to find out exactly where a class is being loaded from, you can plop a few simple lines of code in your application somewhere, run it, and Voila! you now at least know which JAR is causing you headaches which might help you figure out how to solve your problem.</p>
+
+<p>The only reason I remembered how to do this was because <a href="http://www.relevancellc.com">Stu Halloway</a> showed this trick in a <a href="http://www.nofluffjuststuff.com/">No Fluff Just Stuff</a> session on class loading years ago. The code is pretty simple, and here it is:</p>
+
+<pre class="prettyprint">Class aClass = EmbeddedDriver.class;
+ProtectionDomain protectionDomain = aClass.getProtectionDomain();
+CodeSource codeSource = protectionDomain.getCodeSource();
+if (codeSource != null) {
+    URL location = codeSource.getLocation();
+    System.out.println("location = " + location);
+}
+</pre>
+
+<p>The output I received when trying to find where the Apache Derby <code>EmbeddedDriver</code> was being loaded from looked like this:</p>
+
+<pre class="prettyprint">
+
+location = file:/Users/sleberkn/Workspace/learning_derby/lib/derby.jar
+
+</pre>
+
+<p>You could also print out information about the <code>ProtectionDomain</code> and <code>CodeSource</code> for additional information. For example, here's what I got:</p>
+
+<pre class="prettyprint">
+protectionDomain = ProtectionDomain  (file:/Users/sleberkn/Workspace/learning_derby/lib/derby.jar &lt;no signer certificates&gt;)
+ sun.misc.Launcher$AppClassLoader@a9c85c
+ &lt;no principals&gt;
+ java.security.Permissions@5740bb (
+ (java.io.FilePermission /Users/sleberkn/Workspace/learning_derby/lib/derby.jar read)
+ (java.lang.RuntimePermission exitVM)
+)
+
+
+codeSource = (file:/Users/sleberkn/Workspace/learning_derby/lib/derby.jar &lt;no signer certificates&gt;)
+location = file:/Users/sleberkn/Workspace/learning_derby/lib/derby.jar
+</pre>
+
+<p>The information contained in the <code>ProtectionDomain</code> can be very useful as it tells you information about class loaders, permissions, etc. Another trick, which maybe I'll write about some other time, is to find out which class loader is loading a particular class. The code is also simple as you basically just walk the tree of class loaders until there are no more. This can aid in debugging JEE applications that package things in EAR, EAR, and EJB-JAR files, as the various class loading schemes of application servers can be, well, annoying to say the least.</p> 
+{% endraw %}

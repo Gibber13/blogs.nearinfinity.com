@@ -1,0 +1,124 @@
+---
+permalink: /blogs/joe_ferner/remotelinq_how_to_make_your.html
+layout: blogs
+title: !binary |-
+  UmVtb3RlTElOUSAtIEhvdyB0byBtYWtlIHlvdXIgTElOUSBzcGFuIHRoZSBn
+  bG9iZQ==
+date: 2008-05-22 14:39:29.000000000 -04:00
+tags: !binary |-
+  Lk5FVA==
+---
+{% raw %}
+<!-- code formatted by http://manoli.net/csharpformat/ -->
+<style type="text/css">
+.csharpcode, .csharpcode pre
+{
+	font-size: small;
+	color: black;
+	font-family: Consolas, "Courier New", Courier, Monospace;
+}
+
+.csharpcode pre { margin: 0em; }
+
+.csharpcode .rem { color: #008000; }
+
+.csharpcode .kwrd { color: #0000ff; }
+
+.csharpcode .str { color: #006080; }
+
+.csharpcode .op { color: #0000c0; }
+
+.csharpcode .preproc { color: #cc6633; }
+
+.csharpcode .asp { background-color: #ffff00; }
+
+.csharpcode .html { color: #800000; }
+
+.csharpcode .attr { color: #ff0000; }
+
+.csharpcode .alt 
+{
+	background-color: #f4f4f4;
+	width: 100%;
+	margin: 0em;
+}
+
+.csharpcode .lnum { color: #606060; }
+
+.code {
+  border: 1px solid #ccc;
+  background-color: #efefef;
+  font-size: small;
+  padding: 5px;
+  line-height: 110%;
+}
+</style>
+<div>
+<p>
+	After reading <a href="http://msmvps.com/blogs/jon.skeet/default.aspx">John Skeet's blog</a> about <a href="http://msmvps.com/blogs/jon.skeet/archive/2007/10/03/linq-to-silliness-generating-a-mandelbrot-with-parallel-potential.aspx">Generating Mandelbrot images using PLINQ</a>
+	I got the idea to build my own LINQ extension. Instead of just splitting the work across processors like PLINQ does, 
+	I decided to split it across machines as well. Thus was born RemoteLINQ. The concept is simple, take each item from an
+	enumeration and send it to a remote machine for processing. From a users perspective it is just that easy. The magic behind
+	the curtains is not. Handling threading, ordering, communication, etc. was and still is difficult. The code I provide is still very beta and I cannot guarantee it won't blow up, but it's getting better and it does generates Mandelbrot
+	images just fine across 3 machines containing a total of 5 processors.
+</p>
+</div>
+<p>
+</p><h2>Code You Write To Make It Work</h2>
+	Here is an example of what you as a user of RemoteLINQ would need to do:
+<div class="csharpcode code">
+<pre style="overflow: auto;"><span class="lnum">   1:  </span>IEnumerable&lt;<span class="kwrd">int</span>&gt; numbers = Enumerable.Range(0, 500);
+<span class="lnum">   2:  </span>RemoteContext remoteContext = <span class="kwrd">new</span> RemoteContext(
+<span class="lnum">   3:  </span>   <span class="kwrd">new</span>[] { <span class="kwrd">this</span>.GetType().Assembly }, 
+<span class="lnum">   4:  </span>   <span class="kwrd">new</span>[] { <span class="str">"localhost"</span>, <span class="str">"someremotehost"</span> },
+<span class="lnum">   5:  </span>   7776);
+<span class="lnum">   6:  </span>RemoteOptions remoteOptions = <span class="kwrd">new</span> RemoteOptions();
+<span class="lnum">   7:  </span>IEnumerable&lt;<span class="kwrd">int</span>&gt; results = numbers.AsRemotable(remoteContext, remoteOptions).Select(i =&gt; DoSomeWork(i));</pre></div><br />
+	This will take the numbers 0 to 500 and send half of the numbers to "localhost" and half of the numbers to "someremotehost"
+	for processing.
+<p></p>
+<p>
+	Let's walk through the code.
+	</p><ul>
+		<li><b>Line 1</b>, gives us an enumerable of numbers from 0 to 500 for processing.</li>
+		<li><b>Line 2</b>, creates the RemoteContext. This is really just a client which has a list of server connections to which we can send work.</li>
+		<li><b>Line 3</b>, is a list of assemblies that contain the necessary code to run your LINQ statement. The client will actually send 
+					a copy of the dll	to the RemoteLINQ server so that the server will have a copy of the "DoSomeWork" (line 7) method so 
+					that it can execute it.</li>
+		<li><b>Line 4</b>, is the list of servers to divvy the work across.</li>
+		<li><b>Line 5</b>, is just the port that the client will try to connect to the server on.</li>
+		<li><b>Line 6</b>, contains any options to direct how the work gets split across the servers, etc.</li>
+		<li><b>Line 7</b>, is your LINQ statement. Notice the "AsRemotable". This is where all the magic starts.
+					This will actually return a IRemoteEnumerable which knows how to take anything to the right of
+					it and run it remotely.
+	</li></ul>
+	Lines 2-6 can be put into some fields somewhere and be reused across multiple RemoteLINQ calls. This will actually
+	buy you a couple things. First, you will only have one connection to the server. Second, only one copy of your assemblies
+	will be sent across to the server.<br /><br />
+
+<h2>How it works</h2>
+<p>
+	Lets start out with what lambda expression look like in compiled code. When we compile lambda expressions they are moved into a
+	new method with a compiler generated name. If you reflect on a class with lambdas and get all the methods on that type you will see
+	a bunch of method names which you didn't create. Those are your lambdas. The fact that they are first class methods allows us
+	from the outside, with reflection of course, to call those methods. So when we call "Select" on an IRemoteEnumerable,
+	RemoteLINQ is taking the lambda expression passed in, and storing information about it into a serializable object (assembly, 
+	declaring type, method name, etc.). This will allow us to send that information to the server, who can then call the method
+	without all the other stuff around it.
+</p>
+<p>
+	On the server side of things, when we start up a RemoteLINQ server, it will create a worker thread for each processor in the machine.
+	The worker thread will wait quietly until new work arrives on the socket connection. When work arrives we take the serialized object
+	I mentioned before and find the assembly, type, and method and execute that method with the work given to us. In this case the work will
+	be one of the numbers from 0 to 500. The client will handle load balancing the servers by choosing the server with the least amount of pending
+	work per processor. The amount of work queued up on the server is sent back after each unit of work is completed so that the client
+	will have the most up to date picture of what the servers are doing to make the best guess as to where to send the next piece of work.
+</p>
+<p>
+	That's about it. You now have a way to split complex LINQ tasks across multiple machine with just a single call on your LINQ statement.
+</p>
+
+<p>
+  <a href="http://www.fernsroth.com/tech/RemoteLinq.zip">Download The Code</a>
+</p><p></p> 
+{% endraw %}

@@ -1,0 +1,53 @@
+---
+permalink: /blogs/scott_leberknight/dirt_simple_mocks_in_groovy.html
+layout: blogs
+title: !binary |-
+  RGlydCBTaW1wbGUgTW9jayBPYmplY3RzIEluIEdyb292eQ==
+date: 2007-05-31 01:21:29.000000000 -04:00
+tags: !binary |-
+  R3Jvb3Z5IFRlc3Rpbmc=
+---
+{% raw %}
+<p>I've just started on a new project and of course we want to ensure all, and I really mean all, our code is tested. Now, this being a Java project many people assume 80% is pretty good and that getting upwards of 90% coverage and beyond takes a superhuman effort. In the past I would have agreed. Now that I am learning Groovy, however, I no longer agree and now think it is not only possible to get above 90% coverage and close to 100%, but quite easy.</p>
+
+<p>First some background on why normally 80% is acceptable. Well, it is simply that Java is not very flexible when it comes to mocking certain types of objects. For example, try mocking a standard JDK class that is marked as <code>final</code> and making it do your bidding. Not easy. It <i>is</i> easy to mock classes that implement an interface and even non-final classes using things like <a href="http://www.jmock.org/">jMock</a> and <a href="http://www.easymock.org/">EasyMock</a>.</p>
+
+<p>Let's take an example. We have some reflective code that uses the <code>java.lang.reflect.Field</code> class' <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/reflect/Field.html#get(java.lang.Object)">get()</a> method. This method throws <code>IllegalArgumentException</code> and <code>IllegalAccessException</code>, the latter of which is a checked exception. Since there is nothing meaningful we can really do about a <code>IllegalAccessException</code> we catch it and rethrow as an <code>IllegalStateException</code>, which is a runtime (unchecked) exception. The problem is that covering the case when an <code>IllegalAccessException</code> is thrown is not something you can mock using a tool like EasyMock, even the cool <a href="http://www.easymock.org/EasyMock2_0_ClassExtension_Documentation.html">EasyMock Class Extension</a>, since the class is marked <code>final</code>.</p>
+
+<p>Last week I found something called <a href="https://jmockit.dev.java.net/">jmockit</a> which is very cool and essentially uses some Java 5 class instrumentation magic (you must specify a <code>javaagent</code> to the JVM when running your tests) to replace byte code at runtime. This allows you to literally mock anything at all, except for the minor issue that if you want to mock methods in a JDK class like <code>Field</code> all the test classes must be loaded by the boot class loader, which means you have to use the <code>-Xbootclasspath</code> startup option. This starts to really become intrusive, complicate your build process, and generally make things a lot more complex. Even needing to run the JVM with <code>-javaagent:jmockit.jar</code> is intrusive and somewhat complicated.</p>
+
+<p>Enter Groovy. I am a total beginner at Groovy having only attended some sessions at various conferences like <a href="http://www.nofluffjuststuff.com/">No Fluff Just Stuff</a> and <a href="http://java.sun.com/javaone/">JavaOne</a>, a little tinkering with the Groovy shell, and having purchased <a href="http://www.manning.com/koenig/">Groovy in Action</a>. Within an hour or so of tinkering I was able to produce an <code>IllegalAccessException</code> from a mocked <code>Field</code> using Groovy. The following code is probably crap (again being a Groovy newbie) but is ridiculously simple and readable nonetheless:</p>
+
+<pre class="prettyprint">import groovy.mock.interceptor.MockFor
+import java.lang.reflect.Field
+
+class SimpleUnitTest extends GroovyTestCase {
+
+    void testMockingField() {
+        def fieldMock = new MockFor(Field)
+        def mb = new MyBean()
+        fieldMock.demand.get(mb) { throw new IllegalAccessException("haha") }
+        fieldMock.use {
+            Field f = MyBean.class.getDeclaredField("name")
+            shouldFail(IllegalAccessException) {
+                f.get(mb)
+            }
+        }
+    }
+
+}
+
+class MyBean {	
+    def name = "hello, groovy"
+}
+</pre>
+
+<p>That's it. It is ridiculous how easy Groovy makes mocking any object. The steps are basically:</p>
+<ol>
+<li>Create mock using <code>MockFor</code></li>
+<li>Tell mock what to do using <code>demand</code></li>
+<li>Execute code under test in a closure passed to <code>use</code></li>
+</ol>
+
+<p>Developers used to the power of dynamic languages like Ruby of course won't think too much of this as it is even simpler to create mocks, but this is something new for Java developers. Now there is really almost no reason why you can't test literally all of your Java code, and more importantly, do it very easily.</p> 
+{% endraw %}

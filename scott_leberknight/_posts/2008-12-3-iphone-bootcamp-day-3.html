@@ -1,0 +1,60 @@
+---
+permalink: /blogs/scott_leberknight/iphone_bootcamp_day_3.html
+layout: blogs
+title: !binary |-
+  aVBob25lIEJvb3RjYW1wIERheSAz
+date: 2008-12-03 23:53:00.000000000 -05:00
+tags: !binary |-
+  TWFjIE9TIFggaVBob25l
+---
+{% raw %}
+ <p>Today is Day 3 of the iPhone bootcamp at <a href="http://www.bignerdranch.com/">Big Nerd Ranch</a>, taught by Joe Conway.</p>
+
+<p>See <a href="/blogs/scott_leberknight/iphone_bootcamp_blogs.html">here</a> for a list of each day's blog entries.</p>
+
+<h3>Media</h3>
+
+<p>Today we started off learning how to play audio and video files by creating a simple application that allows you to play a system sound, an audio file, and a movie. If all you want to do is play .caf, .wav. or .aiff audio files tat are less than 30 seconds in length, you're in luck because you can simply use <code>AudioServicesCreateSystemSoundID</code> to register a sound with the system and then use <code>AudioServicesPlaySystemSound</code> to play the sound. On the other hand, if you want to play almost any type of audio file, you can use the <code>AVAudioPlayer</code>, which really isn't all that much more complicated. You create a <code>AVAudioPlayer</code> and then implement <code>AVAudioPlayerDelegate</code> methods like <code>audioPlayerDidFinishPlaying</code> to respond to audio player events. You simply call <code>start</code> and <code>stop</code> to control playback and you can use <code>isPlaying</code> to check playback status. Recording audio is apparently more difficult, and we didn't really cover it in lecture or lab, though the exercise book has a whole appendix devoted to creating your own voice recorder application.</p>
+
+<p>For movie playback you can use <code>MPMoviePlayerController</code>. It is also pretty easy to use. But, one caveat is that it completely takes over your iPhone application when you call <code>play</code>, and the user has no control until the movie ends or until the user exits your application.</p>
+
+<h3>Low Memory Warnings</h3>
+
+<p>We next took a (very) short detour talking about low memory warnings. When your application is taking too much memory, the iPhone sends your application the <code>applicationDidReceiveMemoryWarning</code> message. In that method you are supposed to release as much memory as you possibly can. However, according to Joe, the iPhone does not really provide much information about how much memory you need to release, or how much memory will cause a low memory warning in the first place! Joe says to just release as much memory as you possibly can immediately or else the iPhone can simply terminate your application. All your <code>UIViewController</code>s are sent <code> didReceiveMemoryWarning</code>. The default implementation checks if you have implemented <code>loadView</code>, and if so releases its view instance. The next time the view needs to be shown on screen, it gets reconstructed. One last thing is that the iPhone simulator allows you to simulate a low memory warning via the "Simulate Memory Warning" option on the Hardware menu.</p>
+
+<h3>OpenGL</h3>
+
+<p><a href="http://www.khronos.org/opengles/">OpenGL ES</a> is the implementation of OpenGL on the iPhone. Basically it is a low-level C API that allows you to draw 2D and 3D graphics on the iPhone in various colors and textures. Triangles, lines, and points comprise the basic geometrical shapes you can use to compose graphics. When coding OpenGL ES you basically need to define all the vertices in two or three dimensional space, then define the color of each vertex, and then, via the <code>EAGLContext</code>, render the graphic. The color of a vertex is defined in RGBA8 format, which allows you to specify red, blue, green color channels and an alpha transparency channel, using 8-bits per channel. The <code>EAGLContext</code> is the bridge between Cocoa Touch and OpenGL ES, and is what allows you to use OpenGL on the iPhone.</p>
+
+<p>When coding OpenGL ES, you use various buffers. The frame buffer describes one frame of drawing. The render buffer contains the pixels created by drawing commands sent to the frame buffer. When you draw to the screen, you really draw to a <code>CAEAGLLayer</code> object, and you use a timer to request drawing updates, e.g. schedule a timer to update the drawing 60 times per second creates a 60 frame per second rendering. Another important thing is that you must call <code>setCurrentContext</code> on the <code>EAGLContext</code> before performing any drawing commands. Last, according to Joe, OpenGL is not at all forgiving if you screw something up, for example if you have an empty buffer or mismatched vertex data in the buffer. When that occurs, your application simply crashes.</p>
+
+<p>The lab exercise for OpenGL was to create a "Fireworks" application that randomly generates "fireworks" using OpenGL and that simulates those fireworks exploding and then burning out. Pretty cool stuff, but man is it a lot of code to just to create relatively simple things because you must fully define all the geometry and colors and then use OpenGL functions to enable various drawing states and draw the geometry. You also of course need to implement logic to change the drawing over time, for example once a firework explodes you need to define the logic to animate the particles using lots of math and even some good old physics equations to compute position, velocity, and acceleration. I bet if they taught physics by having students implement particle engines on the iPhone more people would be into science!</p>
+	
+<h3>Textures</h3>
+
+<p>After various types of pizza, including a really good barbeque pizza, for lunch, we learned about using textures in OpenGL ES. You use per-pixel coloring to spread an image file across geometric primitives (triangles, points, and lines). Textures add depth to a scene and can also be used to create shadow effects and is how you draw text using OpenGL. We extended our Fireworks application by adding texture to each exploding particle. Essentially you pin an image file to your geometry. Since adding textures is still OpenGL coding, it is low level and requires a fair amount of code to define the mapping coordinates for the texture in order to pin it to the scene geometry. But the end result is pretty cool!</p>
+
+<h3>Multi-touch Events</h3>
+
+<p>Before getting into touch events, we took an afternoon hike. It was really nice and I wished we had done the zip lines at Banning Mills today, since it is supposed to rain tomorrow. When we got back from the hike, we plowed into how to handle touch events on the iPhone. First up, Joe told us all about <code>UIResponder</code>, which is the base class for <code>UIView</code>, <code>UIController</code>, <code>UIWindow</code>, and <code>UIApplication</code>. Because of this inheritance relationship, subclasses gain similar functionality automatically for handling the different phases for <code>UIResponser</code>. The phases of <code>UIResponser</code> are: <code>touchesBegan</code>, <code>touchesMoved</code>, and <code>touchesEnded</code>. These phases allow you to handle all kinds of touch events, including up to five simultaneous touches.</p>
+
+<p>The <code>UITouch</code> object is what you work with when handling touches. By default, multi-touch is not enabled, so you have to enable multi-touch either in code using <code>setMultipleTouchEnabled:YES</code> or you can set the property in Interface Builder. Each of the touch callback methods, for example <code>touchesBegan</code>, sends you the touches as a set of <code>UITouch</code> objects and a <code>UIEvent</code> object. You can use the event object to determine the number of touches and respond appropriately. In the lab exercise we extended the Fireworks application to respond to single touches, touch-and-drag, and multiple-touches. When handling multiple touches you need to use math and geometry to figure out things like how far apart the touches are; in the Fireworks application we made it so the further away the touches the faster we disperse the firework particles.</p>
+
+<h3>Core Graphics</h3>
+
+<p>Last for today was Core Graphics, which allows drawing in Cocoa Touch. Core Graphics is much simpler to use than OpenGL but is not as powerful. It is not designed to draw super fast animations and games like OpenGL is, and according to Joe should mostly be used for UIs where you need to do drawing.</p>
+
+<p>You use the <code>drawRect</code> method to define your drawing commands. You draw to a <code>CGContext</code> graphics context. The main iPhone run loop, not you, is responsible for creating the graphics context and calling <code>drawRect</code>; you simply need to define what to draw, not when to do it. The basic process you follow to draw is as follows. First, get a reference to a <code>CGContext</code> graphics context. Second, create a <code>CGMutablePathRef</code> path object and then draw points, lines, curves, and shapes to the path. Next, you set the color of the graphics context, and finally you stroke or fill the path object.</p>
+
+<p>During drawing you can save and restore the state of a <code>CGContext</code>. For example, you might perform some drawing commands, then save the context state, change a few drawing attributes and perform several more drawing operations, restore the context state, and continue drawing using the original state. According to Joe, you should not save/restore state a lot or it can really slow down your application.</p>
+
+<p>Core Graphics uses the "Painter's Method" when drawing objects on screen, meaning objects are drawn from back to front. Objects drawn later are drawn over top objects that were drawn earlier, effectively replacing the existing pixels. One other thing to mention is that, using Core Graphics, you can do 2D transforms applied to <code>CGContext</code> to perform rotation, translation, scaling, and skewing of the shapes on screen.</p>
+
+<h3>Random Thoughts</h3>
+
+<p>My brain is starting to hurt after three days of hardcore learning and coding. Several of us started watching the Bourne Ultimatum after dinner on the nice big flat-screen TV in the Banning Mills lodge to relax a bit.</p>
+
+<p>OpenGL, while powerful, is not what I'd call the most fun API I've ever worked with, and it would probably take a while to learn the ins and outs and become an expert in it. Adding textures using OpenGL can really spice up your application and make it look better. Our Fireworks application went from exploding popcorn before adding texture to looking like real, exploding firework particles after the texture was added to the particles.</p>
+
+<p>Being able to handle multi-touch events is just plain cool.</p> 
+{% endraw %}

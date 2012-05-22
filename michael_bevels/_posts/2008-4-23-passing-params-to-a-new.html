@@ -1,0 +1,85 @@
+---
+permalink: /blogs/michael_bevels/passing_params_to_a_new.html
+layout: blogs
+title: !binary |-
+  UGFzc2luZyBQYXJhbXMgdG8gYSBOZXcgV2luZG93IHdpdGggSlNG
+date: 2008-04-23 14:35:33.000000000 -04:00
+tags: !binary |-
+  R2VuZXJhbA==
+---
+{% raw %}
+<p><b>Here's what I wanted to accomplish:</b></p>
+
+<p>A user performs a search.  The user sees a list of results.  The user clicks on a "details" link for a single record in the list of results.  The action of clicking on the details link launches a popup window that displays the details of the record selected.</p>
+
+<p><b>Here's how I thought it should work:</b></p>
+
+<p>The page with the list of results and the details popup page would share the same backing bean.  Each "details" link (commandLink, commandButton, outputLink...doesn't matter) in the list of results would use f:setPropertyActionListener to set the "selectedRecordId" on the backing bean.  An onclick event on the details link would launch a popup window.  The popup window would get the "selectedRecordId" from the shared backing bean along with other data relating to the selected record.</p>
+
+<p>Sounds pretty straight forward, right?  Wrong.  The problem is that any javascript events are executed before the form is submitted.  So in the situation described above, the popup launches first and THEN the setProperty ActionListener sets selectedRecordId on the backing bean.  When the popup window loads, it can't retrieve selectedRecordId because it hasn't been set yet.</p>
+
+<p><b>A Solution!</b></p>
+
+Here's a high level overview of how it works.  The javascript on the details link passes the recordId on the URL.  When the details popup page accesses the "selectedRecordId" on the backing bean, the getter for this field calls a method which retrieves the value of "recordId" that was passed on the URL.  This value can then be set to "selectedRecordId" on the backing bean.  Both the page with the dataTable results and the details popup page now have access to "selectedRecordId".
+
+<p><b>The Code!</b></p>
+
+<p>I used icefaces in the example code below.</p>
+
+<p>The dataTable with details popup link:</p>
+<pre class="prettyprint">&lt;ice:dataTable id="searchResults" value="#{basicSearch.records}" var="item"&gt;
+    &lt;ice:column&gt;
+        &lt;f:facet name="header"&gt;
+            &lt;ice:commandSortHeader
+                    columnName="#{basicSearch.labelColumnName}"
+                    arrow="true"&gt;
+                &lt;ice:outputText value="#{basicSearch.labelColumnName}"/&gt;
+            &lt;/ice:commandSortHeader&gt;
+        &lt;/f:facet&gt;
+        &lt;ice:outputText value="#{item.label}"/&gt;
+    &lt;/ice:column&gt;
+
+    &lt;ice:column&gt;
+        &lt;f:facet name="header"&gt;
+            &lt;ice:outputText value="Details"/&gt;
+        &lt;/f:facet&gt;
+
+        &lt;ice:commandButton image="/resources/images/icon_small_info.gif"
+                           onclick="doPopup('#{request.contextPath}/recordDetails/details.jspx?recordId=#{item.recordId}'); "&gt;
+        &lt;/ice:commandButton&gt;
+    &lt;/ice:column&gt;
+&lt;/ice:dataTable&gt;</pre> 
+
+<p>The important stuff from the backing bean:</p>
+<pre class="prettyprint">    private String selectedRecordId;
+
+    public String getSelectedRecordId() {
+        selectedRecordId = (String) getParamValue("#{param.recordId}");
+        return selectedRecordId;
+    }
+
+    public void setSelectedRecordId(String selectedRecordId) {
+        this.selectedRecordId = selectedRecordId;
+    }
+
+    public Object getParamValue(String s) {
+        FacesContext facesContext = FacesContext.getCurrentInstance();
+        Object value = facesContext.getApplication().createValueBinding(s).getValue(facesContext);
+        return value;
+    }</pre>
+
+<p>The javascript:</p>
+<pre class="prettyprint">function doPopup(source) {
+    popup = window.open(source, "popup", "height=600,width=900)");
+    popup.focus();
+}</pre>
+
+<p>Accessing the recordId from the popup window:</p>
+<pre class="prettyprint">&lt;ice:outputText  value="#{metadataView.selectedRecordId}"/&gt;</pre>
+
+<p>Concurrent DOM Access so both windows can access the same backing bean: (web.xml)</p>
+<pre class="prettyprint">    &lt;context-param&gt;
+        &lt;param-name&gt;com.icesoft.faces.concurrentDOMViews&lt;/param-name&gt;
+        &lt;param-value&gt;true&lt;/param-value&gt;
+    &lt;/context-param&gt;</pre> 
+{% endraw %}

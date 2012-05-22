@@ -1,0 +1,152 @@
+---
+permalink: /blogs/scott_leberknight/using_a_hibernate_interceptor_to.html
+layout: blogs
+title: !binary |-
+  VXNpbmcgYSBIaWJlcm5hdGUgSW50ZXJjZXB0b3IgVG8gU2V0IEF1ZGl0IFRy
+  YWlsIFByb3BlcnRpZXM=
+date: 2008-08-27 11:47:19.000000000 -04:00
+tags: !binary |-
+  SmF2YQ==
+---
+{% raw %}
+<p>In almost every application I've done, the database tables have some kind of audit trail fields. Sometimes this is a separate "audit log" table where all inserts, updates, deletes, and possibly even queries are logged. Other times there are the four typical audit trail fields in each table, for example you might have <code>created_by</code>, <code>created_on</code>, <code>updated_by</code>, and <code>updated_on</code> fields in each table. The goal in the latter case is to update those four fields with the appropriate information as to who created or updated a record and when they did it. Using s simple Hibernate <a href="http://www.hibernate.org/hib_docs/v3/api/org/hibernate/Interceptor.html">Interceptor</a> this can be accomplished with no changes to your application code (with several assumptions which I'll detail next). In other words, you won't need to and definitely should not be manually setting those audit properties littered around your application code.</p>
+
+<p>The basic assumptions I'll make for this simple audit interceptor are that: (1) model objects contain the four audit properties mentioned above, and (2) there is an easy way to obtain the current user's information from anywhere in the code. The first assumption is needed since you need some way to identify which properties constitute the audit trail properties. The second assumption is required because you need some way to obtain the credentials of the person making the change in order to set the <code>createdBy</code> or <code>updatedBy</code> property in your Hibernate Interceptor class.</p>
+
+<style type="text/css">
+.code {
+  overflow: auto;
+  border: 1px solid #ccc;
+  background-color: #efefef;
+  font-size: small;
+  padding: 5px;
+  line-height: 110%;
+}
+</style>
+
+<p>So, for reference purposes, assume you have a (Groovy) base entity like this with the four audit properties:</p>
+
+<pre class="code">@MappedSuperclass
+class BaseEntity implements Serializable {
+  String createdBy
+  Date createdOn
+  String updatedBy
+  Date updatedOn
+}
+</pre>
+
+<p>I'm using the Hibernate <a href="http://www.hibernate.org/hib_docs/v3/api/org/hibernate/cfg/ImprovedNamingStrategy.html">ImprovedNamingStrategy</a> so that camel case names are translated to underscored names, e.g. "createdBy" becomes "created_by". Next assume there is a <code>BlogEntry</code> entity class that extends <code>BaseEntity</code> and inherits the audit trail properties:</p>
+
+<pre class="code">@Entity
+class BlogEntry extends BaseEntity {
+  @Id @GeneratedValue (strategy = GenerationType.IDENTITY)
+  Long id
+
+  @Version
+  Long version
+
+  String title
+
+  @Column (name = "entry_text")
+  String text
+
+  @Temporal (TemporalType.TIMESTAMP)
+  Date publishedOn
+}
+</pre>
+
+<p>To implement the interceptor, we need to implement the aforementioned <a href="http://www.hibernate.org/hib_docs/v3/api/org/hibernate/Interceptor.html">Interceptor</a> interface. We <i>could</i> do this directly, but it is better to extend <a href="http://www.hibernate.org/hib_docs/v3/api/org/hibernate/EmptyInterceptor.html">EmptyInterceptor</a> so we need only implement the methods we actually care about. Without further ado, here's the implementation (excluding package declaration and imports):</p>
+
+<pre class="code">class AuditTrailInterceptor extends EmptyInterceptor {
+
+  boolean onFlushDirty(Object entity, Serializable id, Object[] currentState,
+                      Object[] previousState, String[] propertyNames,
+                      Type[] types) {
+    setValue(currentState, propertyNames, "updatedBy", UserUtils.getCurrentUsername())
+    setValue(currentState, propertyNames, "updatedOn", new Date())
+    true
+  }
+
+  boolean onSave(Object entity, Serializable id, Object[] state,
+                 String[] propertyNames, Type[] types) {
+    setValue(state, propertyNames, "createdBy", UserUtils.getCurrentUsername())
+    setValue(state, propertyNames, "createdOn", new Date())
+    true
+  }
+
+  private void setValue(Object[] currentState, String[] propertyNames,
+                        String propertyToSet, Object value) {
+    def index = propertyNames.toList().indexOf(propertyToSet)
+    if (index >= 0) {
+      currentState[index] = value
+    }
+  }
+}
+</pre>
+
+<p>So what did we do? First, we implemented the <code>onFlushDirty</code> and <code>onSave</code> methods because they are called for SQL updates and inserts, respectively. For example, when a new entity is first saved, the <code>onSave</code> method is called, at which point we want to set the <code>createdBy</code> and <code>createdOn</code> properties. And if an existing entity is updated, <code>onFlushDirty</code> is called and we set the <code>updatedBy</code> and <code>updatedOn</code>.</p>
+
+<p>Second, we are using the <code>setValue</code> helper method to do the real work. Specfically, the only way to modify the state in a Hibernate Interceptor (that I am aware of anyway) is to dig into the <code>currentState</code> array and change the appropriate value. In order to do that, you first need to trawl through the <code>propertyNames</code> array to find the index of the property you are trying to set. For example, if you are updating a blog entry you need to set the <code>updatedBy</code> and <code>updatedOn</code> properties within the <code>currentState</code> array. For a <code>BlogEntry</code> object, the <code>currentState</code> array might look like this before the update (the updated by and on propertes are both <code>null</code> in this case because the entity was created by Bob but has not been updated yet):</p>
+
+<pre class="code">{ 
+  "Bob",
+   2008-08-27 10:57:19.0,
+   null, 
+   null, 
+   2008-08-27 10:57:19.0, 
+   "Lorem ipsum...",
+   "My First Blog Entry",
+   0
+}
+</pre>
+
+<p>You then need to look at the <code>propertyNames</code> array to provide context for what the above data represents:</p>
+
+<pre class="code">{
+  "createdBy",
+  "createdOn",
+  "updatedBy",
+  "updatedOn",
+  "publishedOn",
+  "text",
+  "title",
+  "version"
+}
+</pre>
+
+<p>So in the above <code>updatedBy</code> is at index 2 and <code>updatedOn</code> is located at index 3. <code>setValue()</code> works by finding the index of the property it needs to set, e.g. "updatedBy," and if the property was found, it changes the value at that index in the <code>currentState</code> array. So for <code>updatedBy</code> at index 2, the following is the equivalent code if we had actually hardcoded the implementation to always expect the audit fields as the first four properties (which is obviously not a great idea):</p>
+
+<pre class="code">// Equivalent hard-coded code to change "updatedBy" in above example
+// Don't use in production!
+currentState[2] = UserUtils.getCurrentUsername()
+</pre>
+
+<p>To actually make your interceptor do something, you need to enable it on the Hibernate <a href="http://www.hibernate.org/hib_docs/v3/api/org/hibernate/Session.html">Session</a>. You can do this in one of several ways. If you are using plain Hibernate (i.e. not with Spring or another framework) you can set the interceptor globally on the <a href="http://www.hibernate.org/hib_docs/v3/api/org/hibernate/SessionFactory.html">SessionFactory</a>, or you can enable it for each <code>Session</code> as in the following example code:</p>
+
+<pre class="code">// Configure interceptor globally (applies to all Sessions)
+sessionFactory =
+  new AnnotationConfiguration()
+    .configure()
+    .setNamingStrategy(ImprovedNamingStrategy.INSTANCE)
+    .setInterceptor(new AuditTrailInterceptor())
+    .buildSessionFactory()
+
+// Enable per Session
+Session session = getSessionFactory().openSession(new AuditTrailInterceptor())
+</pre>	
+
+<p>If you enable the interceptor globally, it must be thread-safe. If you are using <a href="http://www.springframework.org">Spring</a> you can easily configure a global interceptor on your session factory bean:</p>
+
+<pre class="code">&lt;bean id="sessionFactory"
+      class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+  &lt;property name="entityInterceptor">
+    &lt;bean class="com.nearinfinity.hibernate.interceptor.AuditTrailInterceptor"/>
+  &lt;/property>
+  &lt;!-- additional Hibernate configuration properties -->
+&lt;/bean>
+</pre>
+
+<p>On the other hand, if you would rather enable the interceptor per session, you either need to use the <a href="http://www.hibernate.org/hib_docs/v3/api/org/hibernate/SessionFactory.html#openSession(org.hibernate.Interceptor)">openSession(Interceptor)</a> method to open your sessions or alternatively implement your own version of <a href="http://www.hibernate.org/hib_docs/v3/api/org/hibernate/context/CurrentSessionContext.html">CurrentSessionContext</a> to use the <a href="http://www.hibernate.org/hib_docs/v3/api/org/hibernate/SessionFactory.html#getCurrentSession()">getCurrentSession()</a> method in order to set the interceptor. Using <code>getCurrentSession()</code> is preferable anyway since it allows several different classes (e.g. DAOs) to use the same session without needing to explicitly pass the <code>Session</code> object around to each object that needs it.</p>
+
+<p>At this point we're done. But, if you know about the Hibernate eventing system (e.g. you can listen for events such as inserts and updates and define event listener classes to respond to those events), you might be wondering why I didn't use that mechanism rather than the <code>Interceptor</code>. The reason is that, <i>to the best of my current knowledge</i>, you cannot alter state of objects in event listeners. So for example you would not be able to change an entity's state in a <code>PreInsertEventListener</code> implementation class. If anyone knows this is incorrect or has implemented it, I'd love to hear about it.  Until next time, happy auditing!</p> 
+{% endraw %}

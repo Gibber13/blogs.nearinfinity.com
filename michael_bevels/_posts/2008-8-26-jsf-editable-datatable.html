@@ -1,0 +1,227 @@
+---
+permalink: /blogs/michael_bevels/jsf_editable_datatable.html
+layout: blogs
+title: !binary |-
+  SlNGIEVkaXRhYmxlIERhdGF0YWJsZQ==
+date: 2008-08-26 15:55:31.000000000 -04:00
+tags: !binary |-
+  R2VuZXJhbA==
+---
+{% raw %}
+<p>
+I recently needed to create a  "JSF Editable Datatable" where all fields (or a subset) could be edited at once.  Here's what I came up with...
+</p>
+
+<p>
+My requirements:
+</p>
+
+<ul>
+<li>Use a standard JSF datatable.</li>
+<li>When user clicks the Edit Button, all fields (or a subset) become editable inputText components.</li>
+<li>When a user clicks the Save Button, the changes will be saved to the affected objects and persisted to the DB.</li>
+</ul>
+
+<p>
+My implementation involves the following:
+</p>
+
+
+<ul>
+<li>IceFaces, Hibernate, Spring.</li>
+<li>1 jspx page with an ice:datatable component.</li>
+<li>1 backing bean with edit and save actions for the datatable.</li>
+</ul>
+
+<p>
+The jspx: <br /></p>
+<pre class="prettyprint">&lt;jsp:root
+        xmlns:jsp="http://java.sun.com/JSP/Page"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:c="http://java.sun.com/jstl/core"
+        xmlns:ice="http://www.icesoft.com/icefaces/component"
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        version="2.0"&gt;
+    &lt;jsp:directive.page contentType="text/html"/&gt;
+    &lt;jsp:output omit-xml-declaration="no"
+                doctype-root-element="html"
+                doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN"
+                doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"/&gt;
+
+    &lt;ice:dataTable id="editableDatatable" value="#{backingBean.elements}" var="element"&gt;
+        &lt;ice:column&gt;
+            &lt;f:facet name="header"&gt;
+                &lt;ice:outputText value="Value 1"/&gt;
+            &lt;/f:facet&gt;
+            &lt;h:inputText disabled="#{backingbean.elementsDisabled}"
+                         value="#{element.value1}"/&gt;
+        &lt;/ice:column&gt;
+        &lt;ice:column&gt;
+            &lt;f:facet name="header"&gt;
+                &lt;ice:outputText value="Value 2"/&gt;
+            &lt;/f:facet&gt;
+            &lt;h:inputText disabled="#{backingbean.elementsDisabled}"
+                         value="#{element.value2}"/&gt;
+        &lt;/ice:column&gt;
+    &lt;/ice:dataTable&gt;
+
+    &lt;br/&gt;
+
+    &lt;!--Buttons will be hidden or visible based on whether the table is in edit mode or display mode--&gt;
+    &lt;div id="editElement" style="display:block;"&gt;
+        &lt;!--Put the table in edit mode by enabling the inputtext components--&gt;
+        &lt;ice:commandButton value="Edit Element" partialSubmit="true"
+                           onclick="toggleLayerOn('updateElement');toggleLayerOff('editElement');"&gt;
+            &lt;f:setPropertyActionListener value="#{false}" target="#{backingBean.elementsDisabled}"/&gt;
+        &lt;/ice:commandButton&gt;
+    &lt;/div&gt;
+    &lt;div id="updateElement" style="display:none;"&gt;
+        &lt;!--Save the changes and return to display mode--&gt;
+        &lt;ice:commandButton action="#{backingBean.updateElementValues}" value="Update Element Values"
+                           partialSubmit="true"
+                           onclick="toggleLayerOn('editElement');toggleLayerOff('updateElement');"/&gt;
+        &lt;!--Cancel the changes and return to display mode--&gt;
+        &lt;ice:commandButton value="Cancel Changes" partialSubmit="true"
+                           onclick="toggleLayerOn('editElement');toggleLayerOff('updateElement');"&gt;
+            &lt;f:setPropertyActionListener value="#{true}" target="#{backingBean.elementsDisabled}"/&gt;
+        &lt;/ice:commandButton&gt;
+    &lt;/div&gt;
+
+&lt;/jsp:root&gt;
+</pre>
+
+
+
+
+
+<p>
+The backing bean.  Please note the upateElementValues() method.  This gets the editableDataTable from the FacesContext, casts it to an HtmlDataTable, loops over the rows of this datatable, and casts each row to an Element.  These Elements contain the updated values entered by the user.  You must then load the original Elements via Id and make the necessary changes before persisting the updates back to the database.  Make sure to set your datatable rowIndex back to -1 (see code) or there will be JSF errors.
+</p>
+<pre class="prettyprint">import com.icesoft.faces.component.ext.HtmlDataTable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.faces.component.UIComponent;
+import javax.faces.component.UIData;
+import javax.faces.context.FacesContext;
+import java.util.*;
+
+public class BackingBean {
+
+    public static final Logger log = LoggerFactory.getLogger(BackingBean.class);
+
+    private ElementDao elementDao;
+    private boolean elementsDisabled = true;
+    private List&lt;Element&gt; elements = new ArrayList&lt;Element&gt;();
+
+    public BackingBean() {
+        >//get all the elements from the database
+        elements = elementDao.getAllElements();
+    }
+
+    public void setElementDao(ElementDao elementDao) {
+        this.elementDao = elementDao;
+    }
+
+    public void updateElementValues() {
+        >//get the datatable as a UI component
+        UIComponent comp = FacesContext.getCurrentInstance().getViewRoot().findComponent("editableDataTable");
+
+        if (comp != null) {
+            UIData uIData = (UIData) comp;
+            HtmlDataTable myTable = (HtmlDataTable) uIData;
+
+            for (int i = 0; i &lt; myTable.getRowCount(); i++) {
+                >//loop over the rows
+                myTable.setRowIndex(i);
+                >//get the values that the user edited for this row
+                Element modifiedElement = (Element) myTable.getRowData();
+                >//print the values to verify they are correct
+                log.info("Value 1 " + modifiedElement.getValue1());
+                log.info("Value 2 " + modifiedElement.getValue2());
+
+                >//load the element from the database
+                Element originalElement = elementDao.load(modifiedElement.getId());
+                originalElement.setValue1(modifiedElement.getValue1());
+                originalElement.setValue2(modifiedElement.getValue2());
+                >//update the values in the database for the given element
+                elementDao.update(originalElement);
+
+            }
+            >//make sure to set the row Index back to -1!!!
+            myTable.setRowIndex(-1);
+        }
+        >//disable the inputtext components, they should only be enabled during "edit mode"
+        setElementsDisabled(true);
+    }
+
+    public boolean isElementsDisabled() {
+        return elementsDisabled;
+    }
+
+    public void setElementsDisabled(boolean elementsDisabled) {
+        this.elementsDisabled = elementsDisabled;
+    }
+
+    public List&lt;Element&gt; getElements() {
+        return elements;
+    }
+
+    public void setElements(List&lt;Element&gt; elements) {
+        this.elements = elements;
+    }
+}</pre>
+
+
+<p>
+The object:
+</p>
+<pre class="prettyprint">import javax.persistence.Id;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Column;
+
+public class Element {
+
+    @Id
+    @GeneratedValue(generator = "hibernate-uuid")
+    private String id;
+
+    @Column(nullable = false)
+    private String value1;
+
+    @Column(nullable = false)
+    private String value2;
+
+    public Element(String value1, String value2) {
+        this.value1 = value1;
+        this.value2 = value2;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getValue1() {
+        return value1;
+    }
+
+    public void setValue1(String value1) {
+        this.value1 = value1;
+    }
+
+    public String getValue2() {
+        return value2;
+    }
+
+    public void setValue2(String value2) {
+        this.value2 = value2;
+    }
+}
+</pre> 
+{% endraw %}

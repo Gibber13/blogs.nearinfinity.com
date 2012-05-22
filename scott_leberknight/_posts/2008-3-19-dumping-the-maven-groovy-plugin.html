@@ -1,0 +1,12 @@
+---
+permalink: /blogs/scott_leberknight/dumping_the_maven_groovy_plugin.html
+layout: blogs
+title: !binary |-
+  RHVtcGluZyB0aGUgTWF2ZW4gR3Jvb3Z5IFBsdWdpbg==
+date: 2008-03-19 16:07:51.000000000 -04:00
+tags: !binary |-
+  R3Jvb3Z5
+---
+{% raw %}
+<p>On my current project we are using Maven2 (yeah, yeah I know) which I become less and less happy with over time. That's not the point of this blog though. The point is that we have been using the <a href="http://mojo.codehaus.org/groovy/">Groovy Maven Plugin</a> for a few months now to compile tests written in Groovy. The project is a Java project but several months ago we started writing new tests entirely in Groovy. This has worked nicely for a while, until today in one test I wanted to use a static import, which Groovy 1.5.x supports just fine. Unfortunately it seems the Groovy Maven Plugin uses a <i>much</i> earlier version of Groovy which doesn't support static imports. After a lot of fiddling around trying to get the plugin to work, we simply gave up and went with using the Maven Ant plugin to <a href="http://docs.codehaus.org/display/GROOVY/Compiling+With+Maven2">compile</a> the Groovy code instead. It actually works and now we know for sure that we are using Groovy version 1.5.4.</p> 
+{% endraw %}

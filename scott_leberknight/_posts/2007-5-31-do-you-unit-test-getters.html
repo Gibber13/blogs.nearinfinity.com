@@ -1,0 +1,110 @@
+---
+permalink: /blogs/scott_leberknight/do_you_unit_test_getters.html
+layout: blogs
+title: !binary |-
+  RG8gWW91IFVuaXQgVGVzdCBHZXR0ZXJzIGFuZCBTZXR0ZXJzPw==
+date: 2007-05-31 11:06:04.000000000 -04:00
+tags: !binary |-
+  SmF2YSBUZXN0aW5n
+---
+{% raw %}
+<p>Since Java has no notion native syntax for declaring properties you have to write explicit getter and setter methods, or hopefully you never write them but rather you have your IDE generate them. The question is whether you should write explicit tests for these methods or not. If you measure your unit test coverage, getters and setters are normally tested during the course of all your other tests, for example if you use an ORM tool like Hibernate it will call the setters when populating objects and the getters when reading object state to persist changes. But most people don't assert every single property in the course of testing their data access tier, so the actual behavior many times is not actually being tested.</p>
+
+<p>Since getters and setters are explicit code in your application, I think they should be tested. But no way am I going to write individual tests for every single getter and setter method. So the other day I wrote a test utility that uses reflection to test that values passed to the setter methods are the values returned by the corresponding getters. Some people think this is cheating or just playing around with test coverage numbers. :-) Tools like <a href="http://findbugs.sourceforge.net/">Findbugs</a> consider this to be a code smell since the getter may be returning a reference to a mutable object, as does Josh Bloch in <a href="http://java.sun.com/docs/books/effective/">Effective Java</a>. While true to an extent, I want to know how many Java developers really create defensive copies in getter and/or setter methods. Not many I bet. As a matter of practicality, it just doesn't matter most of the time. I've never once had a problem where a <code>Date</code>, which is a mutable object, returned by a getter was changed and caused weird issues.</p>
+
+<p>Most Java developers know that objects returned by getters are meant for reading, and if you want to change the value, explicitly call the setter. There are exceptions of course: if a collection or map or array is returned sometimes you are expected (or required) to actually manipulate the returned mutable collection object. One of those cases is when using Hibernate as I described in an earlier <a href="http://www.nearinfinity.com/blogs/page/sleberkn?entry=let_s_play_who_owns">post</a>. In any case I think that since it is <i>possible</i> someone could manually mess up a getter or setter, they should be tested. In languages that provide explicit support for properties this is a joke, but this is Java, let's just get over that and just test it. (As the mantra goes, "test everything that could possibly break.")</p>
+
+<p>Ok, some code. The following is all we have to do to test basic getter/setter behavior of an object:</p>
+
+<pre class="prettyprint">@Test
+public void testProperties() {
+    assertBasicGetterSetterBehavior(new MyBean());
+}
+</pre>
+
+<p>This tests all the getter/setter pairs in the <code>MyBean</code> class. The <code>assertBasicGetterSetterBehavior</code> is statically imported from a class we created named <code>PropertyAsserter</code>, so we can just call it. This is the simplest usage in which we use the Java beans package classes like <code>Introspector</code> and <code>PropertyDescriptor</code> to find all the read/write properties and test the behavior, automatically creating argument objects for setter methods.</p>
+
+<p>The core method is this one:</p> 
+
+<pre class="prettyprint">/**
+ * See {@link #assertBasicGetterSetterBehavior(Object,String)} method. Only difference is that here we accept an
+ * explicit argument for the setter method.
+ *
+ * @param target   the object on which to invoke the getter and setter
+ * @param property the property name, e.g. "firstName"
+ * @param argument the property value, i.e. the value the setter will be invoked with
+ */
+public static void assertBasicGetterSetterBehavior(Object target, String property, Object argument) {
+    try {
+        PropertyDescriptor descriptor = new PropertyDescriptor(property, target.getClass());
+        Object arg = argument;
+        if (arg == null) {
+            Class type = descriptor.getPropertyType();
+            if (DEFAULT_TYPES.contains(type)) {
+                arg = DEFAULT_ARGUMENTS.get(DEFAULT_TYPES.indexOf(type));
+            }
+            else {
+                arg = ReflectionUtils.invokeDefaultConstructorEvenIfPrivate(type);
+            }
+        }
+
+        Method writeMethod = descriptor.getWriteMethod();
+        Method readMethod = descriptor.getReadMethod();
+
+        writeMethod.invoke(target, arg);
+        Object propertyValue = readMethod.invoke(target);
+        assertSame(property + " getter/setter failed test", arg, propertyValue);
+    }
+    catch (IntrospectionException e) {
+        String msg = "Error creating PropertyDescriptor for property [" + property +
+                "]. Do you have a getter and a setter?";
+        log.error(msg, e);
+        fail(msg);
+    }
+    catch (IllegalAccessException e) {
+        String msg = "Error accessing property. Are the getter and setter both accessible?";
+        log.error(msg, e);
+        fail(msg);
+    }
+    catch (InvocationTargetException e) {
+        String msg = "Error invoking method on target";
+        fail(msg);
+        log.error(msg, e);
+    }
+}
+</pre>
+
+<p>This method accepts a target object, the name of the property to test, and optionally an argument. If the argument is one a of a list of default types, things like a Set or a List, we'll just use a default object like an empty Set or List as the argument. Otherwise we'll use the default constructor, which means one must exist. Then we invoke the setter with the supplied argument or one we created, and assert that the object returned by the getter is the exact same object, e.g. using <code>==</code> for comparison. (Making this assertion is what makes tools like Findbugs unhappy, which is why I disable the rule that checks this "problem.") As you can see, we have a nice little subversive method named <code>invokeDefaultConstructorEvenIfPrivate</code> in our <code>ReflectionUtils</code> class that allows you to call private constructors. In Java you need this kind of thing for unit testing so you can keep private things private, as opposed to elevating to default access just for unit tests. But what about the one-liner in our test example above? The following method is the one we saw earlier:</p>
+
+<pre class="prettyprint">/**
+ * See {@link #assertBasicGetterSetterBehavior(Object,String)} method. Big difference here is that we try to
+ * automatically introspect the target object, finding read/write properties, and automatically testing the getter
+ * and setter. Note specifically that read-only properties are ignored, as there is no way for us to know how to set
+ * the value (since there isn't a public setter).
+ * &lt;p/>
+ * Note also that array properties are ignored.
+ *
+ * @param target the object on which to invoke the getter and setter
+ */
+public static void assertBasicGetterSetterBehavior(Object target) {
+    try {
+        BeanInfo beanInfo = Introspector.getBeanInfo(target.getClass());
+        PropertyDescriptor[] descriptors = beanInfo.getPropertyDescriptors();
+        for (PropertyDescriptor descriptor : descriptors) {
+            if (descriptor.getWriteMethod() == null) {
+                continue;
+            }
+            if (descriptor.getPropertyType().isArray()) {
+                continue;
+            }
+            assertBasicGetterSetterBehavior(target, descriptor.getDisplayName());
+        }
+    }
+    catch (IntrospectionException e) {
+        fail("Failed while introspecting target " + target.getClass());
+    }
+}
+</pre>
+
+<p>This is pretty simple, albeit verbose. We use the nifty <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/beans/Introspector.html">java.beans.Introspector</a> class to find the "properties," get the property descriptors and then call another overloaded <code>assertBasicGetterSetterBehavior</code> method that will call our original method with a <code>null</code> argument which means we'll create one automatically. Using this technique it is simple to automatically test generic getters and setters by adding one test method containing one line of code. We have a bunch of other overloaded methods in <code>PropertyAsserter</code> so you could choose to test only some of your properties automatically, for example if the getter and/or setter have side effects like validation and you need to explicitly test those cases.</p> 
+{% endraw %}

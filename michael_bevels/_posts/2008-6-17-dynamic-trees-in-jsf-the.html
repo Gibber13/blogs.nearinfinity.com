@@ -1,0 +1,163 @@
+---
+permalink: /blogs/michael_bevels/dynamic_trees_in_jsf_the.html
+layout: blogs
+title: !binary |-
+  RHluYW1pYyBUcmVlcyBpbiBKU0YgLSBUaGUgRWFzeSBXYXk=
+date: 2008-06-17 08:50:12.000000000 -04:00
+tags: !binary |-
+  R2VuZXJhbA==
+---
+{% raw %}
+<p>
+Another JSF project I've been working on required another dynamic JSF tree.  However, this time the component library being used was IceFaces.  If you recall, the last time I used RichFaces.  I have to say that using IceFaces made this task MUCH easier.
+</p>
+
+<p>
+The basic setup:
+</p>
+
+<ul>
+<li>
+A "tree" structure that is made up of "node" objects.  Each node has a parent node as well as a list of child nodes.  Root nodes have a null parent.  The tree object takes a list of root nodes.  (see code below)
+</li>
+<li>
+A JSF Tree.  IceFaces was used this time. (see code below)
+</li>
+<li>
+A JSF managed backing bean with ActionListeners and DAO access.  ActionListeners are used for the CRUD operations on nodes.  DAO access is used for directly updating the objects in the database. (see code below)
+</li>
+<li>
+A great place to start is with one of IceFaces tree examples.  I used this one: <a href="http://facestutorials.icefaces.org/tutorial/tree-tutorial.html#dynamicallychangingatree">IceFaces Sample Tree Application</a>
+</li>
+</ul>
+
+<p>
+All of this sounds very familiar, right?  
+</p>
+
+<p>
+Here's where it starts to get different.  
+</p>
+
+<p>
+The Tree UI:
+</p>
+
+<pre class="prettyprint">&lt;ice:panelGroup style="border: 1px solid gray;"&gt;
+                &lt;ice:tree id="tree"
+                          value="#{tree.model}"
+                          var="item"
+                          hideRootNode="false"
+                          hideNavigation="false"
+                        &gt;
+                    &lt;ice:treeNode&gt;
+                        &lt;f:facet name="content"&gt;
+                            &lt;ice:panelGroup style="display: inline"&gt;
+                                &lt;ice:commandLink
+                                        actionListener="#{item.userObject.nodeClicked}"
+                                        value="#{item.userObject.label}"/&gt;
+                            &lt;/ice:panelGroup&gt;
+                        &lt;/f:facet&gt;
+                    &lt;/ice:treeNode&gt;
+                &lt;/ice:tree&gt;
+            &lt;/ice:panelGroup&gt;</pre>
+
+<p>
+Note that "tree.model" is passed in.  Also note that there is a commandLink with actionListener.  This sets the selected node id on the backing bean.  Both of these things can be seen in the IceFaces sample tree application referenced above.
+</p>
+
+<p>
+What you'll need to do to make this truly dynamic is add some controls to your tree display page and some backing bean methods.  I'll use adding a node as an example.
+</p>
+
+<p>
+Add the code below to the page that displays the tree.  newNodeName is a field on the backing bean.  addChildToSelectedNode is the method on the backing bean that takes "newNodeName", creates a node, and persists it to the database.    
+</p>
+
+<pre class="prettyprint">&lt;div id="addNode"&gt;
+    &lt;table width="100%"&gt;
+        &lt;tr&gt;
+            &lt;td&gt;&lt;ice:outputText value="Name:"/&gt;&lt;/td&gt;
+            &lt;td&gt;&lt;ice:inputText value="#{nodeManagement.newNodeName}"/&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td&gt;
+                &lt;ice:commandButton 
+                                   value="Add Child to Selected Node"
+                                   action="#{nodeManagement.addChildToSelectedNode}"
+                                   partialSubmit="true"/&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/div&gt;
+
+&lt;ice:outputText
+        value="Selected Node: #{tree.selectedNodeObject.label}"
+        escape="false" style="font-weight:bold;"/&gt;</pre>
+
+<p>
+The method that add a node to the tree is shown below.  Note the last line (tree.buildTreeModel()).  This rebuilds the tree model that used to display the tree.  If this method is not implemented on the Tree bean, you will have to refresh the page manually to see the node that was just created.
+</p>
+
+<pre class="prettyprint">    public void addNodeToSelectedNode() {
+        //you'll probably want to handle errors here
+        //selectedNodeId can't be blank or null
+        //newNodeName shouldn't be blank or null
+
+        Node newNode = new Node();
+        
+        //load the selectedNode using the selectedNodeId
+        Node selectedNode = nodeDao.load(selectedNodeId);
+        
+        //get the selected node's Set of children
+        Set&lt;Node&gt; childrenOfParent = selectedNode.getChildren();
+
+        //create node to be added
+        newNode.setChildren(null);
+        newNode.setLabel(newNodeName);
+        newNode.setParent(selectedNode);
+
+        //add new node to selectedNode
+        childrenOfParent.add(newNode);
+
+        //saving selected node saves selectedNode as well as newNode
+        nodeDao.save(selectedNode);
+
+        //rebuild tree
+        tree.buildTreeModel();
+    }</pre>
+
+
+<p>The node: (more of the same from last time)</p>
+
+<pre class="prettyprint">import javax.persistence.*;
+import java.util.List;
+import org.hibernate.annotations.GenericGenerator;
+
+@Entity
+@GenericGenerator(
+        name = "hibernate-uuid", strategy = "uuid"
+)
+public class Node {
+    @Id
+    @GeneratedValue(generator = "hibernate-uuid")
+    private String id;
+
+    @Column(nullable = false)
+    private String label;
+
+    @OneToMany(mappedBy = "parent", cascade = {CascadeType.ALL})
+    private List<node> children;
+
+    @ManyToOne
+    @JoinColumn(name = "fk_parent_id")
+    private Node parent;
+
+   // Getters and Setters...
+}
+</node></pre>
+
+<p>
+I think is a much more straight forward way of creating a dynamic JSF tree.  Using the <a href="http://facestutorials.icefaces.org/tutorial/tree-tutorial.html#dynamicallychangingatree">IceFaces Sample Application</a> is a good starting point.  Adding the few snippets of code I've provided above should get you the rest of the way.
+</p> 
+{% endraw %}

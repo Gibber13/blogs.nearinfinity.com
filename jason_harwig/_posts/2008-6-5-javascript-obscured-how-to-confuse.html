@@ -1,0 +1,53 @@
+---
+permalink: /blogs/jason_harwig/javascript_obscured_how_to_confuse.html
+layout: blogs
+title: !binary |-
+  SmF2YVNjcmlwdCBPYnNjdXJlZCAoSG93IHRvIGNvbmZ1c2UgY293b3JrZXJz
+  KQ==
+date: 2008-06-05 20:19:44.000000000 -04:00
+tags: !binary |-
+  SmF2YVNjcmlwdA==
+---
+{% raw %}
+<p>I was reading a blog entry at <a href="http://webreflection.blogspot.com/2008/06/two-simple-tricks-in-javascript-olds.html">Web Reflection</a> that outlined some obscure solutions to common JavaScript patterns.</p>
+
+<p>I thought that entry was interesting, but I'm not sure I'd use them because of code readability and maintenance. It did get me thinking of some other ways to obscure simple tasks.</p> 
+<h3>a better ternary?</h3>
+
+<p>Have a co-worker that thinks ternary expressions are ugly?  Offer them this alternative:</p>
+
+<code class="prettyprint">var saveFunc = isNew ? insert : update;
+
+// becomes...
+
+var saveFunc = [update, insert][+isNew];
+</code>
+
+<p>Looks a little crazy, huh?  It works because a '+' or '-' before a boolean converts the boolean to a one or zero depending on its truthiness. The one or zero is accessing that element of the array. They'll be begging for ternary after that.</p>
+
+<p>I think I might actually use that that syntax in situations where I need to add one depending on a boolean:</p>
+
+<code class="prettyprint">var version = x + (+shouldIncrement);
+
+var version = x + (-shouldNotIncrement);
+</code>
+
+<h3>throw out parseInt</h3>
+
+<p>Converting a string to a number is often done with parseInt. There are some gotchas that many people fall into in that the second parameter to parseInt is not required, but should be. For instance:</p>
+
+<code class="prettyprint">var x = parseInt("08");
+// x is 0, because it assumes octal (base 8)
+var x = parseInt("08", 10); // force base 10
+// x is 8
+
+// an alternative
+var x = +"08";
+// x is 8
+
+// Negation works also
+var x = -"08";
+// x is -8
+</code>
+
+<p>Use them wisely, or preferably never.</p>{% endraw %}

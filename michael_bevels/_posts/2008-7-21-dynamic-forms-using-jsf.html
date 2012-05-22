@@ -1,0 +1,92 @@
+---
+permalink: /blogs/michael_bevels/dynamic_forms_using_jsf.html
+layout: blogs
+title: !binary |-
+  SlNGIC0gRHluYW1pY2FsbHkgQWRkaW5nIFVJQ29tcG9uZW50cyBUbyBBIEZv
+  cm0=
+date: 2008-07-21 10:25:40.000000000 -04:00
+tags: !binary |-
+  R2VuZXJhbA==
+---
+{% raw %}
+<p>
+Here's a quick and easy way to dynamically add JSF components to a page.  You'll need a jsp, a backing bean, and a jsf component library.  On the jsp, you will need a button and "container component" (I used a PanelGrid) with a binding to a backing bean.  The button will call a method on the backing bean.  The method will add child UI components to the bound container component.
+</p>
+
+<p>
+1.  The jsp.  Notice the container component (PanelGrid) has a binding to the backing bean.  The button calls the "addComponents" method on the backing bean.
+</p>
+
+<pre class="prettyprint">&lt;html xmlns:jsp="http://java.sun.com/JSP/Page"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:ice="http://www.icesoft.com/icefaces/component"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns="http://www.w3.org/1999/xhtml"&gt;
+&lt;jsp:directive.page contentType="text/html"/&gt;
+
+&lt;ui:composition&gt;
+
+
+    &lt;ice:panelGrid binding="#{backingBean.containerComponent}"/&gt;
+
+    &lt;br/&gt;
+
+    &lt;ice:commandButton value="Add UI Components" action="#{backingBean.addComponents}" partialSubmit="true"/&gt;
+
+&lt;/ui:composition&gt;
+&lt;/html&gt;</pre>
+
+<p>
+2.  The backing bean.  The addComponents method makes a call to a database to determine what/how many fields need to be added to the container component.
+</p>
+
+<pre class="prettyprint">import com.icesoft.faces.component.ext.HtmlPanelGrid;
+import com.icesoft.faces.component.ext.UIColumn;
+import com.icesoft.faces.component.ext.HtmlOutputText;
+import com.icesoft.faces.component.ext.HtmlInputText;
+
+public class BackingBean {
+
+    private HtmlPanelGrid containerComponent;
+
+    public void addComponent() {
+        //clean previous component
+        containerComponent.getChildren().clear();
+
+        List&lt;Node&gt; nodes = nodeDao.getAllNodes();
+
+        //dynamically add Child Components to Container Component
+        for (Node node : nodes) {
+            UIColumn col = new UIColumn();
+            HtmlOutputText ot = new HtmlOutputText();
+            ot.setValue(node.getLabel() + ": ");
+            col.getChildren().add(ot);
+            HtmlInputText it = new HtmlInputText();
+            it.setValue("");
+            it.setId(node.getLabel());
+            col.getChildren().add(it);
+
+            if (containerComponent == null) {
+                containerComponent = new HtmlPanelGrid();
+            }
+            containerComponent.getChildren().add(col);
+        }
+
+    }
+
+    public HtmlPanelGrid getContainerComponent() {
+        return containerComponent;
+    }
+
+    public void setContainerComponent(HtmlPanelGrid containerComponent) {
+        this.containerComponent = containerComponent;
+    }
+}
+</pre>
+
+<p>
+That's it!
+</p> 
+{% endraw %}
