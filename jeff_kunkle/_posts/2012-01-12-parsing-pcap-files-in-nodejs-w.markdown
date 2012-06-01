@@ -12,13 +12,11 @@ The module, called [pcap-parser](https://github.com/nearinfinity/node-pcap-parse
 {% highlight js %}
 var pcapp = require('pcap-parser');
 
-var parser = new pcapp.Parser('/path/to/file.pcap');
-// var parser = new pcapp.Parser(process.stdin);
+var parser = pcapp.parse('/path/to/file.pcap');
+// var parser = pcapp.parse(process.stdin);
 
 parser.on('packet', function(packet) {
   console.log(packet.header);
   console.log(packet.data);
 });
-
-parser.parse(); // to kick things off
 {% endhighlight %}

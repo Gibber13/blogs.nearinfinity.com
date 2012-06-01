@@ -14,57 +14,57 @@ Vows can generate test coverage reports with its --cover-plain, --cover-html, an
 
 The first prerequisite is fairly easy to satisfy, although you need to remember to re-run node-jscoverage any time you change the source files you're interested in covering. Setting up a script using something like [watchr](https://github.com/balupton/watchr) to re-instrument your files if anything changes might be a good option. Anyway, simply executing the following (assuming you've installed node-jscoverage and added it to your path) from the root of your node project will create the instrumented versions of the files in your lib directory:
 
-{% highlight js %}
-    node-js coverage lib lib-cov
+{% highlight bash %}
+node-jscoverage lib lib-cov
 {% endhighlight %}
 
 The second prerequisite is not as straightforward to resolve as you might expect unless you want to generate the code coverage on every test run. Why? Because requiring the instrumented code from your test is not the same as requiring the un-instrumented versions. Consider
 
 {% highlight js %}
-    // test/myfile_test.js
-    var fut = require('../lib/myfile.js'); // regular version
-    var fut = require('../lib-cov/myfile.js'); // instrumented version
+// test/myfile_test.js
+var fut = require('../lib/myfile.js'); // regular version
+var fut = require('../lib-cov/myfile.js'); // instrumented version
 {% endhighlight %}
 
 Since the statement requiring the file under test is in every test you write, having to change it when you want to run the instrumented or un-instrumented files is, in my opinion, not an option. So, on my current project we wrote the following javascript to to serve as a replacement to requiring your files under test.
 
 {% highlight js %}
-    // test/coverage.js
-    var covererageOn = process.argv.some(function(arg) {
-      return /^--cover/.test(arg);  
-    });
+// test/coverage.js
+var covererageOn = process.argv.some(function(arg) {
+  return /^--cover/.test(arg);  
+});
 
-    if (covererageOn) {
-      console.log('Code coverage on');
+if (covererageOn) {
+  console.log('Code coverage on');
 
-      exports.require = function(path) {
-        var instrumentedPath = path.replace('/lib', '/lib-cov');
+  exports.require = function(path) {
+    var instrumentedPath = path.replace('/lib', '/lib-cov');
 
-        try {
-          require.resolve(instrumentedPath);
-          return require(instrumentedPath);
-        } catch (e) {
-          console.log('Coverage on, but no instrumented file found at ' 
-            + instrumentedPath);
-          return require(path);
-        }
-      }
-    } else {
-      console.log('Code coverage off');
-      exports.require = require;
+    try {
+      require.resolve(instrumentedPath);
+      return require(instrumentedPath);
+    } catch (e) {
+      console.log('Coverage on, but no instrumented file found at ' 
+        + instrumentedPath);
+      return require(path);
     }
+  }
+} else {
+  console.log('Code coverage off');
+  exports.require = require;
+}
 {% endhighlight %}
 
 In essence, the script checks the process arguments to see if one of the vows --cover-* arguments were passed and changes its require method to substitute /lib-cov for any /lib references. If none of the coverage arguments are detected it simply requires the file as usual. Since your files under test normally use relative references to other files in your lib directory, they get covered too. Check out the example below to see how you would use the script in a test.
 
 {% highlight js %}
-    // test/mytest.js
-    var vows = require('vows');
-    var assert = require('assert');
-    var coverage = require('coverage');
-    var fileUnderTest = coverage.require('../lib/myfile.js');
+// test/mytest.js
+var vows = require('vows');
+var assert = require('assert');
+var coverage = require('coverage');
+var fileUnderTest = coverage.require('../lib/myfile.js');
 
-    vows.describe('your test').addBatch({
-        // do some testing
-    }).export(module);
+vows.describe('your test').addBatch({
+    // do some testing
+}).export(module);
 {% endhighlight %}

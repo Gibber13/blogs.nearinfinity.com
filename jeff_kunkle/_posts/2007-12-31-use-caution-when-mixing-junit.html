@@ -7,7 +7,8 @@ tags: Java
 ---
 <p>Quick quiz, what is the output from the following JUnit test?</p>
 
-{% highlight text %}package com.nearinfinity.sandbox;
+{% highlight java %}
+package com.nearinfinity.sandbox;
 import junit.framework.TestCase;
 
 import org.junit.After;
@@ -36,16 +37,18 @@ public class ModelTest extends TestCase {
 
 <p>If you said</p>
 
-{% highlight text %}<code>Setup has been called.
+{% highlight text %}
+Setup has been called.
 Teardown has been called.
-</code>{% endhighlight %}
+{% endhighlight %}
 
 <p>you'd be wrong. Don't feel bad though, I spent about two hours staring at a similar test until I finally figured out what was going on. So, what's the problem?</p>
 
 <p>The problem lies in the mixed use of JUnit 3 and 4 concepts. The astute reader will notice that this test extends the JUnit 3 <em>junit.framework.TestCase</em> while also using JUnit 4 annotations. So which wins, the base class methods, the annotations, or both? Well, it turns out that the JUnit 3 base class conventions win out and the annotations are ignored. With that said, can you now guess what the test output is? Did you guess</p>
 
-{% highlight text %}<code>Setup has been called.
-</code>{% endhighlight %}
+{% highlight text %}
+Setup has been called.
+{% endhighlight %}
 
 <p>If not, don't feel bad. It's not immediately obvious. It turns out that the <em>testSomething</em> test method runs because it starts with the word <em>test</em>, not because it's decorated with the <em>org.junit.Test</em> annotation. The <em>setUp</em> method runs because it overrides <em>junit.framework.TestCase</em>'s <em>setUp</em> method, not because it has a <em>org.junit.Before</em> annotation. Lastly, the <em>teardown</em> method doesn't run at all because it does not override the base class <em>tearDown</em> method due to the lowercase "d" and as we've seen, the <em>org.junit.After</em> annotation has no effect.</p>
 

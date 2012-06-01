@@ -13,22 +13,24 @@ Rather than specify which operations are restricted, Grant restricts all CRUD op
 
 Enough talk, let me show you an example of how you might use it. To enable model security you simply include the Grant::ModelSecurity module in your model class. In this example you see three grant statements. The first grants find (aka read) permission to everyone. The second example grants create, update, and destroy permission when the passed block evaluates to true, which in this case happens when the model is editable by the current user. You can put any code you want in that block as long as it returns a boolean value. Similarly, the third grant statement permits additions and removals from the tags association when it's block evaluates to true. A Grant::ModelSecurityError is raised if any grant block evaluates to false or nil.
 
-    class EditablePage < ActiveRecord::Base
-      include Grant::ModelSecurity
-      has_many :tags
-      
-      grant(:find) { true }
-      grant(:create, :update, :destroy) do |user, model| 
-        model.editable_by_user? user 
-      end
-      grant(:add => :tags, :remove => :tags) do |user, model, associated_model| 
-        model.editable_by_user? user 
-      end
+{% highlight ruby %}
+class EditablePage < ActiveRecord::Base
+  include Grant::ModelSecurity
+  has_many :tags
 
-      def editable_by_user? user
-        user.administrator?
-      end
-    end
+  grant(:find) { true }
+  grant(:create, :update, :destroy) do |user, model| 
+    model.editable_by_user? user 
+  end
+  grant(:add => :tags, :remove => :tags) do |user, model, associated_model| 
+    model.editable_by_user? user 
+  end
+
+  def editable_by_user? user
+    user.administrator?
+  end
+end
+{% endhighlight %}
 
 There's a lot more to the grant statement than shown in the above example. For instance, you can have multiple grant statements for the same action. Ultimate permission to perform the action will not be granted unless all grant blocks evaluate to true.
 

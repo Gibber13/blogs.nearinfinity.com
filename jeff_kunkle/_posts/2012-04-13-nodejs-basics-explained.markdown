@@ -15,7 +15,7 @@ I/O Latency
 ===========
 The core premise behind Node's approach is that I/O operations are slow compared to the computation done in your application. Consider the table below, taken from Ryan Dahl's 2008.11.08 presentation on Node.js. It shows various I/O operations on the left and the number of CPU cycles it takes to perform them. Don't focus on the actual numbers, but on the differences in magnitude for the  operations.
 
-<table border="1" cellspacing="0" cellpadding="10">
+<table>
 	<tr><th>Operation</th><th>CPU cycles</th></tr>
 	<tr><td>L1</td><td align="right">3</td></tr>
 	<tr><td>L2</td><td align="right">14</td></tr>
