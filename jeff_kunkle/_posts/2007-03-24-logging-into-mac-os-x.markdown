@@ -3,7 +3,7 @@ permalink: /blogs/jeff_kunkle/logging_into_mac_os_x.html
 layout: blogs
 title: Logging into Mac OS X Hidden Administrator Accounts
 date: 2007-03-24 12:20:12 -04:00
-tags: Mac OS X
+tags: macosx
 ---
 Every once in a while I need to login to a hidden administrator account on my Mac. It's a simple process after you invest lots of time trying to remember the key combination needed to expose the User Name and Password prompt instead of the usual graphical user account login prompt (which doesn't show the hidden admin accounts of course). Many times I've searched all over the Internet to uncover the secret and never seem to find anything quickly, so I thought I'd document it here for future reference.
 
