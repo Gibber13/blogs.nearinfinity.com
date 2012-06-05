@@ -3,7 +3,7 @@ permalink: /blogs/jeff_kunkle/lessons_learned_building_an_ht.html
 layout: blogs
 title: Lessons Learned Building an HTTPS Everywhere Safari Extension Clone
 date: 2010-12-14 08:31:55 -05:00
-tags: JavaScript Mac OS X Security
+tags: JavaScript macosx Security
 ---
 Ever since hearing about [Firesheep](http://codebutler.com/firesheep) I've wanted a Safari extension similar to the [HTTPS Everywhere](https://www.eff.org/https-everywhere) extension for Firefox. Frankly, I was puzzled that one didn't already exist, so I set out to write it. The result is [SSL Everywhere](http://www.nearinfinity.com/home/opensource/ssl-everywhere.html). The journey is this blog post.
 

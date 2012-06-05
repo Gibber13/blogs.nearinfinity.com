@@ -3,7 +3,7 @@ permalink: /blogs/frank_showalter/ruby_perl_and_mysql_55_on_snow.html
 layout: blogs
 title: Ruby, Perl and MySql 5.5 on Snow Leopard
 date: 2011-01-20 09:25:46 -05:00
-tags: Database Mac OS X Ruby
+tags: Database macosx Ruby
 ---
 <h3>The Problem</h3>
 
