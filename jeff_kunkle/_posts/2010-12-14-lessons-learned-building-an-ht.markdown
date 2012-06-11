@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2010:/blogs//7.1808 # This is for backwards compatibility do not change!
 permalink: /blogs/jeff_kunkle/lessons_learned_building_an_ht.html
 layout: blogs
 title: Lessons Learned Building an HTTPS Everywhere Safari Extension Clone

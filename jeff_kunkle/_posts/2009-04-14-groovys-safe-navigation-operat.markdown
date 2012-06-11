@@ -1,4 +1,5 @@
 ---
+atom_id: tag:www.nearinfinity.com,2009:/blogs//7.716 # This is for backwards compatibility do not change!
 permalink: /blogs/jeff_kunkle/groovys_safe_navigation_operat.html
 layout: blogs
 title: Groovy's Safe Navigation Operator Not as Safe as I Thought

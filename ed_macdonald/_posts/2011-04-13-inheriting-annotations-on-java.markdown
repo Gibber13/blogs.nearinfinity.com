@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2011:/blogs//7.1839 # This is for backwards compatibility do not change!
 permalink: /blogs/ed_macdonald/inheriting_annotations_on_java.html
 layout: blogs
 title: Inheriting Annotations on Java Methods

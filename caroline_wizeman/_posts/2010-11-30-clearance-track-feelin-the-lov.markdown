@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2010:/blogs//7.1798 # This is for backwards compatibility do not change!
 permalink: /blogs/caroline_wizeman/clearance_track_feelin_the_lov.html
 layout: blogs
 title: Clearance Track feelin' the love in San Antonio

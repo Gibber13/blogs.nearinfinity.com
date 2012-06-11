@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2010:/blogs//7.1778 # This is for backwards compatibility do not change!
 permalink: /blogs/jeff_kunkle/is_system_refactoring_possible.html
 layout: blogs
 title: Is system refactoring possible?

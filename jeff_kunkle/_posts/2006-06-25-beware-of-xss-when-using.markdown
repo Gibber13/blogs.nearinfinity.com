@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:nic-www01.nearinfinity.com,2006:/blogs//7.443 # This is for backwards compatibility do not change!
 permalink: /blogs/jeff_kunkle/beware_of_xss_when_using.html
 layout: blogs
 title: XSS Vulnerabilities of JSP 2.0 Expressions

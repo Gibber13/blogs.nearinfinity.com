@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2010:/blogs//7.1801 # This is for backwards compatibility do not change!
 permalink: /blogs/jeff_kunkle/environment_specific_default_a.html
 layout: blogs
 title: Environment Specific Default Attachment Options for Paperclip

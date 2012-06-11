@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2010:/blogs//7.1805 # This is for backwards compatibility do not change!
 permalink: /blogs/jeff_kunkle/mini_confluence_adds_diffchang.html
 layout: blogs
 title: Mini Confluence Adds Diff/Change Viewing

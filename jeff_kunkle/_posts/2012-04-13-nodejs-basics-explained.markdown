@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2012:/blogs//7.1902 # This is for backwards compatibility do not change!
 permalink: /blogs/jeff_kunkle/nodejs_basics_explained.html
 layout: blogs
 title: Node.js Basics Explained

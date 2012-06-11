@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2011:/blogs//7.1873 # This is for backwards compatibility do not change!
 permalink: /blogs/jeff_kunkle/rails_3_performance_monitoring.html
 layout: blogs
 title: Rails 3 Performance Monitoring with System Metrics

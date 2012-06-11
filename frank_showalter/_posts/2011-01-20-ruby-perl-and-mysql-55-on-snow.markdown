@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2011:/blogs//7.1818 # This is for backwards compatibility do not change!
 permalink: /blogs/frank_showalter/ruby_perl_and_mysql_55_on_snow.html
 layout: blogs
 title: Ruby, Perl and MySql 5.5 on Snow Leopard

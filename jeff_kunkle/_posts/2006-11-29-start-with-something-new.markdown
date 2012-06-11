@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2006:/blogs//36.1569 # This is for backwards compatibility do not change!
 permalink: /blogs/jeff_kunkle/start_with_something_new.html
 layout: blogs
 title: Start with Something New

@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2011:/blogs//7.1820 # This is for backwards compatibility do not change!
 permalink: /blogs/jeff_kunkle/ruby_default_arguments_and_nil.html
 layout: blogs
 title: Ruby Default Arguments and nil

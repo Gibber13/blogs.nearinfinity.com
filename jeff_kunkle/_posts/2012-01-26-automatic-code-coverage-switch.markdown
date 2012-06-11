@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2012:/blogs//7.1895 # This is for backwards compatibility do not change!
 permalink: /blogs/jeff_kunkle/automatic_code_coverage_switch.html
 layout: blogs
 title: Automatic Code Coverage Switching for Vows.js

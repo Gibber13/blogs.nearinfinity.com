@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2011:/blogs//7.1855 # This is for backwards compatibility do not change!
 permalink: /blogs/jeff_kunkle/are_you_really_done.html
 layout: blogs
 title: Are You Really Done?

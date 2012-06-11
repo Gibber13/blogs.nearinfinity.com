@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2010:/blogs//7.1755 # This is for backwards compatibility do not change!
 permalink: /blogs/chris_rohr/configuring_webrick_to_use_ssl.html
 layout: blogs
 title: Configuring WEBrick to use SSL in Rails 3

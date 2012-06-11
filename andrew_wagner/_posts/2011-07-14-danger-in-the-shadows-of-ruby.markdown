@@ -1,4 +1,5 @@
---- 
+---
+atom_id: tag:www.nearinfinity.com,2011:/blogs//7.1866 # This is for backwards compatibility do not change!
 permalink: /blogs/andrew_wagner/danger_in_the_shadows_of_ruby.html
 layout: blogs
 title: Danger in the shadows of ruby...
