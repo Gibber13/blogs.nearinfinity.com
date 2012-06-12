@@ -25,7 +25,9 @@ namespace :blog do
 
     # Query for Title
     STDOUT.puts "\nPlease enter the TITLE for your new blog post:"
-    yaml_data['title'] = STDIN.gets.strip
+    raw_title = STDIN.gets.strip
+    raw_title = '"' + raw_title + '"' if raw_title.include? ':'
+    yaml_data['title'] = raw_title
 
     # Query For Tags
     STDOUT.puts "\nPlease enter the relevant TAGS (space delimited) for your new blog post:"
