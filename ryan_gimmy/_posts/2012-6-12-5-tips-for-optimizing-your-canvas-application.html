@@ -1,0 +1,269 @@
+---
+title: 5 Tips for Optimizing your Canvas Application
+tags: javascript canvas html5
+---
+
+<style type='text/css'>
+
+.title { 
+  font-weight: bolder;
+  font-size: 140%;
+}
+
+.section-title{
+  font-weight: bold;  
+}
+</style>
+
+
+<div class='title'>5 Tips for Optimizing your Canvas Application</div>
+
+    <p>The other day I was playing around with integrating a rather large and rather javascript-heavy technology stack: I connected an Arduino to a node server over the serial port and I had a webpage running an html5 canvas which was connected to the same server through a websocket.  The end result that I wanted to accomplish was, when I clicked a button attached to the Arduino, a message would be sent to my node server which in turn would signal the webpage to draw something on the canvas.  </p>
+   
+    <p>The experiment was a success in that I accomplished the message passing.  One thing I noticed is that the canvas application lagged a little bit when I clicked the Arduino button rapidly.  Also, I could see the animation that I wanted happen in chrome, but in IE I couldn’t see anything.  I looked a little bit deeper into what was happening, and I found that I was actually rendering too fast in IE.  I fixed the problem, but I came up with some simple tips to optimize a canvas application for use in multiple environments.  To see a more complete example of what I am trying to explain, you can watch me explain these tips at a conference at Near Infinity in spring of 2011: <a href='http://youtu.be/0cBNtcNRD4M'>http://youtu.be/0cBNtcNRD4M</a>.</p>
+
+<div class='section-title'>Tip 1:  Code for your target audience</div>
+
+    <p>The first thing that I recommend doing (and it should really go without saying) is to consider your target audience.  Canvas is well-suited to displaying graphics, but it is not good for applications that need text input (Reasons are explained here: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#best-practices) so it may be to your benefit to not even consider using it for your application.  Good use cases for the canvas are games, simulations, banners, moving backgrounds, etc.  Also, you may be targeting browsers in an enterprise environment that haven’t upgraded to a browser that supports canvas.  There exists (excanvas: http://excanvas.sourceforge.net/) in that situation, but definitely consider it carefully.</p>
+
+    <p>Your canvas application will probably running on a browser that is mostly up to date.  Support for canvas has been around for a while: Trident, IE’s rendering engine supports the canvas element in IE9 which was the last major rendering engine to have support for it.  The rendering engines may be located on a system that has more than enough power to handle everything they need to do, but they may also be on a resource-starved system, such as a mobile device, netbook, or inside a vm. How do you handle different execution speeds?</p>
+
+    <p>A typical animation loop consists of two parts, update your application state and drawing your application state.  If you’ve ever used the XNA framework, it shamelessly abstracts the game loop away into these two parts so anything that you want in your XNA application goes in either update or draw.  How does this apply to canvas?  Odds are, if you are simply making a basic canvas application, you will have an update-draw loop as well that looks similar to the next one:</p>
+
+{% highlight js linenos %}
+while(true){
+
+    update();
+
+    draw();
+
+}
+{% endhighlight %}
+   
+<p>I hope that you cringed at the last code snippet since you know that the UI thread of the webpage shares with the javascript execution engine and this infinite loop will get you nothing but a pop-up saying that your code is taking too long.  Since we know we need to update the canvas we will need to return execution to the UI thread after calling our update-draw loop:</p>
+
+{% highlight js linenos %}
+var loop = function(){
+
+    update();
+
+    draw();
+
+    setTimeout(loop, 5);
+
+};
+
+loop();
+{% endhighlight %}
+
+<p>Getting better.  You can probably get some good mileage out of this loop.  Imagine you have a starfield that is scrolling by, similar to the background in galaga.  Your update method could call this simple method to update each star’s position:</p>
+
+{% highlight js linenos %}  
+var interpolateStars = function(stars){
+        for(var i = stars.length; i--; ){
+            stars[i].yPosition += stars[i].velocity;
+
+        }
+};
+{% endhighlight %}
+
+
+    <p>Every star that is in the array stars will have it’s y position changed after calling that loop.  This will work fine, and a simple drawing of the new position of the stars should update the position of the stars on the canvas itself.  Some extra logic may be required to generate new stars once the current ones are out of bounds on the screen, but it is a shamelessly trivial example so I won’t go into the specifics of everything.</p>
+   
+    <p>So what happens when you try to run this on chrome, firefox, IE9, or even safari?  It will depend on the number of stars that you have on the screen of course, since drawing and updating the stars are going to take a O(n) time to update, but chrome and firefox will typically run this at far different speeds than eachother.  Shock coming up: if you are running a windows box and run the example I suspect that IE9 will run it far faster than you expect.  I was stunned to see this, and to notice that IE9 out-performed it’s cooler and trendier cousins firefox and chrome.  Why did it do that?  Microsoft has been pushing for canvas support to be hardware accelerated.  IE9 can use your PC’s graphics card to handle this simple starfield with ease.  At the time of writing I was maxing out chrome at 80 fps, firefox at 50, and IE9 at 130.</p>
+
+    <p>We understand the problem now.  We now know that we need to normalize the update-draw loop based on time so that we can still harness the power of each of the browsers, but not have their power have an adverse effect on the performance of our application.  A loop that does just that follows:</p>
+   
+{% highlight js linenos %}
+var lastUpdateTime = +new Date();
+
+var loop = function(){
+
+    updateStartTime = +new Date();
+
+    update(updateStartTime - lastUpdateTime);
+
+    draw();
+
+    lastUpdateTime = updateStartTime;
+
+    setTimeout(loop, 5);
+
+};
+
+loop();   
+{% endhighlight %}
+
+<p>By figuring out the time between the last time that this loop ran, we can now insert it into our interpolateStars method to allow us to have a consistent rate of change for the stars.  We want to update the stars such that the longer it takes between updates, the farther the stars travel.  Code updates shown as follows:</p>
+
+{% highlight js linenos %}
+var interpolateStars = function(stars, elapsedTime){
+        for(var i = stars.length; i--; ){
+            stars[i].yPosition += stars[i].velocity * elapsedTime;
+
+}
+
+};
+{% endhighlight %}
+
+<p>This will move the stars consistently across the screen.  You may have to experiment a little with the initial set velocity, but it will be normalized and appear even in all browsers regardless of available resources.</p>
+
+<div class='section-title'>Tip 2:  Keep a tight animation loop</div>
+
+<p>This is another one of those things that I hope goes without saying: keep a tight animation loop.  Sometimes you just have to do some extensive processing inside of the draw loop, which causes freezes inside of the canvas application.  The holy grail for (most) programmers who desire efficiency is to not need to process anything.  For example, this starfield doesn’t need to calculate the exact moment that the star goes out of bounds and put it back up at the top.  If we calculate this result every tenth time the loop ran, we may be able to save some of the internal processing that is going on, and speed up the number of fps that we have in the app which would enhance the look of the app.</p>
+
+<p>To this effect, we can introduce the concept of interpolation: calculating only position updates of the stars, and not checking to see if a star is out of bounds until every tenth time the update-draw loop has been gone through.  Updating the loop again, we have:</p>
+
+{% highlight js linenos %}
+var lastUpdateTime = +new Date(), threshold = 200, updateTimeElapsed = 0;;
+
+var loop = function(){
+
+    updateStartTime = +new Date();
+
+var elapsedTime = updateStartTime - lastUpdateTime;
+
+updateTimeElapsed += elapsedTime;
+
+if(updateTimeElapsed > threshold){
+
+    update(elapsedTime);
+
+}
+
+interpolate(elapsedTime);
+
+    draw();
+
+    lastUpdateTime = updateStartTime;
+
+    setTimeout(loop, 5);
+
+};
+
+loop();   
+{% endhighlight %}
+
+<p>This way, at the cost of having an extra increment operation and a comparison every draw cycle, we can cut down on the number of times the application checks every star to see if it is out of bounds and puts it back up at the top.  We have then increased the tightness of the loop and can render the scene even faster.</p>
+
+<p>Of course there are always the simple things that you can do inside of the animation loop by using some common ways to speed up javascript itself.  Use var to declare a local variable, use a for loop that iterates through the reverse of an array cuts down on the number of comparisons done, and caching members that are far from scope, far in the prototype chain, or in arrays to improve the performance of any javascript app:</p>
+
+{% highlight js linenos %}
+increment = 5;
+
+slowerClosure = function(){
+
+    arr = [1,3,6,9];
+
+return function(){
+
+    str = “”;
+
+    for(i = 0; i < arr.length; i++){
+
+        str += “-” + (arr[i] + increment);
+
+}
+
+return str;
+
+}();
+
+};
+{% endhighlight %}
+
+<p>I’ll admit I’m going to cram in a bunch of optimizations into the next example, and these optimizations don’t look beautiful.  The trade-off for the code cleanliness is probably worth it:</p>
+
+{% highlight js linenos %}
+var increment = 5;
+
+var fasterClosure = function(){
+
+    var arr = [1,3,6,9];
+
+return function(){
+
+    var array = arr, incr = increment; str = “”;
+
+    for(var i = array.length; i--; ){
+
+        str += “” + (array[i] + incr);
+
+}
+
+return str;
+
+}();
+
+};
+{% endhighlight %}
+
+<div class='section-title'>Tip 3:  Consider multiple heuristics on your app’s performance</div>
+
+    <p>So how do we actually judge that we are optimizing our application?  Chrome has an awesome javascript profiler, (if you haven’t seen it, it is definitely worth checking it out) and there are a few firefox and IE plugins to do javascript profiling.  These are great tools to use and they can be good to see where your performance bottlenecks are in your app.  </p>
+   
+    <p>But the javascript profiler has a very fine resolution around methods.  It is great for echoing out times, but it falls a little bit short when you want to judge your entire application to see if it is running as smoothly as you want.</p>
+
+    <p>The human eye can pick up individual frame 10-12 fps (the brain interprets vision as a continuous stream so this is a little bit of a loaded stat) but it can pick up on the choppiness of a low frame rate application.  In order to measure the actual framerate in our application, we should re-write the loop to add frames per second as a benchmark within the application.  Adding to the update-draw loop that we had like before:</p>
+   
+{% highlight js linenos %}
+var lastUpdateTime = +new Date(), threshold = 200, updateTimeElapsed = 0, lastFps = 0, currentFps = 0, fpsSampleTime = 1000;
+
+var loop = function(){
+
+    updateStartTime = +new Date();
+
+var elapsedTime = updateStartTime - lastUpdateTime;
+
+updateTimeElapsed += elapsedTime;
+
+if(updateTimeElapsed > threshold){
+
+    update(elapsedTime);
+
+}
+
+interpolate(elapsedTime);
+
+    draw();
+
+    lastUpdateTime = updateStartTime;
+
+    currentFps++;
+
+    setTimeout(loop, 5);
+
+};
+
+loop();   
+
+setInterval(function(){
+
+    lastFps = currentFps * 1000 / fpsSampleTime;
+
+    currentFps = 0;
+
+}, fpsSampleTime);
+{% endhighlight %}
+
+<p>This addition now allows us to store the fps for the last second in a variable called lastFps which can easily be passed into anywhere in the update-draw loop that it seems it may be helpful for (I typically put it in the draw method so that I can echo out it’s value to the canvas itself.</p>
+
+<p>Now that we are processing the actual speed at which we can hold on to the data to make charts, output it to the screen, or just bask in the glow of how fast your application should be running right now.  But another thing to consider is that it is possible to leak memory in javascript and cause the entire browser to crash.  One of the tools in chromes repertoire is the memory profiler, which is on the same panel as the javascript function profiler.  In order to verify that you are not leaking memory, it takes snapshots of the javascript heap and you can track how your application is doing.  This is useful if you have long running applications that eventually cause the browser to crash after a while, because javascript was never designed to care much about memory.  A built-in garbage collector handles most of the javascript clean-up and there is very little way to analyze the memory usage of your javascript application from within the application (ie. no sizeof(obj) method).</p>
+
+
+<div class='section-title'>Tip 4:  Draw only what you need to draw</div>
+   
+
+<p>In the starfield example, the background is the big black vacuum of space.  It is relatively trivial and speedy to draw the frame from scratch every single time.  After all, it is a simplified canvas application designed to only illustrate a few talking points of mine rather than to do anything intense with it.  But what happens when it actually becomes a burden on the system to repaint your entire scene every frame? I’m certain there are many strategies to counter this problem, many of which will probably be relevant to changing your animation/domain logic within your app.  Below are two strategies that I have found.</p>
+
+<p>When working with graphics, there are little objects called sprites which can simply rotate through their animations any which way.  By only drawing only the deltas of the picture rather than redrawing the whole scene for only one sprite to change, it may be possible to maintain most of the scene while updating only that sprite.</p>
+
+<p>Another strategy is to use some CSS to stack canvases on top of one another.  Canvases are transparent by default, and act essentially as bitmap buffers.  If you maintain a background and the object state on them, then whenever you overwrite the background with the objects that are in front of it, you will lose that data that was already in the bitmap buffer of the canvas.  Even worse, when you clear away that object if you are using the ctx.clearRect method, the entire part of the canvas specified in the clearRect method goes away.  By stacking them, you can make use of drawing deltas on the screen (ie: erasing the data in only a certain part of the buffer then drawing the updated object.  This has an added bonus of being able to add different layers to your application, which can be tedious to manage, but a good game engine on top of the canvas would be able to manage them almost trivially.</p>
+
+<div class='section-title'>Tip 5:  Know the advantages and disadvantages of how you are rendering your app</div>
+ 
+    <p>I already mentioned that there are certain use cases that canvas shouldn’t even be on the table for creating.  But what about the applications that I do want to make on the html5 canvas?  Does this blog contain some sure-fire method that will optimize my application for me by
+recommending using images over vector graphics, or compositing images on the canvas vs. compositing images in the back-end of the app?  Unfortuantely no, because if there was, I would already have put my name on the patent.  </p>
+   
+    <p>There are a couple of libraries that are worth checking out and have gotten a lot of mention around the internet on blogs similar to this one: Easel js which, from what I gather is designed to work a lot like actionscript works for flash, and impact js, a paid-for canvas framework that comes with a lot of built-in tools to make 2d applications.  They will abstract away a lot of the nitty-gritty that we have delved into here and help you rapidly create a canvas application without any knowledge of the fundamentals behind canvas.</p>
+
