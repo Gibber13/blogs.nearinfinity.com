@@ -79,15 +79,15 @@ var lastUpdateTime = +new Date();
 
 var loop = function(){
 
-    updateStartTime = +new Date();
+  updateStartTime = +new Date();
 
-    update(updateStartTime - lastUpdateTime);
+  update(updateStartTime - lastUpdateTime);
 
-    draw();
+  draw();
 
-    lastUpdateTime = updateStartTime;
+  lastUpdateTime = updateStartTime;
 
-    setTimeout(loop, 5);
+  setTimeout(loop, 5);
 
 };
 
@@ -98,10 +98,12 @@ loop();
 
 {% highlight js linenos %}
 var interpolateStars = function(stars, elapsedTime){
-        for(var i = stars.length; i--; ){
-            stars[i].yPosition += stars[i].velocity * elapsedTime;
-
-}
+  
+  for(var i = stars.length; i--; ){
+  
+    stars[i].yPosition += stars[i].velocity * elapsedTime;
+  
+  }
 
 };
 {% endhighlight %}
@@ -119,25 +121,25 @@ var lastUpdateTime = +new Date(), threshold = 200, updateTimeElapsed = 0;;
 
 var loop = function(){
 
-    updateStartTime = +new Date();
+  updateStartTime = +new Date();
 
-var elapsedTime = updateStartTime - lastUpdateTime;
+  var elapsedTime = updateStartTime - lastUpdateTime;
 
-updateTimeElapsed += elapsedTime;
+  updateTimeElapsed += elapsedTime;
 
-if(updateTimeElapsed > threshold){
+  if(updateTimeElapsed > threshold){
 
     update(elapsedTime);
 
-}
+  }
 
-interpolate(elapsedTime);
+  interpolate(elapsedTime);
 
-    draw();
+  draw();
 
-    lastUpdateTime = updateStartTime;
+  lastUpdateTime = updateStartTime;
 
-    setTimeout(loop, 5);
+  setTimeout(loop, 5);
 
 };
 
@@ -153,21 +155,21 @@ increment = 5;
 
 slowerClosure = function(){
 
-    arr = [1,3,6,9];
+  arr = [1,3,6,9];
 
-return function(){
+  return function(){
 
     str = “”;
 
     for(i = 0; i < arr.length; i++){
 
-        str += “-” + (arr[i] + increment);
+      str += “-” + (arr[i] + increment);
 
-}
+    }
 
-return str;
+    return str;
 
-}();
+  }();
 
 };
 {% endhighlight %}
@@ -179,21 +181,21 @@ var increment = 5;
 
 var fasterClosure = function(){
 
-    var arr = [1,3,6,9];
+  var arr = [1,3,6,9];
 
-return function(){
+  return function(){
 
     var array = arr, incr = increment; str = “”;
 
     for(var i = array.length; i--; ){
 
-        str += “” + (array[i] + incr);
+      str += “” + (array[i] + incr);
 
-}
+    }
 
-return str;
+    return str;
 
-}();
+  }();
 
 };
 {% endhighlight %}
@@ -211,27 +213,27 @@ var lastUpdateTime = +new Date(), threshold = 200, updateTimeElapsed = 0, lastFp
 
 var loop = function(){
 
-    updateStartTime = +new Date();
+  updateStartTime = +new Date();
 
-var elapsedTime = updateStartTime - lastUpdateTime;
+  var elapsedTime = updateStartTime - lastUpdateTime;
 
-updateTimeElapsed += elapsedTime;
+  updateTimeElapsed += elapsedTime;
 
-if(updateTimeElapsed > threshold){
+  if(updateTimeElapsed > threshold){
 
     update(elapsedTime);
 
-}
+  }
 
-interpolate(elapsedTime);
+  interpolate(elapsedTime);
 
-    draw();
+  draw();
 
-    lastUpdateTime = updateStartTime;
+  lastUpdateTime = updateStartTime;
 
-    currentFps++;
+  currentFps++;
 
-    setTimeout(loop, 5);
+  setTimeout(loop, 5);
 
 };
 
@@ -239,9 +241,9 @@ loop();
 
 setInterval(function(){
 
-    lastFps = currentFps * 1000 / fpsSampleTime;
+  lastFps = currentFps * 1000 / fpsSampleTime;
 
-    currentFps = 0;
+  currentFps = 0;
 
 }, fpsSampleTime);
 {% endhighlight %}
