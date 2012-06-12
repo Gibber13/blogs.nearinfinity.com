@@ -95,14 +95,15 @@ namespace :blog do
       bio_page.puts '# Name: How you want your name to be displayed on your Bio Page'
       bio_page.puts "name: #{first_name} #{last_name}"
       bio_page.puts '# User_info: Assorted information about yourself (Any added fields will not be displayed)'
+      bio_page.puts 'user_info:'
       index_info.each do |key, value|
-        bio_page.puts key + ': ' + value
+        bio_page.puts '  ' + key + ': ' + value
       end
       bio_page.puts 'social:'
-      bio_page.puts "\t# Include your social pages, for example:"
-      bio_page.puts "\t# name of service (i.e. twitter) => your service url (http://www.twitter.com/jharwig)"
-      bio_page.puts "\t# twitter: http://www.twitter.com/jharwig"
-      bio_page.puts "\t# For a working example check out Jason's bio page (jason_harwig/index.html)"
+      bio_page.puts "  # Include your social pages, for example:"
+      bio_page.puts "  # name of service (i.e. twitter) => your service url (http://www.twitter.com/jharwig)"
+      bio_page.puts "  # twitter: http://www.twitter.com/jharwig"
+      bio_page.puts "  # For a working example check out Jason's bio page (jason_harwig/index.html)"
       bio_page.puts "# Long Bio Below the lines (as html)"
       bio_page.puts '---'
       bio_page.puts '(Insert Bio Information)' 
