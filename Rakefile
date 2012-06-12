@@ -34,7 +34,7 @@ namespace :blog do
     yaml_data['tags'] = STDIN.gets.strip.downcase
 
     # Create Full blog title
-    blog_date_title = [Time.now.year.to_s, Time.now.month.to_s, Time.now.day.to_s].join '-'
+    blog_date_title = ["%02d" % Time.now.year, "%02d" % Time.now.month, "%02d" % Time.now.day].join '-'
 
     # Shorten the title to soemthing readable in the url (do not cut off mid word)
     blog_end_title = ''
