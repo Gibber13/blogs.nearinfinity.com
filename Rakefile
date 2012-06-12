@@ -16,12 +16,9 @@ namespace :blog do
     file_extension = '.markdown'
 
     # Ask the user if .markdown is ok
-    STDOUT.puts "\nThe default blog type is markdown, if yes press enter otherwise enter a different extension (i.e. html):"
+    STDOUT.puts "\nThe default blog type is markdown, if you want to blog in markdown press enter otherwise enter a different extension (i.e. html):"
     new_extension = STDIN.gets.strip
     file_extension = '.' + new_extension if new_extension.length > 1
-
-    # Standard Blog Layout
-    yaml_data['layout'] = 'blogs'
 
     # Begin Interracting with the blog creator
     STDOUT.puts "\nAll of the collected data can be changed by editting the YAML at the top of your generated post."
@@ -33,9 +30,6 @@ namespace :blog do
     # Query For Tags
     STDOUT.puts "\nPlease enter the relevant TAGS (space delimited) for your new blog post:"
     yaml_data['tags'] = STDIN.gets.strip.downcase
-
-    #Get the current
-    yaml_data['date'] = Time.now.to_s
 
     # Create Full blog title
     blog_date_title = [Time.now.year.to_s, Time.now.month.to_s, Time.now.day.to_s].join '-'
@@ -79,24 +73,37 @@ namespace :blog do
     Dir.chdir folder_name
 
     #Create the posts and assets folders
+    # Add .gitignore so that the folders are versioned
     Dir.mkdir '_posts'
+    File.open '_posts/.gitignore', 'w'
     Dir.mkdir 'assets'
+    File.open 'assets/.gitignore', 'w'
 
     # Index page information
     index_info = {
-      'layout' => 'person',
-      'user' => folder_name
+      'title' => '',
+      'areas_of_interest' => '',
+      'employment_date' => '',
+      'alma_mater' => '',
+      'nic_sports' => ''
     }
 
     #Create the shell index folder
     # Open the blog file and write the data to the file
     File.open('index.html', 'w') do |bio_page|  
       bio_page.puts '---'
+      bio_page.puts '# Name: How you want your name to be displayed on your Bio Page'
+      bio_page.puts "name: #{first_name} #{last_name}"
+      bio_page.puts '# User_info: Assorted information about yourself (Any added fields will not be displayed)'
       index_info.each do |key, value|
         bio_page.puts key + ': ' + value
       end
       bio_page.puts 'social:'
-      bio_page.puts "\t twitter: (Your twitter url)"
+      bio_page.puts "\t# Include your social pages, for example:"
+      bio_page.puts "\t# name of service (i.e. twitter) => your service url (http://www.twitter.com/jharwig)"
+      bio_page.puts "\t# twitter: http://www.twitter.com/jharwig"
+      bio_page.puts "\t# For a working example check out Jason's bio page (jason_harwig/index.html)"
+      bio_page.puts "# Long Bio Below the lines (as html)"
       bio_page.puts '---'
       bio_page.puts '(Insert Bio Information)' 
     end
