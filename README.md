@@ -58,5 +58,5 @@ Embed Videos
     {% video_tag :vimeo => [video_id] %}
     {% video_tag :youtube => [unique_id] %}
     
-If you have any questions or concerns email bmarcaur@nearinfinity.com
+If you have any questions or concerns email bmarcaur@nearinfinity.com or wbrady@nearinfinity.com
     
