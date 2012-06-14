@@ -1,0 +1,119 @@
+---
+title: Rails 3.2 and Asset Pipeline Gotchas
+tags: ruby
+---
+<p>
+Recently I upgraded a Rails 3.0 application to Rails 3.2.  Part of
+this task involved configuring the application to fully utilize the
+asset pipeline, which means the assets (javascript and stylesheets)
+would need to be precompiled before deploying the application.  I read
+through a few guides and it looked easy enough, but there were a few
+"gotchas" that required some debugging.
+</p>
+
+<h2>
+Issue 1: Initialize on Precompile
+</h2>
+
+<p>
+The first issue stemmed from the following asset pipeline
+configuration parameter: "config.assets.initialize_on_precompile".  By
+default, this configuration parameter is set to true.  However, if you
+precompile assets for your test and production environments on your
+local machine before deployment, you may not be able to connect to
+those environments' databases and/or other dependencies.  Other steps
+that occur during initialization for those environments may
+potentially fail as well.
+</p>
+
+<p>
+The top results from a quick google search will tell you to simply set
+that configuration parameter to false.  Precompile your assets without
+initializing the application.  Sounds simple enough and this may work
+for your application.  However, it may just cause you more problems.
+Does your local environment have a different context root than your
+test and production environments?  Do important steps happen during
+initialization that are environment specific such as javascript route
+generation?  If that's the case, you should keep
+"initialize_on_precompile" turned on.
+</p>
+
+<p>
+One potential work-around is inserting conditional "unless
+ENV['RAILS_GROUPS'] == 'assets' " statements throughout your code.
+When you run the rake task, 'rake assets:precompile', behind the
+scenes the RAILS_GROUPS environment variable is set to 'assets'.
+Conditionally checking for the existence and value of this environment
+variable can allow you execute or not execute certain bits of code.
+However, this solution may not always work or you may not actually
+want these conditional statements throughout your code.
+</p>
+
+<p>
+Another option (and my choice) is to create a special 'asset'
+environment file.  In your application_root/config/environments
+directory, you probably already have development.rb, test.rb, and
+production.rb files (or some variation of those environment files).
+Why not create a bare-bones "deploy-assets.rb" environment file that
+only has the stuff you need to precompile your assets?  You can leave
+"config.assets.initialize_on_precompile" set to true and not have to
+litter your code with the previously mentioned conditional statements.
+ If you go this route, you'll simply call "rake
+RAILS_ENV='deploy-assets' assets:precompile" to precompile your
+assets.
+</p>
+
+<h2>
+Issue 2: Rails Relative URL Root
+</h2>
+
+<p>
+I mentioned above that my local development environment has a
+different context root than the test and production environments.  If
+different a context root is something that you need to account for
+when the application is initialized, you need to set
+RAILS_RELATIVE_URL_ROOT when calling the assets:precompile task.  The
+complete command would look something like this:  "rake
+RAILS_ENV='deploy-assets' RAILS_RELATIVE_URL_ROOT='/applicationRoot'
+assets:precompile", where "applicationRoot" is the your application's
+context root.  It's a simple and easy fix, but I didn't see it
+mentioned in any of the asset pipeline guides that I read through.
+</p>
+
+<h2>
+Issue 3:  Verify your assets actually precompiled
+</h2>
+
+<p>
+A certain javascript rich text editor gave me some issues.  I thought
+I'd include it in the app/assets/javascript directory and have it
+precompiled with the rest of the assets.  I ran "rake
+assets:precompile --trace" and it appeared that everything had worked
+(no stack trace, no visible errors).  I even did a quick scan of the
+freshly generated public/assets directory and saw the newly created
+javascript, images, and stylesheets.  However, a css file within the
+javascript rich text editor directory was causing assets:precompile to
+fail before completion without raising an exception.  This became
+evident when I started the server and pages raised exceptions that
+certain assets couldn't be found.  The root of the issue was the
+following line "{filter:;}" within a css file.
+</p>
+
+<p>
+If you precompile the assets and it appears to succeed, but you're
+seeing "resource not found" exceptions, asset precompilation may be
+failing silently.
+</p>
+
+<h2>
+Conclusion
+</h2>
+
+<p>
+I like the asset pipeline.  My application's home page requests were
+cut in half due to the condensed application.js and application.css
+files which in turn improved speed.  The few issues I mentioned above
+aren't hard to overcome, but they did take some time to track down.
+Hopefully if you're experiencing the same issues, you will find these
+tips helpful.
+</p>
