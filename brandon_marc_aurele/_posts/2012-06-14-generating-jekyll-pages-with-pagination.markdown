@@ -70,7 +70,7 @@ end
 {% endhighlight %}
 
 
-This code block grabs each set of posts organized by tag, it then splits each set of posts into their different categories (blogs, techtalks, and speaking engagments), and then creates a page for that subset of posts.
+This code block grabs each set of posts organized by tag, it then splits each set of posts into their different categories (blogs, techtalks, and speaking engagments), and then creates a page for that subset of posts. This code generates the paging as seperate folders with index.html pages; the first page would be located at /tags/category/page_1/index.html, the second page would be located at /tags/category/page_2/index.html, etc. You can also use the Jekyll filter system to generate the links for the bottom of each page.
 
 When creating pages in Jekyll you first create a page object and then push the page onto the page stack. This page will then be compiled after all other pages have been pushed onto the stack.
 
