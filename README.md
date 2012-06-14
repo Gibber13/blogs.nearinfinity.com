@@ -23,15 +23,15 @@ cd {firstname}_{lastname}
 rake blog:create
 # And begin Editting your new blog
 ```
-A blog can be written in [Markdown](http://daringfireball.net/projects/markdown/), HTML, and [Textile](http://www.textism.com/tools/textile/). If there is a mistake in the generated metadata (front yaml) then make any necessary changes.
+A blog can be written in [Markdown](http://daringfireball.net/projects/markdown/), HTML, and [Textile](http://www.textism.com/tools/textile/). You can edit the generated front yaml to make any necessary changes.
 
-Editing Your Bio
+Editing Your Profile
 ----------------
 
-As part of Near Infinity's new site and blogging system you now have your own bio page. This is your personal space to professionally express yourself. Each bio has two sections, an about you list (the front yaml) and the bio at the bottom. The bio portion is written in standard html. If you wish to edit the about you section and also wish to use a ':' then you need to surround the value with quotations (otherwise it causes compile errors). For example:
+As part of Near Infinity's new site and blogging system you now have your own profile page. This is your personal space to professionally express yourself. Each profile has two sections, an about you list (the front yaml) and the bio at the bottom. The bio portion is written in standard html. If you wish to edit the about you section and also wish to use a ':' then you need to surround the value with quotations (otherwise it causes compile errors). For example:
 ```
 title: A Great Title
-# This title with a colon would now become
+# This title with a colon would need to be
 title: "A Greater Title: Part 2"
 ```
 
@@ -48,7 +48,7 @@ Highlighting with Line Numbers
 
     {% highlight <language> linenos %}
 
-View list of [languages](http://pygments.org/docs/lexers/) or use the command:
+View the list of [languages](http://pygments.org/docs/lexers/) or use the command:
 
     > pygmentize -L
 
