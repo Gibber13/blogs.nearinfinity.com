@@ -16,12 +16,11 @@ namespace :blog do
     file_extension = '.markdown'
 
     # Ask the user if .markdown is ok
-    STDOUT.puts "\nThe default blog type is markdown, if you want to blog in markdown press enter otherwise enter a different extension (i.e. html):"
+    STDOUT.puts "\nThe default blog type is markdown. If you want to blog in markdown press enter, otherwise enter a different extension (i.e. html):"
     new_extension = STDIN.gets.strip
     file_extension = '.' + new_extension if new_extension.length > 1
 
-    # Begin Interracting with the blog creator
-    STDOUT.puts "\nAll of the collected data can be changed by editting the YAML at the top of your generated post."
+    STDOUT.puts "\nAll of the following collected data can be changed by editting the YAML at the top of your generated post."
 
     # Query for Title
     STDOUT.puts "\nPlease enter the TITLE for your new blog post:"
