@@ -32,8 +32,7 @@ As part of Near Infinity's new site and blogging system you now have your own pr
 ```
 title: A Great Title
 
-# This title with a colon would need to be
-title: "A Greater Title: Part 2"
+title: "A Greater Title: Part 2"  # This title needs to be surrounded in quotes
 ```
 
 Syntax Highlighting
