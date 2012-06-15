@@ -32,7 +32,7 @@ namespace :blog do
     STDOUT.puts "\nPlease enter the relevant TAGS (space delimited) for your new blog post:"
     yaml_data['tags'] = STDIN.gets.strip.downcase
 
-    # Create Full blog title
+    # Create date portion of title
     blog_date_title = ["%02d" % Time.now.year, "%02d" % Time.now.month, "%02d" % Time.now.day].join '-'
 
     # Shorten the title to soemthing readable in the url (do not cut off mid word)
