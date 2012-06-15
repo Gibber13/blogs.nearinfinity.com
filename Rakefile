@@ -57,6 +57,8 @@ namespace :blog do
       blog_post.puts '---'
       blog_post.puts '(Insert Blog Content)' 
     end
+    
+    STDOUT.puts "\nGenerated blog post #{raw_title} at _posts/#{full_title}"
   end
 
   desc "Create a new user's blog directory structure (Run in the root of the repository)"
@@ -110,5 +112,7 @@ namespace :blog do
       bio_page.puts '---'
       bio_page.puts '(Insert Bio Information)' 
     end
+    
+    STDOUT.puts "\nGenerated directory #{folder_name}/"
   end
 end
