@@ -1,6 +1,7 @@
 ---
 title: Scripting Amazon Web Services with the Ruby SDK
 tags: ruby aws cloudcomputing
+layout: blogs
 date: 2012-06-15 10:00:00 -04:00
 ---
 Since launching in early 2006, [Amazon Web Services (AWS)](http://aws.amazon.com) has been the dominant entity in Cloud Computing. Their offering includes such services as EC2 for elastic computing, S3 for simple object storage, RDS for relational databases, and many more. Software companies are utilizing the cloud model to not only scale applications as demand increases, but also control expenses related to software deployment. Over the past year, I have found myself using AWS more and more across a variety of development projects. Amazon provides a graphical user interface called the AWS Management Console that provides full control over all its services. The AWS Management Console is suitable for many of the tasks involving setup and maintenance of your cloud infrastructure.

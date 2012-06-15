@@ -1,6 +1,7 @@
 ---
 title: Generating Jekyll Pages With Pagination
 tags: jekyll ruby
+layout: blogs
 date: 2012-06-14 20:00:00 -04:00
 ---
 
