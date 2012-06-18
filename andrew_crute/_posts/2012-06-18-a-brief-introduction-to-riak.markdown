@@ -35,7 +35,7 @@ bucket = client.bucket("people")
 
 bruce = Riak::RObject.new(bucket, "Bruce")
 bruce.content_type = "application/json"
-bruce.data = { "name" => "Bruce Wayne", "quote": "I'm Batman." }
+bruce.data = { "name" => "Bruce Wayne", "quote" => "I'm Batman." }
 
 bruce.store
 {% endhighlight %}
@@ -72,7 +72,7 @@ links.each do |x|
 end
 {% endhighlight %}
 
-<p>A Riak link object is really just a tag and a destination, so once you-ve retrieved the links with the tags you're interested in, all that's left is to look at the bucket and key properties on the link (both are stored as simple strings) and go grab the destination entry.</p>
+<p>A Riak link object is really just a tag and a destination, so once you've retrieved the links with the tags you're interested in, all that's left is to look at the bucket and key properties on the link (both are stored as simple strings) and go grab the destination entry.</p>
 <p>Of course, this is a very simple example, but in the wild Riak's linking functionality can be used to create and traverse and very large and complex data sets just as easily as one would create and traverse a graph.</p>
 
 # Map Reduce in Riak
@@ -104,8 +104,8 @@ require 'riak'
 client = Riak::Client.new(:http_port => 8091)
 mapred = Riak::MapReduce.new(client)
 
-# Here we-re telling the mapreduce object to take the entire test_scores bucket as its input
-# In production, you-d probably want to use Riak's key filters to choose specific elements in a bucket
+# Here we're telling the mapreduce object to take the entire test_scores bucket as its input
+# In production, you'd probably want to use Riak's key filters to choose specific elements in a bucket
 # But since we know we only have 100 test scores, this is fine for us
 mapred.add("test_scores")
 
