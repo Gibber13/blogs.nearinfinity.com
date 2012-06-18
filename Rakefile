@@ -115,6 +115,6 @@ namespace :blog do
       bio_page.puts '(Insert Bio Information)' 
     end
     
-    STDOUT.puts "\nGenerated directory #{folder_name}/"
+    STDOUT.puts "\nGenerated directory #{folder_name}/. Please edit the index file in your directory."
   end
 end
