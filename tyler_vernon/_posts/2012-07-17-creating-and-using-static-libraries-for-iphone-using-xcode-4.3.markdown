@@ -51,9 +51,11 @@ lipo -create libPictureTouchLibraryDevice.a libPictureTouchLibrarySimulator.a -o
 
 This will create a new library in the same folder that can be used for either devices or simulators.
 
-Finally, to distribute the library, we need to include the .h files and any resources, such as plists, that will be used in the library. These files, along with the “fat” .a file are allyou need to implement the library. You now have a static library, ready to be added to any Xcode project.
+Finally, to distribute the library, we need to include the .h files and any resources, such as plists, that will be used in the library. These files, along with the “fat” .a file are allyou need to implement the library. 
 
 ![Alt text](/blogs/tyler_vernon/assets/blogimages/CreateLibrary7.png)
+
+You now have a static library, ready to be added to any Xcode project.
 
 #Adding a static library to a project#
 
