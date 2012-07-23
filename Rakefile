@@ -31,7 +31,7 @@ namespace :blog do
     # Query For Tags
     STDOUT.puts "\nPlease enter the relevant TAGS (space delimited) for your new blog post:"
     yaml_data['tags'] = STDIN.gets.strip.downcase
-    
+
     # Set blogs layout
     yaml_data['layout'] = 'blogs'
 
@@ -59,22 +59,21 @@ namespace :blog do
       blog_post.puts '---'
       blog_post.puts '(Insert Blog Content)' 
     end
-    
+
     STDOUT.puts "\nGenerated blog post #{raw_title} at _posts/#{full_title}"
   end
 
   desc "Create a new user's blog directory structure (Run in the root of the repository)"
-  task :directory do
-    # Grab their first name
-    STDOUT.puts "\nPlease enter your first name:"
-    first_name = STDIN.gets.strip
-
-    # Grab their last name
-    STDOUT.puts "\nPlease enter your last name:"
-    last_name = STDIN.gets.strip
+  task :directory, :full_name do |t, args|
+    unless args[:full_name]
+      STDOUT.puts "\nPlease enter your full name:"
+      full_name = STDIN.gets.strip
+    else
+      full_name = args[:full_name]
+    end
 
     #Create and cd to your folder
-    folder_name = first_name.downcase + '_' + last_name.downcase
+    folder_name = full_name.gsub(/\s+/, '_').gsub(/'/, '').downcase
     Dir.mkdir folder_name
     Dir.chdir folder_name
 
@@ -99,7 +98,7 @@ namespace :blog do
     File.open('index.html', 'w') do |bio_page|  
       bio_page.puts '---'
       bio_page.puts '# Name: How you want your name to be displayed on your Bio Page'
-      bio_page.puts "name: #{first_name} #{last_name}"
+      bio_page.puts "name: #{full_name}"
       bio_page.puts '# User_info: Assorted information about yourself (Any added fields will not be displayed)'
       bio_page.puts 'user_info:'
       index_info.each do |key, value|
