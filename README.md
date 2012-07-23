@@ -69,4 +69,14 @@ Embed Videos
     {% video_tag :vimeo => [video_id] %}
     {% video_tag :youtube => [unique_id] %}
     
+Directory Structure / Profile
+-----------------------------
+
+If you do not have a user directory created already, create one with the following directory structure:
+
+    first_last/
+      _posts/          --> Holds all of your blog posts
+      assets/          --> Local assets folders for any files you want to reference from your blog
+      index.html       --> Your profile
+
 If you have any questions or concerns email wbrady@nearinfinity.com
