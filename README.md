@@ -3,43 +3,44 @@ NIC Blogs
 
 This README describes a simple method to create a new blog post without having to install anything (except git). If you prefer to take the more involved route (installing the dependencies for the entire website and compiling the site locally), check out the [www.nearinfinity.com](https://github.com/nearinfinity/www.nearinfinity.com) project.
 
-Setup Repository
+Gain Push Access
+----------------
+
+If you haven't already, create a Github account and add your username to the [Github Logins](https://mobius.nearinfinity.com/display/RD/Github+Logins) mobius page. We will have to manually add you to the Github group so it may take a couple days.
+
+Clone Repository
 ----------------
 
 ```
-# Clone the repo
 git clone --recursive git@github.com:nearinfinity/blogs.nearinfinity.com.git
 cd blogs.nearinfinity.com
 ```
 
-Creating a blog
----------------
+Generating A Post Template
+--------------------------
 
-Run these commands from the blogs directory
+Go to the [blog previewer](http://nic-util02.nearinfinity.com/blog-previewer) (you must be on the NIC network to access) and click "Generate Blank Post".
 
-```
-# If this is your first blog
-rake blog:directory
-
-# Cd to your directory
-cd {firstname}_{lastname}
-# Follow the on screen instructions to create your new blog post
-rake blog:create
-# And begin Editting your new blog
-```
-A blog can be written in [Markdown](http://daringfireball.net/projects/markdown/), HTML, and [Textile](http://www.textism.com/tools/textile/). You can edit the generated front yaml to make any necessary changes.
-
-Do not remove the date that is generated in the filename
-
-Editing Your Profile
+Previewing A Post
 ----------------
 
-As part of Near Infinity's new site and blogging system you now have your own profile page. Your profile is located at /blogs/user_name/index.html. This is your personal space to professionally express yourself. Each profile has two sections: an about you section (the front yaml) and a bio section. The bio section is written in standard html. Your profile page can also be written as markdown but you must rename the file index.md. If you add a line to your about you section that contains a colon, you need to surround the entire string in quotes (otherwise it causes compile errors). For example:
-```
-title: A Great Title
+Go to the [blog previewer](http://nic-util02.nearinfinity.com/blog-previewer) (you must be on the NIC network to access), paste the contents of your post in the text box and click "Preview". You should see what your post would look like on the actual site. The previewer will also alert you of any errors in the header of your file.
 
-title: "A Greater Title: Part 2"  # This title needs to be surrounded in quotes
-```
+Uploading Changes
+-----------------
+
+Once you're done writing your blog post and have tested that everything looks ok with the previewer, save your file in the _posts/ folder of your personal blogs directory.
+The filename should be in the following format "{date}-{title}.{extension}"
++ {date} - The date of the post in the format "YYY-MM-DDD"
++ {title} - Shortened version of your title without spaces
++ {extension} - "html" or "md" for markdown
+
+So if I was creating a post about CSS3 on July 23, 2012, the path of my post might be "will_brady/_posts/2012-07-23-dolphins.md"
+
+Limitations of the Previewer
+----------------------------
+
+The previewer does not support loading any assets you have included in your blogs folder. So if you have an image to your assets/ folder and link to it from your blog post, the previewer will not recognize the image even though it will be included properly on the site when you push it.
 
 Syntax Highlighting
 -------------------
