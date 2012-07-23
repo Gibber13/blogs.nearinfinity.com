@@ -1,10 +1,7 @@
 NIC Blogs
 ===========
 
-PLEASE NOTE
---------------
-
-By only cloning this project you will be able to add/edit blog posts, but you won't be able to compile the site locally to test your changes. It is recommended that you clone the main [www.nearinfinity.com](https://github.com/nearinfinity/www.nearinfinity.com) project instead and follow the README instructions there to make sure your posts are formatted correctly before pushing LIVE changes.
+This README describes a simple method to create a new blog post without having to install anything (except git). If you prefer to take the more involved route (installing the dependencies for the entire website and compiling the site locally), check out the [www.nearinfinity.com](https://github.com/nearinfinity/www.nearinfinity.com) project.
 
 Setup Repository
 ----------------
