@@ -42,11 +42,11 @@ Once you have your post in the right place, commit and push your changes. The ch
 Limitations of the Previewer
 ----------------------------
 
-The previewer does not support referencing local assets. So if you have an image to your assets/ folder and link to it from your blog post, the previewer will not recognize the image even though it will be recognized properly on the site when you push it.
-
-Currently, the previewer does not support video_tag.
-
-The previewer does not currently support overriding the date of the post from the header.
+The previewer does not currently support:
++ referencing local assets - for example if you have an image to your assets/ folder and link to it from your blog post, the previewer will not recognize the image even though it will be recognized properly on the site when you push it
++ the video_tag
++ overriding the date of the post from the header
++ previewing profile pages
 
 Syntax Highlighting
 -------------------
