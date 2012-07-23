@@ -12,7 +12,7 @@ Clone Repository
 ----------------
 
 ```
-git clone --recursive git@github.com:nearinfinity/blogs.nearinfinity.com.git
+git clone git@github.com:nearinfinity/blogs.nearinfinity.com.git
 cd blogs.nearinfinity.com
 ```
 
@@ -35,12 +35,18 @@ The filename should be in the following format "{date}-{title}.{extension}"
 + {title} - Shortened version of your title without spaces
 + {extension} - "html" or "md" for markdown
 
-So if I was creating a post about CSS3 on July 23, 2012, the path of my post might be "will_brady/_posts/2012-07-23-dolphins.md"
+So if I was creating a post about CSS3 on July 23, 2012, the path of my post might be "will_brady/_posts/2012-07-23-css3.md"
+
+Once you have your post in the right place, commit and push your changes. The changes will be pushed to the live site within about 2 minutes.
 
 Limitations of the Previewer
 ----------------------------
 
-The previewer does not support loading any assets you have included in your blogs folder. So if you have an image to your assets/ folder and link to it from your blog post, the previewer will not recognize the image even though it will be included properly on the site when you push it.
+The previewer does not support referencing local assets. So if you have an image to your assets/ folder and link to it from your blog post, the previewer will not recognize the image even though it will be recognized properly on the site when you push it.
+
+Currently, the previewer does not support video_tag.
+
+The previewer does not currently support overriding the date of the post from the header.
 
 Syntax Highlighting
 -------------------
@@ -55,9 +61,7 @@ Highlighting with Line Numbers
 
     {% highlight <language> linenos %}
 
-View list of [languages](http://pygments.org/docs/lexers/) or use the command:
-
-    > pygmentize -L
+[Languages supported](http://pygments.org/docs/lexers/)
 
 Embed Videos
 ------------
@@ -65,4 +69,4 @@ Embed Videos
     {% video_tag :vimeo => [video_id] %}
     {% video_tag :youtube => [unique_id] %}
     
-If you have any questions or concerns email bmarcaur@nearinfinity.com or wbrady@nearinfinity.com
+If you have any questions or concerns email wbrady@nearinfinity.com
