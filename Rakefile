@@ -32,9 +32,6 @@ namespace :blog do
     STDOUT.puts "\nPlease enter the relevant TAGS (space delimited) for your new blog post:"
     yaml_data['tags'] = STDIN.gets.strip.downcase
 
-    # Set blogs layout
-    yaml_data['layout'] = 'blogs'
-
     # Create date portion of title
     blog_date_title = ["%02d" % Time.now.year, "%02d" % Time.now.month, "%02d" % Time.now.day].join '-'
 
