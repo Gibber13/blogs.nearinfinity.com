@@ -24,7 +24,7 @@ Go to the [blog previewer](http://nic-util02.nearinfinity.com/blog-previewer) (y
 Previewing A Post
 ----------------
 
-Go to the [blog previewer](http://nic-util02.nearinfinity.com/blog-previewer) (you must be on the NIC network to access), paste the contents of your post in the text box and click "Preview". You should see what your post would look like on the actual site. The previewer will also alert you of any errors in the header of your file.
+Go to the [blog previewer](http://nic-util02.nearinfinity.com/blog-previewer) (you must be on the NIC network to access), paste the contents of your post in the text box, select the format of your file (Markdown, Textile or HTML) and click "Preview". You should see what your post would look like on the actual site. The previewer will also alert you of any errors in the header of your file.
 
 Uploading Changes
 -----------------
@@ -44,7 +44,6 @@ Limitations of the Previewer
 
 The previewer does not currently support:
 + referencing local assets or pages - for example if you have an image to your assets/ folder and link to it from your blog post, the previewer will not recognize the image even though it will be recognized properly on the site when you push it
-+ Textile markup
 + overriding the date of the post from the header
 + previewing profile pages
 
