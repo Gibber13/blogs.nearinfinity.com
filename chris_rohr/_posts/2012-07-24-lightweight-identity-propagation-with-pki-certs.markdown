@@ -13,10 +13,12 @@ If you aren't in the market or don't have the time for one of the commercial sol
 
 First thing that you will need to do is to add a call to your service so that a token can be retrieved.  This call will need to be made with the user's certificate.  This will ensure that the user made the initial call.
 
+{% highlight ruby %}
     # Pre-condition: Validate user's cert
     token = ::SecureRandom.urlsafe_base64
     data_hash = {:user_id => user.dn, :token => token}
     # Store the token, json form of data_hash and Time.now into the database
+{% endhighlight %}
 
 This will generate a token and assign it to the user.  The time piece is so that you can expire a ticket after a specified amount of time.
 
@@ -24,12 +26,14 @@ This will generate a token and assign it to the user.  The time piece is so that
 
 At this point there are 2 ways to get the token back to the requester.  The first is to simply send back the token in the response.  This is useful if the requesting application is a thick client that doesn't support cookies.  The second is to generate a javascript block that sets the token into a cookie.
 
+{% highlight ruby %}
     js_lines = []
     js_lines << "var expiresTime = new Date()"
     js_lines << "expiresTime.setTime(expiresTime.getTime()+(1000*60*55))"
     js_lines << "document.cookie = 'apptoken=#{token};expires=' + expiresTime.toGMTString() + ';path=/;secure=true'"
     js_lines << "window.setTimeout(function(){var scriptElem=document.getElementById('tokenElem');if(scriptElem && scriptElem.parentNode && scriptElem.parentNode.removeChild){scriptElem.parentNode.removeChild(scriptElem);} var script=document.createElement('script'); script.src='/tokenurl?ts' + new Date(); script.id='tokenElem'; document.body.appendChild(script);}, 300000)"
     js_lines.join('; ')
+{% endhighlight %}
 
 The above block of javascript will set the token into a cookie that expires in 55 minutes.  It will then set a timeout to reload the token in 5 minutes (if the user stays on the page).  This will continue to run every 5 minutes making it so your user will have a fresh token.
 
@@ -37,6 +41,7 @@ The above block of javascript will set the token into a cookie that expires in 5
 
 When the server that the identity is being propagated from sends your service the request they will pass along both the identifier of the user (in our case the user's DN) and the token that was retrieved (in the case of another website contacting your service they will get the token from the cookie that is sent to them).  Your system then can validate that the user matches the token.
 
+{% highlight ruby %}
     # Request token created time and data_hash where token = provided value from database (might want to order on created date to get the newest one just to be safe)
     raise "Invalid user" if token_info.count == 0
     row = token_info.first
@@ -45,6 +50,7 @@ When the server that the identity is being propagated from sends your service th
     raise "Invalid user" if token_info_json['user_id'] != user_dn
     raise "Invalid user" if token_created_on < Time.now - (60*60) # I've set mine to an hour but it can be any time you want
     # If we get here we have a valid token
+{% endhighlight %}
 
 Basically what happened there was we tried to find the existing token, if we found one, we compared the user_id that is associated with the token to the user_id that was given to us.  Finally we check to make sure the token isn't expired.  If all of this passes, then the token is valid and thus the user is valid.
 
