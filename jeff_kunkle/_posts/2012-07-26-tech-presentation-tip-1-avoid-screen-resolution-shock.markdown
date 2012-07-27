@@ -2,7 +2,7 @@
 title: Tech Presentation Tip 1 - Avoid Screen Resolution Shock
 tags: presenting
 ---
-This is the first in a series of posts extracted from my [Presentation Tips Video](https://www.nearinfinity.com/techtalks/jeff_kunkle/2011/08/15/Presentation_Tips.html) from last year. There’s an endless supply of books, articles, blog posts, and videos to help you improve your presentations, but most of them focus on the organization and delivery aspects of presenting. These tips target some of the technical aspects surrounding your presentation, such as making sure you have the right adapter for your projector, preparing for screen-resolution changes, and a whole bunch more. Hopefully you can learn something from my observations and personal gaffes over the years.
+This is the first in a series of posts extracted from my [Presentation Tips Video](http://www.nearinfinity.com/techtalks/jeff_kunkle/2011/08/15/Presentation_Tips.html) from last year. There’s an endless supply of books, articles, blog posts, and videos to help you improve your presentations, but most of them focus on the organization and delivery aspects of presenting. These tips target some of the technical aspects surrounding your presentation, such as making sure you have the right adapter for your projector, preparing for screen-resolution changes, and a whole bunch more. Hopefully you can learn something from my observations and personal gaffes over the years.
 
 If you're a developer, chances are you do most work with your screen resolution cranked up as high as it'll go. As I write this, my pre-retina 15-inch MacBook Pro resolution is set at 1440x900. So what happens when you plug your laptop into a projector displaying at 1024x768?
 
