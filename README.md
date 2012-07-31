@@ -44,7 +44,6 @@ Limitations of the Previewer
 
 The previewer does not currently support:
 + referencing local assets or pages - for example if you have an image to your assets/ folder and link to it from your blog post, the previewer will not recognize the image even though it will be recognized properly on the site when you push it
-+ overriding the date of the post from the header
 + previewing profile pages
 
 Syntax Highlighting
