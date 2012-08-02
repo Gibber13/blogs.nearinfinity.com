@@ -12,24 +12,24 @@ tags: Groovy Java Testing
 
 <p>The core problem is pretty simple, though it took me a while to figure out how to fix it. Seems to be pretty standard in Maven: I know what I want to do, but finding out how to do it is the <i>really</i> hard part. The only thing you need to do is tell Maven about the Groovy source code and where it lives. The way I did this is to use the Codehaus <a href="http://mojo.codehaus.org/build-helper-maven-plugin/">build-helper-maven-plugin</a> which has an add-source goal. The add-source goal does just what you would expect; it adds a specified directory (or directories) as a source directory in your Maven build. Here's how you use it in your Maven pom.xml file:</p>
 
-{% highlight text %}
-&lt;plugin&gt;
-    &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
-    &lt;artifactId&gt;build-helper-maven-plugin&lt;/artifactId&gt;
-    &lt;executions&gt;
-        &lt;execution&gt;
-            &lt;phase&gt;generate-sources&lt;/phase&gt;
-            &lt;goals&gt;
-                &lt;goal&gt;add-source&lt;/goal&gt;
-            &lt;/goals&gt;
-            &lt;configuration&gt;
-                &lt;sources&gt;
-                    &lt;source&gt;src/main/groovy&lt;/source&gt;
-                &lt;/sources&gt;
-            &lt;/configuration&gt;
-        &lt;/execution&gt;
-    &lt;/executions&gt;
-&lt;/plugin&gt;
+{% highlight xml %}
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>build-helper-maven-plugin</artifactId>
+    <executions>
+        <execution>
+            <phase>generate-sources</phase>
+            <goals>
+                <goal>add-source</goal>
+            </goals>
+            <configuration>
+                <sources>
+                    <source>src/main/groovy</source>
+                </sources>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
 {% endhighlight %}
 
 <p>In the above code snippet, we're  using the "build-helper-maven-plugin" to add the src/main/groovy directory. That's pretty much it. Run Cobertura as normal, view the reports, and you should now see coverage on Groovy source code as well as Java.</p>

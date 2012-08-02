@@ -10,7 +10,7 @@ tags: Ruby Testing
 
 As an example suppose we have the following code that prints out the size of each line in a file as stars (asterisks):
 
-{% highlight text %}
+{% highlight ruby %}
 def lines_to_stars(file_path)
   File.open(file_path, 'r').each_line { |line| puts '*' * line.size }
 end
@@ -18,7 +18,7 @@ end
 
 <p>Let's say we use FakeFS to create a fake file like this:</p>
 
-{% highlight text %}
+{% highlight ruby %}
 require 'fakefs/safe'
 require 'stringio'
 
@@ -35,13 +35,13 @@ end
 
 <p>So far, so good. But now if we call <code>lines_to_stars</code> we get an error:</p>
 
-{% highlight text %}
+{% highlight ruby %}
 NoMethodError: undefined method `each_line' for #&lt;FakeFS::File:0x000001012c22b8&gt;
 {% endhighlight %}
 
 <p>Oops. No <code>each_line</code>. If you don't want to use an unreleased version of the gem, you can add <code>each_line</code> onto FakeFS::File using the following code:</p>
 
-{% highlight text %}
+{% highlight ruby %}
 module FakeFS
   class File
     def each_line

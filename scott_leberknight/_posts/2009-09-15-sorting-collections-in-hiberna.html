@@ -8,7 +8,7 @@ tags: Java
 ---
 <p>When you have collections of associated objects in domain objects, you generally want to specify some kind of default sort order. For example, suppose I have domain objects <code>Timeline</code> and <code>Event</code>:</p>
 
-{% highlight text %}
+{% highlight java %}
 @Entity
 class Timeline {
 
@@ -17,7 +17,7 @@ class Timeline {
 
     @OneToMany(mappedBy = "timeline")
     @javax.persistence.OrderBy("startYear, endYear")
-    Set&lt;Event&gt; events
+    Set<Event> events
 }
 
 @Entity
@@ -46,26 +46,26 @@ class Event {
 
 <p>What if you want to control how null values are ordered so they come first rather than last? In Hibernate there are several ways you could do this. First, you could use the Hibernate-specific <code>@Sort</code> annotation to perform in-memory (i.e. not in the database) sorting, using natural sorting or sorting using a <code>Comparator</code> you supply. For example, assume I have an <code>EventComparator</code> helper class that implements <code>Comparator</code>. I could change <code>Timeline</code>'s collection of events to look like this:</p>
 
-{% highlight text %}
+{% highlight java %}
 @OneToMany(mappedBy = "timeline")
 @org.hibernate.annotations.Sort(type = SortType.COMPARATOR, comparator = EventCompator)
- Set&lt;Event&gt; events
+ Set<Event> events
 {% endhighlight %}
 
 <p>Using <code>@Sort</code>  will perform sorting in-memory once the collection has been retrieved from the database. While you can certainly do this and implement arbitrarily complex sorting logic, it's probably better to sort in the database when you can. So we now need to turn to <i>Hibernate's</i> <code>@OrderBy</code> annotation, which lets you specify a <i>SQL fragment</i> describing how to perform the sort. For example, you can change the events mapping to :</p>
 
-{% highlight text %}
+{% highlight java %}
 @OneToMany(mappedBy = "timeline")
 @org.hibernate.annotations.OrderBy("start_year, end_year")
- Set&lt;Event&gt; events
+ Set<Event> events
 {% endhighlight %}
 
 <p>This sort order is the same as using the JPA <code>@OrderBy</code> with "startYear, endYear" sort order. But since you write actual SQL in Hibernate's <code>@OrderBy</code> you can take advantage of whatever features your database has, at the possible expense of portability across databases. As an example, Oracle 10g supports using a syntax like "order by start_year, end_year nulls first" to order null end years before non-null end years. You could also say "order by start_year, end year nulls last" which sorts null end years last as you would expect. This syntax is probably not portable, so another trick you can use is the NVL function, which is supported in a bunch of databases. You can rewrite <code>Timeline</code>'s collection of events like so:</p>
 
-{% highlight text %}
+{% highlight java %}
 @OneToMany(mappedBy = "timeline")
 @org.hibernate.annotations.OrderBy("start_year, nvl(end_year , start_year)")
- Set&lt;Event&gt; events
+ Set<Event> events
 {% endhighlight %}
 
 <p>The expression "nvl(end_year , start_year)" simply says to use <code>end_year</code> as the sort value if it is not null, and <code>start_year</code> if it is null. So for sorting purposes you end up treating <code>end_year</code> as the same as the <code>start_year</code> if <code>end_year</code> is null. In the contrived example earlier, applying the nvl-based sort using Hibernate's <code>@OrderBy</code> to specify SQL sorting criteria, you now end with the events sorted like this:</p>
