@@ -2,17 +2,14 @@
 atom_id: tag:nic-www01,2008:/blogs//7.586 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/the_n_matchers_expected_m.html
 layout: blogs
-title: !binary |-
-  VGhlICJOIG1hdGNoZXJzIGV4cGVjdGVkLCBNIHJlY29yZGVkIiBQcm9ibGVt
-  IGluIEVhc3lNb2Nr
+title: The "N matchers expected, M recorded" Problem in EasyMock
 date: 2008-09-30 17:43:21.000000000 -04:00
-tags: !binary |-
-  SmF2YSBHcm9vdnk=
+tags: groovy java
 ---
-{% raw %}
 <p><a href="http://www.easymock.org/">EasyMock</a> is a Java dynamic mocking framework that allows you to record expected behavior of mock objects, play them back, and finally verify the results. As an example, say you have an interface <code>FooService</code> with a method <code>List&lt;Foo> findFoos(FooSearchCriteria criteria, Integer maxResults, String[] sortBy)</code> and that you have a <code>FooSearcher</code> class which uses a <code>FooService</code> to perform the actual searching. With EasyMock you could test that the <code>FooSearcher</code> uses the <code>FooService</code> as it should <i>without needing to also test the actual FooService implementation</i>. It is important in unit tests to isolate dependent collaborators so they can be tested independently. One thing I pretty much always forget when using EasyMock is that if you use any <a href="http://www.jdocs.com/link/org/easymock/IArgumentMatcher.html">IArgumentMatcher</a>s in your expectations, then <i>all</i> the arguments must use an <code>IArgumentMatcher</code>. Going back to the <code>FooSearcher</code> example, you might start out with the following test (written in Groovy for convenience):</p>
 
-<pre class="prettyprint">void testSearch() {
+{% highlight java %}
+void testSearch() {
   def service = createMock(FooService)
   def searcher = new FooSearcher(fooService: service, maxAllowedResults: 10)
   def criteria = new FooSearchCriteria()
@@ -24,11 +21,12 @@ tags: !binary |-
   assertSame expectedResult, result
   verify service
 }
-</pre>
+{% endhighlight %}
 
 <p>The above test fails with the following error message:</p>
 
-<pre class="prettyprint">java.lang.AssertionError: 
+{% highlight java %}
+java.lang.AssertionError: 
   Unexpected method call findFoos(com.acme.FooSearchCriteria@ea443f, 10, [Ljava.lang.String;@e41d4a):
     findFoos(com.acme.FooSearchCriteria@ea443f, 10, [Ljava.lang.String;@268cc6): expected: 1, actual: 0
 	at org.easymock.internal.MockInvocationHandler.invoke(MockInvocationHandler.java:29)
@@ -39,19 +37,21 @@ tags: !binary |-
 	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
 	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
     ...
-</pre>
+{% endhighlight %}
 
 <p>We expected a call to <code>findFoos</code> which takes a <code>FooSearchCriteria</code>, an integer, and a string array describing the sort conditions. But from the error message, EasyMock told us that the expected method was not called and so verification of the mock behavior failed. What happened? Well, basically the string array that was expected was not the string array actually passed as the argument. Look back at the stack trace and specifically the array arguments: the actual argument was <code>[Ljava.lang.String;@e41d4a</code> while the expected argument was <code>[Ljava.lang.String;@268cc6</code>. The <code>FooSearcher.search</code> method's signature is <code>List&lt;Foo> FooSearchCriteria criteria, String... sortBy)</code> - the varargs that are passed to <code>FooSearcher.search</code> are getting packed into a new array when called and that new array is subsequently passed into the <code>FooService</code> which is what causes the difference between the expected and actual array arguments!</p>
 
 <p>To make sure that arguments such as arrays and other complex objects are matched properly by the mock object, EasyMock provides <a href="http://www.jdocs.com/link/org/easymock/IArgumentMatcher.html">IArgumentMatcher</a> to compare the expected and actual arguments to method calls. Essentially, it is like performing a logical "assertEquals" on the arguments. One of the matchers EasyMock provides is obtained via the static <a href="http://www.jdocs.com/easymock/2.2/org/easymock/EasyMock.html#M-aryEq(T[])">aryEq</a> method in the <a href="http://www.jdocs.com/easymock/2.2/org/easymock/EasyMock.html">EasyMock</a> class. So for example if you had a method that took a single array argument, you could make an expectation of mock behavior like this:</p>
 
-<pre class="prettyprint">def myArray = ["foo", "bar", "baz"] as String[]
+{% highlight java %}
+def myArray = ["foo", "bar", "baz"] as String[]
 expect(someObject.someMethod(EasyMock.aryEq(myArray)).andReturn(anotherObject)
-</pre>
+{% endhighlight %}
 
 <p>Here you tell EasyMock to expect a call to <code>someMethod</code> on <code>someObject</code> with <code>myArray</code> as the sole argument, and to return <code>anotherObject</code>. Cool, so let's try to fix the failing test above using <code>EasyMock.aryEq</code> (which was imported statically using <code>import static</code>):</p>
 
-<pre class="prettyprint">void testSearch() {
+{% highlight java %}
+void testSearch() {
   def service = createMock(FooService)
   def searcher = new FooSearcher(fooService: service, maxAllowedResults: 10)
   def criteria = new FooSearchCriteria()
@@ -64,11 +64,12 @@ expect(someObject.someMethod(EasyMock.aryEq(myArray)).andReturn(anotherObject)
   assertSame expectedResult, result
   verify service
 }
-</pre>
+{% endhighlight %}
 
 <p>This test <i>also</i> fails with the following error message:</p>
 
-<pre class="prettyprint">java.lang.IllegalStateException: 3 matchers expected, 1 recorded.
+{% highlight java %}
+java.lang.IllegalStateException: 3 matchers expected, 1 recorded.
 	at org.easymock.internal.ExpectedInvocation.createMissingMatchers(ExpectedInvocation.java:41)
 	at org.easymock.internal.ExpectedInvocation.<init>(ExpectedInvocation.java:33)
 	at org.easymock.internal.ExpectedInvocation.<init>(ExpectedInvocation.java:26)
@@ -78,7 +79,7 @@ expect(someObject.someMethod(EasyMock.aryEq(myArray)).andReturn(anotherObject)
 	at $Proxy0.findFoos(Unknown Source)
 	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
     ...
-</init></init></pre>
+{% endhighlight %}
 
 <p>Wait, shouldn't that have made EasyMock ensure that the supplied argument was verified using an <code>IArgumentMatcher</code>, specifically an <a href="http://www.jdocs.com/easymock/2.2/org/easymock/internal/matchers/ArrayEquals.html">ArrayEquals</a> matcher? Well, sort of. And this is where I always forget what the "N matchers expected, M recorded" error message means and fumble around for a few minutes while I remember. In short, the rule is this:</p>
 
@@ -86,7 +87,8 @@ expect(someObject.someMethod(EasyMock.aryEq(myArray)).andReturn(anotherObject)
 
 <p>So in the above example, we recorded one matcher via the call to <code>aryEq</code>. Now EasyMock will expect an argument matcher for all the arguments in the expectation, and there are three arguments. Now this makes sense. We need to add argument matchers for the other arguments as well. So let's now fix the test:</p>
 
-<pre class="prettyprint">void testSearch() {
+{% highlight java %}
+void testSearch() {
   def service = createMock(FooService)
   def maxResults = 10
   def searcher = new FooSearcher(fooService: service, maxAllowedResults: maxResults)
@@ -100,7 +102,6 @@ expect(someObject.someMethod(EasyMock.aryEq(myArray)).andReturn(anotherObject)
   assertSame expectedResult, result
   verify service
 }
-</pre>
+{% endhighlight %}
 
 <p>Now the test passes as we expect it to. We used several other common types of argument matchers here via the static <code>isA</code> and <code>eq</code> argument matchers. The <a href="http://www.jdocs.com/easymock/2.2/org/easymock/EasyMock.html#M-isA(Class%3CT%3E)">isA</a> matcher ensures the argument is an instance of the specified class, while the <a href="http://www.jdocs.com/easymock/2.2/org/easymock/EasyMock.html#M-eq(T)">eq</a> matcher checks that the actual argument equals the expected argument via the normal Java equality check, i.e. <code>expected.equals(actual)</code>. So in summary, if you ever receive the dreaded "N matchers expected, M recorded" error message from EasyMock, you know you need to ensure that all arguments to an expectation use a matcher. And, if you got this far and were dying to mention that if you're using Groovy to test Java code there are easier ways in Groovy to test than using a framework like EasyMock, you're right for the most part. There are still some things you cannot do when testing Java code using Groovy. I plan to go into that more in a future blog post.</p> 
-{% endraw %}
