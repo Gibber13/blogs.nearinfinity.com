@@ -2,37 +2,35 @@
 atom_id: tag:nic-www01,2008:/blogs//7.436 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/apache_commons_collections_for_dealing.html
 layout: blogs
-title: !binary |-
-  QXBhY2hlIENvbW1vbnMgQ29sbGVjdGlvbnMgRm9yIERlYWxpbmcgV2l0aCBD
-  b2xsZWN0aW9ucyBJbiBKYXZh
+title: Apache Commons Collections For Dealing With Collections In Java
 date: 2008-10-03 17:15:30.000000000 -04:00
-tags: !binary |-
-  SmF2YQ==
+tags: java
 ---
-{% raw %}
 <p>If you are (stuck) in Javaland, which for my main project I currently am, and you'd like a little of the closure-like goodness you get from, well, lots of other languages like Ruby, Groovy, C#, Scala, etc. then you can get a tad bit closer by using the <a href="http://commons.apache.org/">Apache Commons Collections</a> library. Ok, scratch that. You aren't going to get much closer but at least for some problems the extensive set of utilities available can make your life at least a little easier when dealing with collections, in that you don't need to code the same stuff over and over again, or create your own library of collection-related utilities for many common tasks. Note also I am not intending to start any kind of religious war here abut Java vs. <a href="http://blog.thinkrelevance.com/2008/9/24/java-next-overview">Java.next</a>, which is how Stu aptly refers to languages like Grooovy, JRuby, Scala, and Clojure.</p>
 
 <p>As a really quick and simple example, say you have a collection of <code>Foo</code> objects and that you need to extract the value of the <code>bar</code> property of every one of those objects, and you want all the values in a new collection that you can use for whatever you need to. In that case you can use the <a href="http://commons.apache.org/collections/apidocs/org/apache/commons/collections/CollectionUtils.html#collect(java.util.Collection,%20org.apache.commons.collections.Transformer)">collect</a> method of the <a href="http://commons.apache.org/collections/apidocs/org/apache/commons/collections/CollectionUtils.html">CollectionUtils</a> class to do this pretty easily.</p>
 
-<pre class="prettyprint">List&lt;Foo> foos = getListOfFoosSomehow();
-Collection&lt;String> bars = CollectionUtils.collect(foos, TransformerUtils.invokerTransformer("getBar"));
-</pre>
+{% highlight java %}
+List<Foo> foos = getListOfFoosSomehow();
+Collection<String> bars = CollectionUtils.collect(foos, TransformerUtils.invokerTransformer("getBar"));
+{% endhighlight %}
 
 <p>This simple code is equivalent to the following:</p>
 
-<pre class="prettyprint">List&lt;Foo> foos = getListOfFoosSomehow();
-Collection&lt;String> bars = new ArrayList&lt;String>();
+{% highlight java %}
+List<Foo> foos = getListOfFoosSomehow();
+Collection<String> bars = new ArrayList<String>();
 for (Foo foo : foos) {
     bars.add(foo.getBar());
 }
-</pre>
+{% endhighlight %}
 
 <p>Depending on your viewpoint and how willing you are to ignore the ugliness of passing a method name into a method as in the first example, you can write less code for common scenarios such as this using the Commons Collections utilities.  If Java gets <a href="http://blogs.sun.com/jrose/entry/method_handles_in_a_nutshell">method handles</a> in Java 7, the first example could possibly be more elegantly rewritten like this:</p>
 
-<pre class="prettyprint">List&lt;Foo> foos = getListOfFoosSomehow();
+{% highlight java %}
+List<Foo> foos = getListOfFoosSomehow();
 // Making a HUGE assumption here about how method handles could possibly work...
-Collection&lt;String> bars = CollectionUtils.collect(foos, TransformerUtils.invokerTransformer(Foo.getBar));
-</pre>
+Collection<String> bars = CollectionUtils.collect(foos, TransformerUtils.invokerTransformer(Foo.getBar));
+{% endhighlight %}
 
 <p>Of course, if Java 7 also gets closures then everything I just wrote is moot and irrelevant (which it might be anyway even as I write this). Regardless, with the current state of Java (no closures and no method handles) the Commons Collections library just might have some things to make your life a bit easier when dealing with collections using good old pure Java code.</p> 
-{% endraw %}
