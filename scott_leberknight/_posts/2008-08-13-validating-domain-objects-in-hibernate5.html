@@ -2,14 +2,10 @@
 atom_id: tag:nic-www01,2008:/blogs//7.608 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/validating_domain_objects_in_hibernate5.html
 layout: blogs
-title: !binary |-
-  VmFsaWRhdGluZyBEb21haW4gT2JqZWN0cyBpbiBIaWJlcm5hdGUgUGFydCA2
-  OiBJbnRlZ3JhdGlvbiBXaXRoIFdlYiBGcmFtZXdvcmtz
+title: "Validating Domain Objects in Hibernate Part 6: Integration With Web Frameworks"
 date: 2008-08-13 11:02:22.000000000 -04:00
-tags: !binary |-
-  SmF2YQ==
+tags: java
 ---
-{% raw %}
 <p>This is the final (and way, way overdue) article in a series of blogs describing how you can effectively use Hibernate validators. The <a href="http://www.sleberknight.com/blog/sleberkn/entry/20071023">fifth article</a> described how to bypass Hibernate validation in specific use cases, for example if you need to save a "draft" object that should not be validated yet. In this article I'll describe how the Hibernate Validator can be integrated into web applications so that validation errors propagate seamlessly from the data access code back up through the web tier and to the end user as nicely formatted error messages. For this article I'm using Spring MVC, but the basic concept should be applicable no matter which of the 100 billion Java web frameworks you are using.</p>
 
 <p>The basic concept is this: When a user submits a form, you first want to bind the form values to your domain object (making <a href="http://searchsoftwarequality.techtarget.com/news/article/0,289142,sid92_gci1321417,00.html">sure</a> of course that you <a href="http://www.springsource.com/securityadvisory">only allow</a> <a href="http://www.ouncelabs.com/security_advisories/security-vulnerabilities-spring-framework.asp">user-editable fields to be bound to the object</a>). You then want to validate the domain object with the updated values. Finally, you want the Hibernate Validator validation errors translated into your web framework's native error validation mechanism so it can inform the user of the errors and do  things like display the errors to the user next to the problematic fields. Stated more succinctly, the following steps must occur: submit form, data binding to domain object, validate domain object using Hibernate Validator, translate Hibernate Validator errors to web framework errors, re-display form with nicely formatted error messages to user for correction.</p>
@@ -18,7 +14,7 @@ tags: !binary |-
 
 <p>So, let's look at the <code>HibernateAnnotationSpringValidator</code> class which is responsible for validating any of our domain objects (which are all assumed to ultimately extend from a custom <code>BaseEntity</code> class for this example) and then translating the Hibernate Validator <code>InvalidValue</code> objects into Spring MVC <code>Errors</code>.</p>
 
-<pre class="prettyprint">
+{% highlight java %}
 package com.nearinfinity.common.spring.validation.hibernate;
 
 // imports...
@@ -58,11 +54,10 @@ public class HibernateAnnotationSpringValidator implements Validator {
   }
 
 }
-</pre>
+{% endhighlight %}
 
 <p>The most important things in the above code are the <code>validate</code> and <code>translateToSpringValidationErrors</code> methods. As expected, <code>validate</code> expects a domain object that extends from <code>BaseEntity</code> and uses Hibernate Validator to validate it. This validator caches Hibernate <code>ClassValidator</code> instances and so one instance of <code>HibernateAnnotationSpringValidator</code> could be used in all of your Spring MVC controllers if desired. It then validates the object and gets back an array of <code>InvalidValue</code> objects from Hibernate Validator. Finally, it calls <code> translateToSpringValidationErrors</code>.</p>
 
 <p>The <code>translateToSpringValidationErrors</code> method iterates through the <code>InvalidValue</code>s and transforms them into Spring MVC errors. This implementation is very simplistic and not i18n-ready as it uses the domain object property names to create the error messages using a utility method I wrote called <code>camelCaseToTitleCase</code>. For example, if the property name is "firstName" then the "titleCasedPropertyName" is simply "First Name." So, if the <code>InvalidValue</code>'s <code>getMessage()</code> method returns "is required" then the error message would be "First Name is required." Obviously for production use you'll want to make something more robust than this and support i18n if you need to.</p>
 
 <p>Now you have all the pieces and simply need to plug-in the <code>HibernateAnnotationSpringValidator</code> and use as you would any Spring Validator which is documented extensively in the Spring docs and lots of books, blogs, twitters, etc. Obviously this example only works with Spring MVC. To make it work for the web framework you are using, you'll need to hook into your framework's validation mechanism and do something similar. Again, the two most important things are (1) using Hibernate Validator to validate an object (doesn't even need to be a domain object for that matter since Hibernate Validator can be used on its own independent of Hibernate even) and (2) translating the Hibernate validation errors into your web framework's native errors. That's it!</p> 
-{% endraw %}
