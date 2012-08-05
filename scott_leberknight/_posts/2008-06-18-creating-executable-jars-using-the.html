@@ -2,40 +2,37 @@
 atom_id: tag:nic-www01,2008:/blogs//7.462 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/creating_executable_jars_using_the.html
 layout: blogs
-title: !binary |-
-  Q3JlYXRpbmcgRXhlY3V0YWJsZSBKQVJzIHVzaW5nIHRoZSBNYXZlbiBBc3Nl
-  bWJseSBQbHVnaW4=
+title: Creating Executable JARs using the Maven Assembly Plugin
 date: 2008-06-18 13:59:56.000000000 -04:00
-tags: !binary |-
-  SmF2YQ==
+tags: java
 ---
-{% raw %}
 <p>On a current project I needed to create an executable JAR that does a bunch of processing on collections of files. As with most projects, I rely on a bunch of open source tools as dependencies. Since, to my current knowledge anyway, there is no way to have JARs within JARs I needed a quick way to create an executable JAR containing all the required dependencies. I did a bunch of searching and asking around and eventually found the <a href="http://maven.apache.org/plugins/maven-assembly-plugin/">Maven Assembly Plugin</a>. This plugin generates "assemblies" which could be just the executable JAR or could be an entire source distribution in multiple formats (e.g. zip, tar.gz, etc.).</p>
 
-<p>The basics of the plugin are simple. Add the &lt;plugin> to your Maven POM file, define the assembly, and for executable JARs specify the main class. Here's how I configured the plugin:</p>
+<p>The basics of the plugin are simple. Add the <plugin> to your Maven POM file, define the assembly, and for executable JARs specify the main class. Here's how I configured the plugin:</p>
 
-<pre class="prettyprint">&lt;plugin>
-  &lt;groupId>org.apache.maven.plugins&lt;/groupId>
-  &lt;artifactId>maven-assembly-plugin&lt;/artifactId>
-  &lt;configuration>
-    &lt;descriptorRefs>
-      &lt;descriptorRef>jar-with-dependencies&lt;/descriptorRef>
-    &lt;/descriptorRefs>
-    &lt;archive>
-      &lt;manifest>
-        &lt;mainClass>com.nearinfinity.arc2text.ARC2TextConverter&lt;/mainClass>
-      &lt;/manifest>
-    &lt;/archive>
-  &lt;/configuration>
-&lt;/plugin>
-</pre>
+{% highlight xml %}
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-assembly-plugin</artifactId>
+  <configuration>
+    <descriptorRefs>
+      <descriptorRef>jar-with-dependencies</descriptorRef>
+    </descriptorRefs>
+    <archive>
+      <manifest>
+        <mainClass>com.nearinfinity.arc2text.ARC2TextConverter</mainClass>
+      </manifest>
+    </archive>
+  </configuration>
+</plugin>
+{% endhighlight %}
 
 <p>In the above, I used one of the conveniently predefined <a href="http://maven.apache.org/plugins/maven-assembly-plugin/descriptor-refs.html">descriptor references</a>, in this case "jar-with-dependencies" which does pretty much exactly as you would expect. You could also <a href="http://maven.apache.org/plugins/maven-assembly-plugin/assembly.html">define your own assembly</a> but that looked quite a bit more complicated and all I needed was to simply produce an executable JAR. When the assembly plugin executes the above example configuration, it creates a single executable JAR with all my classes and all the classes from all the dependencies. It also sets up the JAR manifest with the Main-Class that you specify. The dependencies, which in my case were all other JAR files, are extracted from their JARs and placed directly into the JAR file, i.e. the classes in the dependent JARs are extracted and then put into the new custom JAR. The plugin even copies over license files, e.g. LICENSE, ASM-LICENSE.txt, etc. into the META-INF directory in the JAR.</p>
 
 <p>The only things left to do is use the plugin. To do that you can simply run the command:</p>
 
-<pre class="prettyprint">mvn assembly:assembly
-</pre>
+{% highlight text %}
+mvn assembly:assembly
+{% endhighlight %}
 
 <p>There are other goals in the assembly plugin but this is the main one you need. So if you need to create an executable JAR containing dependencies, this is a nice quick way to do it, especially if you were already using Maven.</p> 
-{% endraw %}

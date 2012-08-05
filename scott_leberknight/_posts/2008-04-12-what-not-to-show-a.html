@@ -2,19 +2,16 @@
 atom_id: tag:nic-www01,2008:/blogs//7.614 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/what_not_to_show_a.html
 layout: blogs
-title: !binary |-
-  V2hhdCBOb3QgVG8gU2hvdyBhIFVzZXI=
+title: What Not To Show a User
 date: 2008-04-12 16:00:48.000000000 -04:00
-tags: !binary |-
-  R2VuZXJhbCBTZWN1cml0eQ==
+tags: general security
 ---
-{% raw %}
 <p>Quick rule of thumb: Don't show users cryptic error messages. This one was an error I recently received at a major airline's web site while checking in online for a flight:</p>
 
-<pre>Internal Session Id 1207429769869209087112251146956
+{% highlight text %}
+Internal Session Id 1207429769869209087112251146956
 User Session Id H3qJ4YGjTnTH1Sv0d4nVMBNhr2vdn77m4MKGQ3MT0SVVhQQvsQBk!1447771105!1207429769869
 telprdB UserIntB12 java.lang.NullPointerException
-</pre>
+{% endhighlight %}
 
 <p>That's a lot more information than should be given out to anyone, and is certainly not "user friendly." Do you think they are using Java? That NPE didn't give it away did it? Then again you can pretty much figure that out from the ".do" on the end of the URLs they use, which is one reason why web frameworks these days allow you to map things in a more REST-friendly and technology-agnostic manner using *.html or something like <code>/my/site/person/1</code>. Another rule of thumb: design URLs to be technology agnostic and generic, so that just from a URL it cannot be determined what technology you are using and in case you need or want to switch to a different technology you could theoretically use the same routing scheme in your URLs, which would allow bookmarks to keep working.</p> 
-{% endraw %}

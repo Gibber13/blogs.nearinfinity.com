@@ -2,39 +2,38 @@
 atom_id: tag:nic-www01,2008:/blogs//7.527 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/just_how_does_spring_do.html
 layout: blogs
-title: !binary |-
-  SnVzdCBIb3cgRG9lcyBTcHJpbmcgRG8gSXRzIENsYXNzcGF0aCBDb21wb25l
-  bnQgU2Nhbm5pbmcgTWFnaWM/
+title: Just How Does Spring Do Its Classpath Component Scanning Magic?
 date: 2008-06-23 17:56:46.000000000 -04:00
-tags: !binary |-
-  SmF2YQ==
+tags: java
 ---
-{% raw %}
 <p>One really cool feature in Spring 2.5+ is classpath component scanning. For example, instead of manually defining and wiring up all the beans comprising your Spring-based application, you simply add a few "driver" snippets of XML to your application context configuration, and then annotate your component classes with @Component (or any specialization such as @Controller and @Service). I am calling the XML snippets a "driver" because all they do is enable a specific feature, such as classpath scanning or component autowiring:</p>
 
-<pre class="prettyprint">&lt;-- Enable autowiring via @Autowire annotations -->
-&lt;context:annotation-config/>
+{% highlight xml %}
+<-- Enable autowiring via @Autowire annotations -->
+<context:annotation-config/>
 
-&lt;-- Scan for components in a package (and its subpackages)  -->
-&lt;context:component-scan base-package="org.springframework.samples.petclinic.web"/>
-</pre>
+<-- Scan for components in a package (and its subpackages)  -->
+<context:component-scan base-package="org.springframework.samples.petclinic.web"/>
+{% endhighlight %}
 
 <p>After seeing this was pretty cool, I wanted to know how exactly they did the classpath scanning. It boils down to doing some gymnastics with class loaders and resource path matching and using the <code>ClassLoader.getResources(String name)</code> method which returns an <code>Enumeration</code> containing <code>URL</code>s representing classpath resources. Those resources (Java classes) are then checked to see if they contain the @Component annotation (or a specialization of it) and if so, are considered a "candidate" component. Other filtering can take place but by default those components are then defined programmatically as Spring beans. When annotation configuration is enabled, autowiring of components also takes place, so I can have Spring scan the classpath for all my web controllers, and then automatically inject dependencies such as services or data access objects. Cool!</p>
 
 <p>The actual classes that perform this magic are the <code> ClassPathScanningCandidateComponentProvider</code> which, by default, uses a <code>PathMatchingResourcePatternResolver</code> to find matching classpath resources using <code>ClassLoader.getResources()</code>. As a quick example, you can see this in action by writing a simple script, like so:</p>
 
-<pre class="prettyprint">ClassPathScanningCandidateComponentProvider provider =
+{% highlight java %}
+ClassPathScanningCandidateComponentProvider provider =
     new ClassPathScanningCandidateComponentProvider(true);
 String basePackage = "org/springframework/samples/petclinic";
-Set&lt;BeanDefinition> components = provider.findCandidateComponents(basePackage);
+Set<BeanDefinition> components = provider.findCandidateComponents(basePackage);
 for (BeanDefinition component : components) {
     System.out.printf("Component: %s\n", component.getBeanClassName());
 }
-</pre>
+{% endhighlight %}
 
 <p>Running this code (using the PetClinic sample application shipped with Spring), you get the following output:</p>
 
-<pre class="prettyprint">Component: org.springframework.samples.petclinic.hibernate.HibernateClinic
+{% highlight text %}
+Component: org.springframework.samples.petclinic.hibernate.HibernateClinic
 Component: org.springframework.samples.petclinic.jdbc.SimpleJdbcClinic
 Component: org.springframework.samples.petclinic.jpa.EntityManagerClinic
 Component: org.springframework.samples.petclinic.web.AddOwnerForm
@@ -44,18 +43,18 @@ Component: org.springframework.samples.petclinic.web.ClinicController
 Component: org.springframework.samples.petclinic.web.EditOwnerForm
 Component: org.springframework.samples.petclinic.web.EditPetForm
 Component: org.springframework.samples.petclinic.web.FindOwnersForm
-</pre>
+{% endhighlight %}
 
 <p>For a more fun experiment, I tried to scan using "org" as the base package...</p>
 
-<pre class="prettyprint">Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
+{% highlight java %}
+Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
 	at org.springframework.asm.ClassReader.a(Unknown Source)
 	at org.springframework.asm.ClassReader.<init>(Unknown Source)
 	at org.springframework.core.type.classreading.SimpleMetadataReaderFactory.getMetadataReader(SimpleMetadataReaderFactory.java:76)
 	at org.springframework.core.type.classreading.CachingMetadataReaderFactory.getMetadataReader(CachingMetadataReaderFactory.java:68)
 	at org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider.findCandidateComponents(ClassPathScanningCandidateComponentProvider.java:181)
 	at org.springframework.samples.petclinic.ClassPathScannerTester.main(ClassPathScannerTester.java:17)
-</init></pre>
+</init>{% endhighlight %}
 
 <p>Ok, so you need to restrict the scan space that Spring will use or else you could run out of memory scanning every possible class in your system! Regardless, with classpath scanning of components and autowiring of dependencies, you can cut down the amount of XML in Spring-based apps a lot.</p> 
-{% endraw %}

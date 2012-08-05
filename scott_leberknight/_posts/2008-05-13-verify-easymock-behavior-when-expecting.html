@@ -2,17 +2,14 @@
 atom_id: tag:nic-www01,2008:/blogs//7.609 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/verify_easymock_behavior_when_expecting.html
 layout: blogs
-title: !binary |-
-  VmVyaWZ5IEVhc3lNb2NrIEJlaGF2aW9yIFdoZW4gRXhwZWN0aW5nIEV4Y2Vw
-  dGlvbnM=
+title: Verify EasyMock Behavior When Expecting Exceptions
 date: 2008-05-13 14:51:08.000000000 -04:00
-tags: !binary |-
-  SmF2YSBHcm9vdnkgVGVzdGluZw==
+tags: groovy java testing
 ---
-{% raw %}
 <p>Often when writing unit tests I use <a href="http://www.easymock.org/">EasyMock</a> to mock dependencies of the class under test. And many times I need to test that a certain type of exception is thrown during a test. Sometimes I need both, for example I am using a mock to simulate a dependency that throws an exception <i>and</i> I want my test to verify the appropriate exception was indeed thrown and that the mock was called properly. In those cases, I use a simple little trick: use a try/finally block along with a <a href="http://www.junit.org/">JUnit</a> "<code>@Test(expected = FooException.class</code>" annotation on my test method. Voila! Now you can verify mock behavior and verify the exception was thrown at the same time. This is cleaner than using a catch block and asserting the correct exception was thrown, since you rely on JUnit to verify the exception using the "expected" attribute of the @Test annotation. For example:</p>
 
-<pre class="prettyprint">@Test(expected = ThrottleException.class)
+{% highlight java %}
+@Test(expected = ThrottleException.class)
 public void testSomethingWithDependencies() {
     // Create mock
     Rocket mainBooster = createMock(Rocket.class);
@@ -38,11 +35,12 @@ public void testSomethingWithDependencies() {
         verify(rocket);
     }
 }
-</pre>
+{% endhighlight %}
 
 <p>If instead of writing tests in Java you write them in <a href="http://groovy.codehaus.org/">Groovy</a>, the above code could be a little bit Groovier, though not much. (In an earlier <a href="http://www.sleberknight.com/blog/sleberkn/entry/20080321">post</a> I showed how you can write unit tests in Groovy and still use JUnit instead of <code>GroovyTestCase</code> if you like.)</p>
 
-<pre class="prettyprint">@Test(expected = ThrottleException)
+{% highlight java %}
+@Test(expected = ThrottleException)
 void testSomethingWithDependencies() {
     // Create mock
     def mainBooster = createMock(Rocket)
@@ -68,11 +66,12 @@ void testSomethingWithDependencies() {
         verify rocket
     }
 }
-</pre>
+{% endhighlight %}
 
 <p>Even more Groovy in this case would be to extend <code>GroovyTestCase</code> and use its <code>shouldFail</code> method, like so:</p>
 
-<pre class="prettyprint">void testSomethingWithDependencies() {
+{% highlight java %}
+void testSomethingWithDependencies() {
     // Create mock
     def mainBooster = createMock(Rocket)
 	
@@ -95,7 +94,6 @@ void testSomethingWithDependencies() {
     }
     verify rocket
 }
-</pre>
+{% endhighlight %}
 
 <p>The <code>GroovyTestCase</code> version is probably the cleanest of the above three options. If you're not into Groovy, you can still use the JUnit  "<code>@Test(expected = BarException.class)</code>" together with a try/finally/verify in plain Java unit tests for a cleaner test experience.</p> 
-{% endraw %}
