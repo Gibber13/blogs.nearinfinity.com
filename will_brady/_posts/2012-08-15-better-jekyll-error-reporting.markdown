@@ -28,7 +28,7 @@ Successfully generated site: /blog -> /blog/_site
 
 Why are you lying to me Jekyll? There's no way it could have successfully interpreted "inclde". It didn't. Liquid gives a nice error message "Liquid syntax error: Unknown tag 'inclde'". Unfortunately Jekyll takes the liberty of going ahead and dropping that error message in your rendered page and not letting you know about it. You get something like this:
 
-!["Liquid syntax error: Unknown tag 'inclde'"](/blogs/will_brady/assets/jekyll-error.png "Jekyll Error")
+<img src="/blogs/will_brady/assets/jekyll-error.png" alt="Liquid syntax error: Unknown tag 'inclde'" title="Jekyll Error" style="border: 1px solid black;"/>
 
 The Solution
 -------------
