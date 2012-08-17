@@ -11,7 +11,7 @@ tags: groovy
 {% highlight groovy %}
 groovy:000> test = []
 ===> []
-groovy:000> (1..10).each { test &lt;&lt; "Item $it" }
+groovy:000> (1..10).each { test << "Item $it" }
 ===> 1..10
 groovy:000> test                               
 ===> [Item 1, Item 2, Item 3, Item 4, Item 5, Item 6, Item 7, Item 8, Item 9, Item 10]
@@ -24,7 +24,7 @@ groovy:000> test.contains("Item 1")
 {% highlight groovy %}
 groovy:000> test = []
 ===> []
-groovy:000> (1..10).each { test &lt;&lt; "Item $it" }
+groovy:000> (1..10).each { test << "Item $it" }
 ===> 1..10
 groovy:000> test
 ===> [Item 1, Item 2, Item 3, Item 4, Item 5, Item 6, Item 7, Item 8, Item 9, Item 10]
@@ -61,7 +61,7 @@ groovy:000> b.equals(a)
 {% highlight groovy %}
 groovy:000> test = []
 ===> []
-groovy:000> (1..10).each { test &lt;&lt; "Item $it".toString() }
+groovy:000> (1..10).each { test << "Item $it".toString() }
 ===> 1..10
 groovy:000> test
 ===> [Item 1, Item 2, Item 3, Item 4, Item 5, Item 6, Item 7, Item 8, Item 9, Item 10]
@@ -75,9 +75,10 @@ groovy:000> test.contains('Item 1')
 
 <p>For comparison, let's take a look at similar Ruby example in an irb session:</p>
 
-{% highlight groovy %}>> test = []
+{% highlight groovy %}
+>> test = []
 => []
->> (1..10).each { |n| test &lt;&lt; "Item #{n}" }
+>> (1..10).each { |n| test << "Item #{n}" }
 => 1..10
 >> test
 => ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9", "Item 10"]
