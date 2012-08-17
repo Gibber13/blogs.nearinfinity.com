@@ -2,25 +2,21 @@
 atom_id: tag:nic-www01,2008:/blogs//7.566 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/securityexception_running_groovy_scripts_with.html
 layout: blogs
-title: !binary |-
-  U2VjdXJpdHlFeGNlcHRpb24gUnVubmluZyBHcm9vdnkgU2NyaXB0cyB3aXRo
-  IEpldEdyb292eSBJbnRlbGxpSiBQbHVnaW4=
+title: SecurityException Running Groovy Scripts with JetGroovy IntelliJ Plugin
 date: 2008-02-20 16:22:45.000000000 -05:00
-tags: !binary |-
-  R3Jvb3Z5
+tags: groovy
 ---
-{% raw %}
 <p>Yesterday before leaving for home I happily upgraded the <a href="http://www.jetbrains.net/confluence/display/GRVY/Groovy+Home">JetGroovy</a> plugin to the latest and greatest version 1.0.14394 (on Mac OS X Leopard). Up until now, I've had great luck with this plug-in and have enjoyed using it to write Groovy code. Today, however, when I went to run several Groovy scripts I've been using while preparing a presentation, they failed with a rather nasty error:</p>
 
-<pre class="prettyprint">java.lang.SecurityException: Prohibited package name: java.lang
+{% highlight java %}
+java.lang.SecurityException: Prohibited package name: java.lang
 ...
 ...
 ...lots more stack trace gunk...
-</pre>
+{% endhighlight %}
 
 <p>Uh oh. After doing some investigation on the JetBrains forums, the problem is that the JDK classes are being set in the Groovy classpath that IntelliJ passes to <code>groovyStarter</code>, which causes the security exception, presumably because Java thinks something is trying to add <code>java.lang</code> classes to the classpath. The issue is GRVY-1088 in JetBrains' JIRA tracker in case you are interested.</p>
 
 <p>Fortunately a co-worker had not yet upgraded to the latest version and that version still works fine. In fact, that older version 1.0.14201 actually does not call <code>groovyStarter</code> but instead uses <code>groovy.lang.GroovyShell</code> to execute the script. So somewhere along the way the way JetGroovy runs Groovy scripts was completely changed to use <code>groovyStarter</code> but incorrectly passes all the JDK classes to it, causing the <code>SecurityException</code>. It actually works fine if you remove all the JDK classes from the classpath and run the command.</p>
 
 <p>So the solution that has worked for me today is to <i>downgrade</i> to version 1.0.14201. You can find that version <a href="http://www.sleberknight.com/blog/sleberkn/resource/JetGroovy-1.0.14201.zip">here</a>. Just unzip it and replace the existing plug-in at <code>~/Library/Application Support/IntelliJIDEA70/Groovy</code> and then you should be able to run Groovy scripts again from within IntelliJ. Of course this also means you cannot upgrade the plugin until GRVY-1088 is fixed.</p> 
-{% endraw %}

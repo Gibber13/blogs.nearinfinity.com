@@ -2,18 +2,16 @@
 atom_id: tag:nic-www01,2008:/blogs//7.526 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/junit4_tests_in_groovy.html
 layout: blogs
-title: !binary |-
-  SlVuaXQ0IFRlc3RzIGluIEdyb292eQ==
+title: JUnit4 Tests in Groovy
 date: 2008-03-21 09:03:10.000000000 -04:00
-tags: !binary |-
-  SmF2YSBUZXN0aW5n
+tags: java testing
 ---
-{% raw %}
 <p>On my current (Java-based) project we now write all new unit tests in Groovy, though there are a lot of legacy Java tests still out there that we haven't had time or felt the need to convert to Groovy-based tests. There are also several base test classes, also written in Java, that provide some nice set up and tear down code for certain classes of test. I happened to be testing a web controller and realized I needed (or rather, wanted) to make use of the existing <code>AbstractViewControllerTest</code> base class, which is written in Java, uses JUnit4 annotations, and provides, among other things, code that creates and sets up a simulated authenticated user for the controller along with a bunch of other stuff like mock requests, responses, session, helper methods, etc. So, the problem was that I needed to extend <code>AbstractViewControllerTest</code> and not <code>GroovyTestCase</code>, and initially got all bent out of shape about having to choose to write the test in Java and extend the base test or write it in Groovy extending <code>GroovyTestCase</code> and having to redo the stuff already provided by the base class.</p>
 
 <p>Thankfully about that time <a href="http://www.nearinfinity.com/blogs/page/sfarley">Steve</a> reminded me nicely that you can mix-and-match Groovy and JUnit4 annotations just fine since Groovy has now sported annotation support for a while now (since ~1.1 I think). So I can simply write the test in Groovy, extend the base test class, and use JUnit4 annotations to get exactly what I want. What's the point? Just remember that when writing tests in Groovy there is nothing that says you <i>must</i> extend <code>GroovyTestCase</code> and that you can use JUnit4 in Groovy tests. So for example you could have a Groovy test like this:</p>
 
-<pre class="prettyprint">class MyTest extends TestBaseClass {
+{% highlight groovy %}
+class MyTest extends TestBaseClass {
     @Before
     void doSetup() { ... }
 	
@@ -23,7 +21,6 @@ tags: !binary |-
     @Test(expected = IllegalArgumentException)
     void testBadThing() { ... }
 }
-</pre>
+{% endhighlight %}
 
 <p>This way you can extend some other class if you choose, and get all the normal JUnit4 stuff. Since you are not extending <code>GroovyTestCase</code> one thing that is missing is <code>shouldFail()</code> so instead you use the "expected" parameter in your <code>@Test</code> annotation when you want to verify a specific type of exception was thrown.</p> 
-{% endraw %}

@@ -10,26 +10,17 @@ tags: Java
 
 <p>As indicated by the title of this article, the primary use case I've seen for bypassing standard validation on an object is to allow saving objects in a draft state. For example, suppose you have a lengthy form that a user can fill out, such as a mortgage application or insurance claim, and you want to allow users to save their work as a draft and be able to come back and complete at a later time. In this case, you probably don't want to apply all the validation rules, since it is almost a given that if they haven't finished filling in the form, that it won't pass the validation rules. In this use case bypassing Hibernate validation makes perfect sense. By the way, I am not going to get into the argument of whether storing draft data means that the database must have relaxed constraints, and whether this is good or bad. If you don't relax the database constraints (e.g. allow null values in columns that should be required), then where do you store the draft data? Probably in a separate table that looks almost identical to the "real" table except with all the constraints relaxed (e.g. you might have a <code>loan_applications</code> table as well as a <code>draft_loan_applications</code> table). Assuming, like me, that you don't like that solution and would prefer to save draft objects in the same database table as non-draft objects, read on.</p>
 
-<style type="text/css">
-.tip {
-  border: 1px solid #ccc;
-  background-color: #FFFFCC;
-  font-size: small;
-  padding: 5px;
-}
-</style>
-
-
 <p>In order to allow the Hibernate event-based validation to be bypassed, you need to create your own validation event listener and provide a way to disable validation temporarily. Since the actual validation logic doesn't change, and the only extra logic we need is to allow clients to turn validation off and then back on, we can extend Hibernate's <code>ValidateEventListener</code>. The following class is all you need (some lengthy JavaDocs have been omitted for brevity):</p>
 
-{% highlight text %}package com.nearinfinity.common.hibernate.validator.event;
+{% highlight java %}
+package com.nearinfinity.common.hibernate.validator.event;
 
 import org.hibernate.event.PreInsertEvent;
 import org.hibernate.event.PreUpdateEvent;
 import org.hibernate.validator.event.ValidateEventListener;
 
 /**
- * Extension of Hibernate's &lt;code>ValidateEventListener&lt;/code> that allows you to bypass the normal validation performed
+ * Extension of Hibernate's <code>ValidateEventListener</code> that allows you to bypass the normal validation performed
  * by Hibernate for a specific thread.
  *
  * @author Andrew Avenoso
@@ -37,7 +28,7 @@ import org.hibernate.validator.event.ValidateEventListener;
  */
 public class OptionalValidateEventListener extends ValidateEventListener {
 
-    private static ThreadLocal&lt;Boolean> shouldValidateThreadLocal = new ThreadLocal&lt;Boolean>() {
+    private static ThreadLocal<Boolean> shouldValidateThreadLocal = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {
             return Boolean.TRUE;
@@ -45,7 +36,7 @@ public class OptionalValidateEventListener extends ValidateEventListener {
     };
 
     /**
-     * Perform validation before insert, &lt;code>unless&lt;/code> {@link #turnValidationOff()} has been called for the
+     * Perform validation before insert, <code>unless</code> {@link #turnValidationOff()} has been called for the
      * currently executing thread.
      *
      * @param event the PreInsertEvent
@@ -53,11 +44,11 @@ public class OptionalValidateEventListener extends ValidateEventListener {
      */
     @Override
     public boolean onPreInsert(PreInsertEvent event) {
-        return isCurrentlyValidating() &amp;&amp; super.onPreInsert(event);
+        return isCurrentlyValidating() && super.onPreInsert(event);
     }
 
     /**
-     * Perform validation before update, &lt;code>unless&lt;/code> {@link #turnValidationOff()} has been called for the
+     * Perform validation before update, <code>unless</code> {@link #turnValidationOff()} has been called for the
      * currently executing thread.
      *
      * @param event the PreUpdateEvent
@@ -65,7 +56,7 @@ public class OptionalValidateEventListener extends ValidateEventListener {
      */
     @Override
     public boolean onPreUpdate(PreUpdateEvent event) {
-        return isCurrentlyValidating() &amp;&amp; super.onPreUpdate(event);
+        return isCurrentlyValidating() && super.onPreUpdate(event);
     }
 
     /** Call this method to explicitly turn validation on for the currently executing thread. */
@@ -78,7 +69,7 @@ public class OptionalValidateEventListener extends ValidateEventListener {
         OptionalValidateEventListener.shouldValidateThreadLocal.set(Boolean.FALSE);
     }
 
-    /** @return &lt;code>true&lt;/code> if we need to validate for the current thread */
+    /** @return <code>true</code> if we need to validate for the current thread */
     public static Boolean isCurrentlyValidating() {
         return OptionalValidateEventListener.shouldValidateThreadLocal.get();
     }
@@ -103,7 +94,8 @@ public class OptionalValidateEventListener extends ValidateEventListener {
 
 <p>Once that's done you only need to figure out where you need to bypass validation and use code like the following, which is taken from one of our base Spring MVC web controller classes in my current project:</p>
 
-{% highlight text %} if (shouldPerformHibernateValidation()) {
+{% highlight java %}
+ if (shouldPerformHibernateValidation()) {
      return onSubmitInternal(request, response, command, errors);
  }
  else {

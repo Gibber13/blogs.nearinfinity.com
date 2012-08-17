@@ -2,17 +2,14 @@
 atom_id: tag:nic-www01,2008:/blogs//7.611 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/wackiness_with_string_gstring_and.html
 layout: blogs
-title: !binary |-
-  V2Fja2luZXNzIFdpdGggU3RyaW5nLCBHU3RyaW5nLCBhbmQgRXF1YWxpdHkg
-  aW4gR3Jvb3Z5
+title: Wackiness With String, GString, and Equality in Groovy
 date: 2008-03-20 14:44:18.000000000 -04:00
-tags: !binary |-
-  R3Jvb3Z5
+tags: groovy
 ---
-{% raw %}
 <p>We ran into this one today while writing a Groovy unit test. Check out the following GroovyShell session:</p>
 
-<pre class="prettyprint">groovy:000> test = []
+{% highlight groovy %}
+groovy:000> test = []
 ===> []
 groovy:000> (1..10).each { test &lt;&lt; "Item $it" }
 ===> 1..10
@@ -20,11 +17,12 @@ groovy:000> test
 ===> [Item 1, Item 2, Item 3, Item 4, Item 5, Item 6, Item 7, Item 8, Item 9, Item 10]
 groovy:000> test.contains("Item 1")
 ===> false
-</pre>
+{% endhighlight %}
 
 <p>Um...what? We started by adding items to a list, e.g. "Item 1", "Item 2", and so on. Then we simply ask whether the list contains an item we know (or think) is there. But no, it prints false! How can <code>test</code> possibly not contain "Item 1?" First, what's going on here? Look at this second example:</p>
 
-<pre class="prettyprint">groovy:000> test = []
+{% highlight groovy %}
+groovy:000> test = []
 ===> []
 groovy:000> (1..10).each { test &lt;&lt; "Item $it" }
 ===> 1..10
@@ -32,11 +30,13 @@ groovy:000> test
 ===> [Item 1, Item 2, Item 3, Item 4, Item 5, Item 6, Item 7, Item 8, Item 9, Item 10]
 groovy:000> println test[0].class 
 class org.codehaus.groovy.runtime.GStringImpl
-===> null</pre>
+===> null
+{% endhighlight %}
 
 <p>Ah ha! The items in the list aren't strings. So what? Look at this code:</p>
 
-<pre class="prettyprint">groovy:000> a = "Item 2"
+{% highlight groovy %}
+groovy:000> a = "Item 2"
 ===> Item 2
 groovy:000> a.class
 ===> class java.lang.String
@@ -54,11 +54,12 @@ groovy:000> a.equals(b)
 ===> false
 groovy:000> b.equals(a)
 ===> false
-</pre>
+{% endhighlight %}
 
 <p><code>a</code> is a normal Java String, whereas <code>b</code> is a Groovy GString. Even more interesting (or perhaps confusing), a <code>==</code> comparison yields true, but a comparison using <code>equals()</code> is false! So back in the original example where we checked if the 'test' list contained 'Item 1', the <code>contains()</code> method (which comes from Java not Groovy) uses <code>equals()</code> to compare the values and responds that in fact, no, the list does not contain the <i>String</i> "Item 1." Without getting too much more detailed, how to fix this? Look at this example:</p>
 
-<pre class="prettyprint">groovy:000> test = []
+{% highlight groovy %}
+groovy:000> test = []
 ===> []
 groovy:000> (1..10).each { test &lt;&lt; "Item $it".toString() }
 ===> 1..10
@@ -66,7 +67,7 @@ groovy:000> test
 ===> [Item 1, Item 2, Item 3, Item 4, Item 5, Item 6, Item 7, Item 8, Item 9, Item 10]
 groovy:000> test.contains('Item 1')
 ===> true
-</pre>
+{% endhighlight %}
 
 <p>Now it returns true, since in the above example we explicitly forced evaluation of the GStrings in the list by calling <code>toString()</code>. The Groovy web site <a href="http://groovy.codehaus.org/Strings#Strings-GStrings">explains</a> about GString lazy evaluation stating that "GString uses lazy evaluation so its not until the toString() method is invoked that the GString is evaluated."</p>
 
@@ -74,7 +75,7 @@ groovy:000> test.contains('Item 1')
 
 <p>For comparison, let's take a look at similar Ruby example in an irb session:</p>
 
-<pre class="prettyprint">>> test = []
+{% highlight groovy %}>> test = []
 => []
 >> (1..10).each { |n| test &lt;&lt; "Item #{n}" }
 => 1..10
@@ -82,7 +83,6 @@ groovy:000> test.contains('Item 1')
 => ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9", "Item 10"]
 >> test.include? "Item 1"
 => true
-</pre>
+{% endhighlight %}
 
 <p>Ruby "does the right thing" from just looking at the code. Ruby 1, Groovy 0 on this one. I don't actually know whether Ruby strings evaluate the expressions immediately or not, and should not need to care. Code that looks simple should not require understanding the implementation strategy of a particular feature. Otherwise it is broken in my opinion.</p> 
-{% endraw %}
