@@ -1,11 +1,11 @@
-task :default => ['blogs:create']
+task :default => ['blog:create']
 
 namespace :blog do
-  desc "Create a Blank Blog Post (Run in the root of your blog directory)"
+  desc "Create a Blank Blog Post (Run in your personal blog folder)"
   task :create do
     Dir.chdir Rake.application.original_dir
     if !Dir.exists? '_posts'
-      STDOUT.puts 'The "_posts" directory was not found, are you in your blog root directory?'
+      STDOUT.puts 'The "_posts" directory was not found, are you in your personal blog folder?'
       return
     end
 
