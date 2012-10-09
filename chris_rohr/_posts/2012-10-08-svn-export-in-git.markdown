@@ -13,6 +13,6 @@ Finally after a lot of searching I found one response that looked like it would 
 		
 Here is an explaination of the parts of that command:
 
-+ --remote is the remote location of the git repo that you want to export
++ remote is the remote location of the git repo that you want to export
 + branch is the branch on that repo that you want to export
-+ | tar -x sends the output of archive (a tarball) and pipes it to the tar command to extract in the location where you are.
++ tar -x sends the output of archive (a tarball) and pipes it to the tar command to extract in the location where you are.
