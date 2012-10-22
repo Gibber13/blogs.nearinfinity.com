@@ -1,5 +1,6 @@
 ---
 name: Jason Harwig
+employee_number: 11
 user_info:
   title: Senior Software Engineer
   areas_of_interest: iOS development, JavaScript, User Experience design
