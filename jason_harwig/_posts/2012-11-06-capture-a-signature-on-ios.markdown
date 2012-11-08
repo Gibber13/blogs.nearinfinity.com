@@ -3,11 +3,11 @@ title: Capture a Signature on iOS
 tags: ios opengl
 ---
 
-The Square Engineering Blog has a great article on [Smoother Signatures](http://corner.squareup.com/2012/07/smoother-signatures.html) for Android, but I didn't find anything on specifically about iOS. So, what is the best way to capture a users signature on an iOS device?
+The Square Engineering Blog has a great article on [Smoother Signatures](http://corner.squareup.com/2012/07/smoother-signatures.html) for Android, but I didn't find anything specifically about iOS. So, what is the best way to capture a users signature on an iOS device?
 
-Although I didn't find any articles on signature capture, there are good implementations on the App Store. My target user experience was the iPad application [Paper, by 53](http://fiftythree.com/paper). It's a drawing application with beautiful and responsive brushes.
+Although I didn't find any articles on signature capture, there are good implementations on the App Store. My target user experience was the iPad application [Paper by 53](http://fiftythree.com/paper), a drawing application with beautiful and responsive brushes.
 
-All code is available in my Github repository: [SignatureDemo](https://www.github.com/jharwig/SignatureDemo).
+All code is available in the Github repository: [SignatureDemo](https://www.github.com/jharwig/SignatureDemo).
 
 Connecting the Dots
 ===================
