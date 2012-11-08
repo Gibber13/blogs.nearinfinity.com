@@ -7,7 +7,7 @@ tags: Testing
 ---
 In general Selenium and JUnit mix very well. One of the few areas where I have had problems getting them to play well with each other is when I wanted JUnit to notify Selenium when a test failed.<br /><br />JUnit has a couple mechanisms for catching test failures but all these methods fire after the test is torn down. Since I typically shutdown Selenium in the test tearDown() method (or its @After annotated equivalent) it is too late to ask Selenium to capture a screenshot. <br /><br />My solution has been to capture a screenshot after every test instead of just trying to do it on failures or errors. <br /><br />Initially I had trouble capturing the screenshots because there is also no easy way to get JUnit to tell you which test just completed. Naturally I wanted to name the screenshots after the tests. <br /><br />Thankfully in JUnit 4.7 a set of test "rules" were added (see the <a href="https://github.com/KentBeck/junit/raw/23ffc6baf5768057e366e183e53f4dfa86fbb005/doc/ReleaseNotes4.7.txt">release notes</a>) which included a mechanism for capturing the currently executing test name.<br /><br />The code for this is below. I recommend putting this code in a test base class that all your Selenium tests can inherit.<br /><br />
 
-{% highlight text %}
+{% highlight javascript %}
 @Rule
 public TestName testName = new TestName()
 
