@@ -12,7 +12,7 @@ I was actually a little bit intimidated when we arrived and started setting up o
 
 The truth is, we don't have 2,000 pounds of awesomeness at our booth. Not even if you throw in our pop-up display and our booth babes. Our product is software, so our coolest item is a 30" Apple monitor that we borrowed from our CEO's desk on which we display the software. But we're holding our own. We have a product that people *want*. One of our first visitors took one look at Clearance Track and said to my co-worker, "you're my new best friend."
 
-<img alt="CT-booth-babes.jpg" src="http://www.nearinfinity.com/blogs/CT-booth-babes.jpg" width="360" height="268" class="mt-image-left" style="float: left; margin: 0 20px 20px 0;" />
+<img alt="CT-booth-babes.jpg" src="http://www.nearinfinity.com/blogs/caroline_wizeman/assets/CT-booth-babes.jpg" width="360" height="268" class="mt-image-left" style="float: left; margin: 0 20px 20px 0;" />
 
 We thought we would come here and meet lots of security officers from small consulting companies like Near Infinity whose security officers were overwhelmed with processing clearances. But in talking to the attendees, we're finding more government folks charged with managing the clearance data for thousands of military or other government personnel. They use JPAS, but find it insufficient to report on and manage the details of their employees' clearances. They're getting by now with Excel spreadsheets, outdated Access databases, filing cabinets, and whatever info they can remember in their heads.
 
