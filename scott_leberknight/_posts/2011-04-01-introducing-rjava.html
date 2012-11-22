@@ -14,15 +14,15 @@ tags: Java JRuby Ruby
 
 <p>As a first example, let's see how you could filter a collection in RJava to find only the even numbers from one to ten. In Ruby you'd probably write something like this:</p>
 
-{% highlight text %}
+{% highlight ruby %}
 evens = (1..10).find_all { |n| n % 2 == 0 }
 {% endhighlight %}
 
 <p>With RJava, you'd write this:</p>
 
-{% highlight text %}
-List&lt;Integer&gt; evens = new ArrayList&lt;Integer&gt;();
-for (int i = 1; i &lt;= 10; i++) {
+{% highlight java %}
+List<Integer> evens = new ArrayList<Integer>();
+for (int i = 1; i <= 10; i++) {
   if (i % 2 == 0) {
     evens.add(i);
   }

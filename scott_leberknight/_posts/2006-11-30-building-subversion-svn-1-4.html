@@ -2,15 +2,14 @@
 atom_id: tag:nic-www01,2006:/blogs//7.446 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/building_subversion_svn_1_4.html
 layout: blogs
-title: !binary |-
-  QnVpbGRpbmcgU3VidmVyc2lvbiAoU1ZOKSAxLjQuMiBvbiBNYWMgT1MgWA==
+title: Building Subversion (SVN) 1.4.2 on Mac OS X
 date: 2006-11-30 19:03:37.000000000 -05:00
 tags: macosx
 ---
-{% raw %}
 <p>Today I needed to install Subversion on my Macbook running OS X and was following <a href="http://hivelogic.com/about">Dan Benjamin's</a> excellent <a href="http://hivelogic.com/articles/2006/04/19/svn_on_os_x">instructions</a> for accomplishing this task. The main difference was that I wanted to install the latest and greatest (as of today) version of Subversion, which is 1.4.2. Dan's instructions covered 1.3.1 and a co-worker was able to install SVN just fine using those instructions and the older version. I started following the instructions, substituting 1.4.2 for 1.3.1. Everything was going nicely until the <code>configure</code>, at which point I received an error stating "no suitable apr found". The following is the full output.</p>
 
-<pre class="prettyprint">configure: Configuring Subversion 1.4.2
+{% highlight console %}
+configure: Configuring Subversion 1.4.2
 configure: creating config.nice
 checking for gcc... gcc
 checking for C compiler default output file name... a.out
@@ -62,7 +61,7 @@ getting both from SVN with:
     apr-util
 
 configure: error: no suitable apr found
-</pre>
+{% endhighlight %}
 
 <p>Oops.</p>
 
@@ -70,7 +69,8 @@ configure: error: no suitable apr found
 
 <p>One last note is that the following commands contain my username, <code>sleberkn</code>, so of course you'll need to substitute your username, or follow <a href="http://www.nearinfinity.com/blogs/page/jharwig">Jason's</a> suggestion to use <code>$HOME</code> instead. Before just trying these commands, first read Dan's entire <a href="http://hivelogic.com/articles/2006/04/19/svn_on_os_x">post</a> so you have all the prerequisites, such as setting your <code>PATH</code> correctly!</p>
 
-<pre class="prettyprint">cd ~/Desktop
+{% highlight console %}
+cd ~/Desktop
 mkdir src
 cd src
 curl -O http://subversion.tigris.org/downloads/subversion-1.4.2.tar.gz
@@ -93,17 +93,19 @@ cd subversion-1.4.2
 ./configure --prefix=/usr/local --with-openssl --with-ssl --with-zlib --with-apr=/Users/sleberkn/Desktop/src/subversion-1.4.2 --with-apr-util=/Users/sleberkn/Desktop/src/subversion-1.4.2
 make
 sudo make install
-</pre>
+{% endhighlight %}
 
 <p>Assuming all that worked, verify your installation.</p>
 
-<pre class="prettyprint">which svn
+{% highlight console %}
+which svn
 svn --version
-</pre>
+{% endhighlight %}
 
 <p>The output from the above commands should show the Subversion is installed in  <code>/usr/local/bin</code>. My output looked like this.</p>
 
-<pre class="prettyprint">nic-sleberkn:~/Desktop/src/subversion-1.4.2 sleberkn$ which svn
+{% highlight console %}
+nic-sleberkn:~/Desktop/src/subversion-1.4.2 sleberkn$ which svn
 /usr/local/bin/svn
 nic-sleberkn:~/Desktop/src/subversion-1.4.2 sleberkn$ svn --version
 svn, version 1.4.2 (r22196)
@@ -119,5 +121,4 @@ The following repository access (RA) modules are available:
   - handles 'svn' scheme
 * ra_local : Module for accessing a repository on local disk.
   - handles 'file' scheme
-</pre> 
-{% endraw %}
+{% endhighlight %} 

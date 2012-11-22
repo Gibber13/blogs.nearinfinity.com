@@ -2,50 +2,46 @@
 atom_id: tag:nic-www01,2006:/blogs//7.520 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/java_5_covariant_return_types.html
 layout: blogs
-title: !binary |-
-  SmF2YSA1IENvdmFyaWFudCBSZXR1cm4gVHlwZXMgaW4gU3RyaW5nQnVpbGRl
-  cg==
+title: Java 5 Covariant Return Types in StringBuilder
 date: 2006-07-21 02:08:41.000000000 -04:00
-tags: !binary |-
-  SmF2YQ==
+tags: Java
 ---
-{% raw %}
 <p>Recently I came across a couple of pretty interesting things in Java 5. The <code>StringBuilder</code> class was introduced in Java 5 as an unsynchronized version of the rather ubiquitous <code>StringBuffer</code> class which has been around for ages, and which the beginner Java programmer soon learns about the first time a more experienced Java developer sees his code littered with string concatentation using the '+' operator. The reason <code>StringBuilder</code> was introduced (I am guessing) is that you almost never need synchronization when building up a string, or at least I've never had multiple threads building a string at the same time! So the <code>StringBuilder</code> class is pretty much identical to <code>StringBuffer</code> except its methods are not synchronized.</p>
 
 <p>Another new feature Java 5 introduced is <a href="http://en.wikipedia.org/wiki/Covariant_return_types">covariant return types</a>, which permits an overriding method to return a more specialized type than the overriden method. Some good examples I've seen include <a href="http://java.sun.com/developer/JDCTechTips/2004/tt1201.html">this</a> and <a href="http://www.devarticles.com/c/a/Java/Whats-New-in-Java-15-Tiger/3/">this</a>. In a nutshell, suppose you want to override the <code>clone()</code> method for a <code>Person</code> class. The <code>clone()</code> method in <code>Object</code> can only return, well, <code>Object</code>. Prior to Java 5 your overridden <code>clone()</code> method in <code>Person</code> would also have to return <code>Object</code> and a cast would be required. But now you can do this:</p>
 
-<pre class="prettyprint">
+{% highlight java %}
 @Override
 protected Person clone() throws CloneNotSupportedException {
     ...
 }
-</pre>
+{% endhighlight %}
 
 <p>So now there is no cast required since the overriden <code>clone()</code> can return the type you want - <code>Person</code>. This is a nice feature in general, but the thing I came across that was more interesting was the inheritance relationship between <code>StringBuffer</code>, <code>StringBuilder</code>, and <code>AbstractStringBuilder</code>. <code>StringBuffer</code> and <code>StringBuilder</code> both extend <code>AbstractStringBuilder</code> and use covariant return types in overridden methods. For example, here are the definitions of the <code>append(String)</code> methods for these three classes:</p>
 
 <caption>AbstractStringBuilder</caption>
-<pre class="prettyprint">public AbstractStringBuilder append(String str) {
+{%highlight java %}public AbstractStringBuilder append(String str) {
     ....
 }
-</pre>
+{% endhighlight %}
 
 <caption>StringBuffer</caption>
-<pre class="prettyprint">public synchronized StringBuffer append(String str) {
+{%highlight java %}public synchronized StringBuffer append(String str) {
     ...
 }
-</pre>
+{% endhighlight %}
 
 <caption>StringBuilder</caption>
-<pre class="prettyprint">public StringBuilder append(String str) {
+{%highlight java %}public StringBuilder append(String str) {
     ...
 }
-</pre>
+{% endhighlight %}
 
 <p>So what's cool about this is that the parent class defines the <code>append()</code> method to return an object of the parent type <code>AbstractStringBuilder</code> but the subclasses overriding this method can restrict the return type so that no casts are required. <code>StringBuilder</code>'s <code>append()</code> method can return <code>StringBuilder</code> and <code>StringBuffer</code>'s <code>append()</code> method can return <code>StringBuffer</code>. I found it interesting that the methods were not marked with the <code>@Override</code> annotation - maybe that would have been a gargantuan task to retrofit all existing code using the annotation?</p>
 
 <p>But even though the covariance is cool, what was even more interesting is that <code>AbstractStringBuilder</code> is not a public class, as <a href="http://www.davidflanagan.com/blog/2004_10.html#000047">described by David Flanagan</a>. It is defined as:</p>
 
-<pre class="prettyprint">
+{%highlight java %}
 package java.lang;
 
 // imports
@@ -53,7 +49,6 @@ package java.lang;
 abstract class AbstractStringBuilder implements Appendable, CharSequence {
    ...
 }
-</pre>
+{% endhighlight %}
 
 <p>So it is actually a package-private, or default - or whatever you call it - accessible class that is not visible to code outside the package. If you read the JavaDocs, they say both <code>StringBuilder</code> and <code>StringBuffer</code> extend <code>Object</code>, not <code>AbstractStringBuilder</code>! I guess JavaDoc figures what you don't know can't hurt you, right? This is interesting because I don't think I've ever seen a case where a superclass wasn't as visible as its subclasses, and David points out this is the first time he is aware it has happened (I assume in the JDK he means). I don't know if I necessarily think this is a good design, but I suppose it is an interesting way to limit who can create subclasses of an abstract class. Normally I've always wanted to openly permit subclasses of abstract classes as that is generally the point, i.e. the abstract class provides some base functionality that subclasses then must customize and extend. But if you for whatever reason need to restrict subclassing an abstract class, this is as good a way as any I suppose.</p> 
-{% endraw %}
