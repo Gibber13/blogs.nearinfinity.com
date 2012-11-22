@@ -2,45 +2,45 @@
 atom_id: tag:nic-www01,2007:/blogs//7.599 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/using_jps_to_find_jvm.html
 layout: blogs
-title: !binary |-
-  VXNpbmcganBzIHRvIEZpbmQgSlZNIFByb2Nlc3MgSW5mb3JtYXRpb24=
+title: Using jps to Find JVM Process Information
 date: 2007-04-25 16:54:33.000000000 -04:00
-tags: !binary |-
-  SmF2YQ==
+tags: java
 ---
-{% raw %}
 <p>Recently I wrote a little Rails app that allows people to remotely start/stop/restart CruiseControl and view the output logs on my development workstation, since people don't have access to my workstation directly and from time to time we've had CruiseControl hang for some reason or another. (The shared resource that was available for running CruiseControl is totally overloaded with processes and was taking an hour to run a complete build with tests and code analysis reports while it takes about nine minutes on my machine, so we've decided to keep it on my machine!) Anyway, to control the process I needed to first find the CruiseControl process.</p>
 
 <p>The first iteration used the <code>ntprocinfo</code> tool combined with a simple <code>grep</code> to find all "java.exe" processes running on the machine. This is obviously crap since it only works consistently and correctly if CruiseControl is the only java process running. The I remembered a tool that <a href="http://www.nearinfinity.com/blogs/page/mwizeman">Matt</a> had showed me a while back to list all the JVMs running on a machine called <a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/share/jps.html">jps</a> - the <u>J</u>ava Virtual Machine <u>P</u>rocess <u>S</u>tatus Tool.</p>
 
 <p>This tool was introduced in JDK 1.5/5.0 (or whatever it's called) and lists all the instrumented JVMs currently running on localhost or a remote machine. By default (no command line options) the output shows the local VM identifier (lvmid) and a short form of the class name or JAR file that the VM was started from on the local machine. The <code>lvmid</code> is normally the operating system's process identifier for the JVM. For example:</p>
 
-<pre class="prettyprint">C:\dev\jps
+{% highlight console %}
+C:\dev\jps
 624 startup.jar
 3508 startup.jar
 3348 Jps
 2444 CruiseControlWithJetty
-</pre>
+{% endhighlight %}
 
 <p>This is just what I want since now I can do a simple <code>grep</code> on this output and find which process is the CruiseControl process, and then I can use <code>ntprocinfo</code> to kill the process. Easy.</p>
 
 <p>There are command line switches that provide more process detail such as the fully qualified class name (FQCN) or full path to the application JAR file, the arguments to the <code>main</code> method, and JVM arguments. For example, the "l" switch (a lowercase L) gives the FQCN or full path to the class or JAR:</p>
 
-<pre class="prettyprint">C:\dev\jps -l
+{% highlight console %}
+C:\dev\jps -l
 624 C:\dev\eclipse\startup.jar
 3508 C:\dev\radrails\startup.jar
 1948 sun.tools.jps.Jps
 2444 CruiseControlWithJetty
-</pre>
+{% endhighlight %}
 
 <p>Or, the "l" option combined with the "v" option lists FQCN/JAR file and the VM arguments:</p>
 
-<pre class="prettyprint">C:\dev\jps -lv
+{% highlight console %}
+C:\dev\jps -lv
 624 C:\dev\eclipse\startup.jar -Xms256M -Xmx512M
 3508 C:\dev\radrails\startup.jar
 1316 sun.tools.jps.Jps -Dapplication.home=C:\dev\java\jdk1.5.0_10 -Xms8m
 2444 CruiseControlWithJetty -Xms128m -Xmx256m -Djavax.management.builder.initial=mx4j.server.MX4JMBeanServerBuilder
-</pre>
+{% endhighlight %}
 
 <p>
 You can also list the java processes on a remote host, though that machine must have a <a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/share/jstat.html">jstatd</a> process running.
@@ -54,4 +54,3 @@ You can also list the java processes on a remote host, though that machine must 
 <p></p>
 
 <p>Oh well, nothing is forever, right? By the time thet get around to changing the output format or removing this very useful tool, we'll hopefully have obtained a decent shared build machine where CruiseControl doesn't hang up and which everyone has access to be able to fix any problems if they should arise. As to why CruiseControl hangs up sometimes, I have no idea.</p> 
-{% endraw %}

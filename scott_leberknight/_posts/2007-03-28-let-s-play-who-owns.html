@@ -2,64 +2,68 @@
 atom_id: tag:nic-www01,2007:/blogs//7.530 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/let_s_play_who_owns.html
 layout: blogs
-title: !binary |-
-  TGV0J3MgUGxheSAiV2hvIE93bnMgVGhhdCBDb2xsZWN0aW9uPyIgV2l0aCBI
-  aWJlcm5hdGU=
+title: Let's Play "Who Owns That Collection?" With Hibernate
 date: 2007-03-28 23:11:57.000000000 -04:00
-tags: !binary |-
-  SmF2YQ==
+tags: java
 ---
-{% raw %}
 <p>If you have used Hibernate and mapped a one-to-many relationship you've probably come across the "delete orphan" feature. This feature offers cascade delete of objects orphaned by code like the following:</p>
 
-<pre class="prettyprint">Preference pref = getSomePreference();
+{% highlight java %}
+Preference pref = getSomePreference();
 user.getPreferences().remove(pref);
-</pre>
+{% endhighlight %}
 
 <p>In the above code, a specific <code>Preference</code> is removed from a <code>User</code>. With the delete orphan feature, and assuming there is an active transaction associated with a session, the preference that was removed from the user is <i>automatically</i> deleted from the database when the transaction commits. This feature is pretty handy, but can be tricky if you try to write clever code in you setter methods, e.g. something like this:</p>
 
-<pre class="prettyprint">// Do not do this!
+{% highlight java %}
+// Do not do this!
 public void setPreferences(Set<preference> newPreferences) {
-    this.preferences = newPreferences == null ? new HashSet&lt;Preference>() : newPreferences;
+    this.preferences = newPreferences == null ? new HashSet<Preference>() : newPreferences;
 }
-</preference></pre>
+</preference>
+{% endhighlight %}
 
 <p>Code like the above results in a <code>HibernateException</code> with the following message if you pass <code>null</code> into <code>setPreferences</code> and try to save the user object:</p>
 
-<pre class="prettyprint">A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
-</pre>
+{% highlight java %}
+A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
+{% endhighlight %}
 
 <p>What is happening here is that Hibernate requires complete ownership of the <code>preferences</code> collection in the <code>User</code> object. If you simply set it to a new object as in the above code sample, Hibernate is unable to track changes to that collection and thus has no idea how to apply the cascading persistence to your objects! The same error will occur if you passed in a different collection, e.g.:</p>
 
-<pre class="prettyprint">user.setPreferences(new HashSet&lt;Preference>());
-</pre>
+{% highlight java %}
+user.setPreferences(new HashSet<Preference>());
+{% endhighlight %}
 
 <p>So the point is that Hibernate's delete orphan abstraction is leaking into your domain model object. This is pretty much unavoidable but is a <a href="http://www.joelonsoftware.com/articles/LeakyAbstractions.html">leaky abstraction</a> nonetheless that developers need to be aware of lest they run into the error mentioned above.</p>
 
 <p>So how can you avoid this problem? The only sure way that I know of is to make the setter method private, since passing any new collection or null results in the "owning entity" error. This way only Hibernate will use the setter method to load up user objects (it invokes the method reflectively after setting it accessible via the Reflection API). Then you could add a method <code>addPreference</code> to your code which is the public API for adding preferences. Anyone could of course use reflection to do the same thing Hibernate is doing, but then all bets are off as they are subverting your public API. For example:</p>
 
-<pre class="prettyprint">public void addPreference(Preference p) {
+{% highlight java %}
+public void addPreference(Preference p) {
     getPreferences().add(p);
     p.setUser(this);
 }
-</pre>
+{% endhighlight %}
 
 <p>This has the nice side effect of establishing the bi-directional relationship between user and preference, assuming your model allows bi-directional navigation. You could also add a null check if you are paranoid. Removing a preference from a user is equally simple. You can write a helper method <code>removePreference</code> or you could call the getter and then call remove as shown here:</p>
 
-<pre class="prettyprint">user.getPreferences().remove(aPref);
-</pre>
+{% highlight java %}
+user.getPreferences().remove(aPref);
+{% endhighlight %}
 
 <p>Essentially, you can operate on the collection returned by <code>getPreferences</code> as a normal Java collection and Hibernate will do the right thing. Since you are operating on the collection maintained and observed by Hibernate, it is able to track your changes, whereas replacing the collection wholesale makes Hibernate really mad, since it believes it is the sole proprietor of the collection, not you! For example, if you want to remove all the user's preferences you could write the following:</p>
 
-<pre class="prettyprint">user.getPreferences().clear();
-</pre>
+{% highlight java %}
+user.getPreferences().clear();
+{% endhighlight %}
 
 <p>Note that all the above discussion refers to one-to-many relationships that specify the delete orphan cascade type; usually you will specify both "all" and "delete-orphan." In cases where you are only using the "all" cascade option, the semantics are quite different. Assuming the normal case where the "many" side of the relationship owns the relationship -- i.e. you used <code>inverse="true"</code> in your mapping file or <code>@OneToMany(mappedBy = "user")</code> if using annotations - then you must explicitly delete the child objects as Hibernate will only track that side of the relationship. For example, if cascade is "all" and you remove a preference from a user and then save the user, nothing happens! You would need to explicitly delete the preference object, as shown here:</p>
 
-<pre class="prettyprint">// Assume only using cascade="all" and an inverse="true" mapping in User.hbm.xml
+{% highlight java %}
+// Assume only using cascade="all" and an inverse="true" mapping in User.hbm.xml
 user.getPreferences().remove(aPref);  // does not cause database delete
 session.delete(aPref);                // this causes the database deletion
-</pre>
+{% endhighlight %}
 
 <p>One last thing to note in the above is that you <i>must</i> remove <code>aPref</code> from the user, or else Hibernate will throw an exception stating that the preference would be re-saved upon cascade! So if the <code>User</code> object is in the <code>Session</code>, remember you need to undo <i>both</i> sides of the relationship for things to work properly.</p> 
-{% endraw %}
