@@ -4,7 +4,7 @@ permalink: /blogs/scott_leberknight/just_how_does_spring_do.html
 layout: blogs
 title: Just How Does Spring Do Its Classpath Component Scanning Magic?
 date: 2008-06-23 17:56:46.000000000 -04:00
-tags: java
+tags: java spring
 ---
 <p>One really cool feature in Spring 2.5+ is classpath component scanning. For example, instead of manually defining and wiring up all the beans comprising your Spring-based application, you simply add a few "driver" snippets of XML to your application context configuration, and then annotate your component classes with @Component (or any specialization such as @Controller and @Service). I am calling the XML snippets a "driver" because all they do is enable a specific feature, such as classpath scanning or component autowiring:</p>
 
@@ -32,7 +32,7 @@ for (BeanDefinition component : components) {
 
 <p>Running this code (using the PetClinic sample application shipped with Spring), you get the following output:</p>
 
-{% highlight text %}
+{% highlight console %}
 Component: org.springframework.samples.petclinic.hibernate.HibernateClinic
 Component: org.springframework.samples.petclinic.jdbc.SimpleJdbcClinic
 Component: org.springframework.samples.petclinic.jpa.EntityManagerClinic
