@@ -2,13 +2,10 @@
 atom_id: tag:nic-www01,2007:/blogs//7.473 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/dirt_simple_mocks_in_groovy.html
 layout: blogs
-title: !binary |-
-  RGlydCBTaW1wbGUgTW9jayBPYmplY3RzIEluIEdyb292eQ==
+title: Dirt Simple Mock Objects In Groovy
 date: 2007-05-31 01:21:29.000000000 -04:00
-tags: !binary |-
-  R3Jvb3Z5IFRlc3Rpbmc=
+tags: groovy testing
 ---
-{% raw %}
 <p>I've just started on a new project and of course we want to ensure all, and I really mean all, our code is tested. Now, this being a Java project many people assume 80% is pretty good and that getting upwards of 90% coverage and beyond takes a superhuman effort. In the past I would have agreed. Now that I am learning Groovy, however, I no longer agree and now think it is not only possible to get above 90% coverage and close to 100%, but quite easy.</p>
 
 <p>First some background on why normally 80% is acceptable. Well, it is simply that Java is not very flexible when it comes to mocking certain types of objects. For example, try mocking a standard JDK class that is marked as <code>final</code> and making it do your bidding. Not easy. It <i>is</i> easy to mock classes that implement an interface and even non-final classes using things like <a href="http://www.jmock.org/">jMock</a> and <a href="http://www.easymock.org/">EasyMock</a>.</p>
@@ -19,7 +16,8 @@ tags: !binary |-
 
 <p>Enter Groovy. I am a total beginner at Groovy having only attended some sessions at various conferences like <a href="http://www.nofluffjuststuff.com/">No Fluff Just Stuff</a> and <a href="http://java.sun.com/javaone/">JavaOne</a>, a little tinkering with the Groovy shell, and having purchased <a href="http://www.manning.com/koenig/">Groovy in Action</a>. Within an hour or so of tinkering I was able to produce an <code>IllegalAccessException</code> from a mocked <code>Field</code> using Groovy. The following code is probably crap (again being a Groovy newbie) but is ridiculously simple and readable nonetheless:</p>
 
-<pre class="prettyprint">import groovy.mock.interceptor.MockFor
+{% highlight groovy %}
+import groovy.mock.interceptor.MockFor
 import java.lang.reflect.Field
 
 class SimpleUnitTest extends GroovyTestCase {
@@ -41,7 +39,7 @@ class SimpleUnitTest extends GroovyTestCase {
 class MyBean {	
     def name = "hello, groovy"
 }
-</pre>
+{% endhighlight %}
 
 <p>That's it. It is ridiculous how easy Groovy makes mocking any object. The steps are basically:</p>
 <ol>
@@ -51,4 +49,3 @@ class MyBean {
 </ol>
 
 <p>Developers used to the power of dynamic languages like Ruby of course won't think too much of this as it is even simpler to create mocks, but this is something new for Java developers. Now there is really almost no reason why you can't test literally all of your Java code, and more importantly, do it very easily.</p> 
-{% endraw %}
