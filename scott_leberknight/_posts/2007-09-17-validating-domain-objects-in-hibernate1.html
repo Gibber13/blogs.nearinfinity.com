@@ -2,55 +2,54 @@
 atom_id: tag:nic-www01,2007:/blogs//7.604 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/validating_domain_objects_in_hibernate1.html
 layout: blogs
-title: !binary |-
-  VmFsaWRhdGluZyBEb21haW4gT2JqZWN0cyBpbiBIaWJlcm5hdGUgUGFydCAy
-  OiBFbmFibGluZyBWYWxpZGF0aW9u
+title: "Validating Domain Objects in Hibernate Part 2: Enabling Validation"
 date: 2007-09-17 12:56:52.000000000 -04:00
-tags: !binary |-
-  SmF2YQ==
+tags: java hibernate
 ---
-{% raw %}
 <p>This is the second in a series of short blogs describing how the Hibernate Validator allows you to define validation rules directly on domain objects where it belongs. In the <a href="http://www.nearinfinity.com/blogs/page/sleberkn?entry=validating_domain_objects_in_hibernate">first article</a> I introduced the Hibernate Validator and showed a simple example of annotating a domain object. In this article I'll show you how to enable <i>event-based</i> validation, meaning when an event like a save or update occurs, Hibernate will automatically validate the objects being saved and throw an exception if any of them are invalid. I'll also show how you can <i>manually</i> validate objects using the <a href="http://www.hibernate.org/hib_docs/validator/api/">validator API</a>.</p>
 
 <p>Prior to Hibernate Core version 3.2.4 (or around thereabouts) enabling event-based validation required explicit configuration. In plain Hibernate (i.e. standalone) you configure event-based validation like this:</p>
 
-<pre class="prettyprint">&lt;!-- Plain Hibernate Configuration File (e.g. hibernate.cfg.xml) -->
-&lt;hibernate-configuration>
-  &lt;session-factory>
-    &lt;!-- other configuration -->
-    &lt;event type="pre-update">
-      &lt;listener class="org.hibernate.validator.event.ValidateEventListener"/>
-    &lt;/event>
-    &lt;event type="pre-insert">
-      &lt;listener class="org.hibernate.validator.event.ValidateEventListener"/>
-    &lt;/event>
-  &lt;/session-factory>
-&lt;/hibernate-configuration>
-</pre>
+{% highlight xml %}
+<!-- Plain Hibernate Configuration File (e.g. hibernate.cfg.xml) -->
+<hibernate-configuration>
+  <session-factory>
+    <!-- other configuration -->
+    <event type="pre-update">
+      <listener class="org.hibernate.validator.event.ValidateEventListener"/>
+    </event>
+    <event type="pre-insert">
+      <listener class="org.hibernate.validator.event.ValidateEventListener"/>
+    </event>
+  </session-factory>
+</hibernate-configuration>
+{% endhighlight %}
 
 <p>Since many people use Hibernate in a Spring environment, you would add the following to the <code>AnnotationSessionFactoryBean</code> in your Spring application context file:</p>
 
-<pre class="prettyprint">&lt;!-- Spring-based configuration (e.g. applicationContext-hibernate.xml) -->
-&lt;bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
-  &lt;!-- other configuration -->
-  &lt;property name="eventListeners">
-    &lt;map>
-      &lt;entry key="pre-update">
-        &lt;bean class="org.hibernate.validator.event.ValidateEventListener"/>
-      &lt;/entry>
-      &lt;entry key="pre-insert">
-        &lt;bean class="org.hibernate.validator.event.ValidateEventListener"/>
-      &lt;/entry>
-    &lt;/map>
-  &lt;/property>
-&lt;/bean>
-</pre>
+{% highlight xml %}
+<!-- Spring-based configuration (e.g. applicationContext-hibernate.xml) -->
+<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+  <!-- other configuration -->
+  <property name="eventListeners">
+    <map>
+      <entry key="pre-update">
+        <bean class="org.hibernate.validator.event.ValidateEventListener"/>
+      </entry>
+      <entry key="pre-insert">
+        <bean class="org.hibernate.validator.event.ValidateEventListener"/>
+      </entry>
+    </map>
+  </property>
+</bean>
+{% endhighlight %}
 
 <p>So basically all you are doing is configuring the <code>ValidateEventListener</code> event listener class to fire on "pre-update" and "pre-insert" events. So at runtime Hibernate will validate annotated domain objects <i>before</i> inserting or updating anything in the database. There is nothing particularly special here. Hibernate provides a ton of hook points into the various Hibernate events such as save, update, delete, persist, etc. via a listener model, and the Hibernate Validator simply hooks into this mechanism. Note that you need the Hibernate Validator JAR file in your CLASSPATH as it is not part of the core distribution.</p>
 
 <p>As of Hibernate Core 3.2.4 (or somewhere around that version since I can't seem to find it in the release notes anywhere), Hibernate tries to help you out by <i>auto-registering</i> the <code>ValidateEventListener</code> if it is present in the CLASSPATH. Take a look at the following code snippet from the Hibernate <code>AnnotationConfiguration</code> class' <code>buildSessionFactory()</code> method:</p>
 
-<pre class="prettyprint">// From org.hibernate.cfg.AnnotationConfiguration
+{% highlight java %}
+// From org.hibernate.cfg.AnnotationConfiguration
 public SessionFactory buildSessionFactory() throws HibernateException {
     // ...
     // ...add validator events if the jar is available...
@@ -72,7 +71,7 @@ public SessionFactory buildSessionFactory() throws HibernateException {
     
     // ...rest of method... 
 }
-</pre>  
+{% endhighlight %}  
 
 <p>The salient points of the above code are:</p>
 
@@ -84,7 +83,8 @@ public SessionFactory buildSessionFactory() throws HibernateException {
 
 <p>Regardless of <i>how</i> the configuratio has occurred, once configured everything works exactly the same. So now if you had code that saved a domain object you could catch an <code>InvalidStateException</code> in your code, which is the type of exception Hibernate Validator throws when validation fails. For example, you could write:</p>
 
-<pre class="prettyprint">List&lt;String> allErrors = new ArrayList&lt;String>();
+{% highlight java %}
+List<String> allErrors = new ArrayList<String>();
 try {
     session.save(user);
 }
@@ -94,19 +94,19 @@ catch (InvalidStateException ex) {
     }
     // clean up...
 }
-</pre>
+{% endhighlight %}
 
 <p>That's pretty much it. You catch an <code>InvalidStateException</code> and from that exception you can get an array of <code>InvalidValue</code> objects. Each <code>InvalidValue</code> object contains the property name on which the validation error occurred, and a message such as "is required" or "is not a well-formed email address." The messages come from (by default) a standard Java resource bundle named <code>ValidatorMessages.properties</code> so the validation messages are fully internationalized depending on the locale. The property names will be the JavaBean property name, for example "firstName" so you probably need an extra translation step to convert the Java property notation to a human-readable one. In the example above I have a method named <code>humanize</code> that presumably translates "firstName" to "First Name" assuming a US locale.</p>
 
 <p>Last, what if you want to manually validate an object? It is also very simple. The following code shows how to do it:</p>
 
-<pre class="prettyprint">User user = getUserById(id);  // get object to validate somehow...
+{% highlight java %}
+User user = getUserById(id);  // get object to validate somehow...
 
-ClassValidator&lt;User> validator = new ClassValidator&lt;User>(User.class);
+ClassValidator<User> validator = new ClassValidator<User>(User.class);
 InvalidValue[] errors = validator.getInvalidValues(user);
-</pre>
+{% endhighlight %}
 
 <p>Pretty simple. This allows you to validate domain objects <i>before</i> sending them to Hibernate to be persisted, which might be beneficial in certain cases. For example, you might want to perform validation in a service layer manually before sending objects to a data access tier which interacts with Hibernate. The one big difference is that event-based validation automatically validates parent and child objects (i.e. the object graph being saved) whereas the manual validation does not unless you annotate the child collection with <code>@Valid</code>.</p>
 
 <p>In this article I've shown how to enable the Hibernate Validator and how to use event-based and manual validation of domain objects. In the next article I'll show you how to create your own validators in case you need more than the ones Hibernate Validator provides out of the box.</p> 
-{% endraw %}

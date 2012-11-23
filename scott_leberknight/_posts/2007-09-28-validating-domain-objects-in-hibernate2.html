@@ -2,19 +2,16 @@
 atom_id: tag:nic-www01,2007:/blogs//7.605 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/validating_domain_objects_in_hibernate2.html
 layout: blogs
-title: !binary |-
-  VmFsaWRhdGluZyBEb21haW4gT2JqZWN0cyBpbiBIaWJlcm5hdGUgUGFydCAz
-  OiBDcmVhdGluZyBZb3VyIE93biBWYWxpZGF0b3I=
+title: "Validating Domain Objects in Hibernate Part 3: Creating Your Own Validator"
 date: 2007-09-28 00:25:42.000000000 -04:00
-tags: !binary |-
-  SmF2YQ==
+tags: java hibernate
 ---
-{% raw %}
 <p>This is the third in a series of short blogs describing how the Hibernate Validator allows you to define validation rules directly on domain objects where it belongs. In the <a href="http://www.nearinfinity.com/blogs/page/sleberkn?entry=validating_domain_objects_in_hibernate1">second article</a> I showed how to configure the Hibernate Validator and showed event-based and manual validation of domain objects. Here I'll show you how to create your own validators.</p>
 
 <p>The most common use case is validation of individual properties on your domain objects. For example, is a property required; does it need to match a specific pattern; must it have a minimum and maximum length; or must it be a valid credit card number? Hibernate Validator makes creating validators for specific properties easy. In addition to property-specific validators, you can also write class-level validators. For example, maybe you allow certain fields to be blank, but if one of them is entered, then several others are required as well. You annotate property-level validators on properties (i.e. getter methods) and class-level validators on your domain object itself. Here's a short example showing both types of validator:</p>
 
-<pre class="prettyprint">@Entity
+{% highlight java %}
+@Entity
 @UserNameConfirmation
 public class User extends BaseEntity {
     
@@ -48,7 +45,7 @@ public class User extends BaseEntity {
     public String getSsn() { return ssn; }
     public void setSsn(String ssn) { this.ssn = ssn; }
 }
-</pre>
+{% endhighlight %}
 
 <p>In the above example, there is a <code>UserNameConfirmation</code> annotation at the class level. This applies a validator that ensures a user name and a confirmation user name match, but only if the confirmation user name is supplied. There are also several property-level validators being applied: <code>Email</code>, <code>Required</code>, <code>Length</code>, and <code>Pattern</code>. I've also marked the <code>userNameConfirmation</code> property as transient with the <code>@Transient</code> annotation, since this is not actually a persistent property and we want Hibernate to ignore it during persistence operations; it is used only for validation purposes.</p>
 
@@ -61,7 +58,8 @@ public class User extends BaseEntity {
 
 <p>Without further ado, here is the <code>@Required</code> annotation definition:</p>
 
-<pre class="prettyprint">package com.nearinfinity.hibernate.validator;
+{% highlight java %}
+package com.nearinfinity.hibernate.validator;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
@@ -87,7 +85,7 @@ public @interface Required {
     String message() default "{validator.required}";
 
 }
-</pre>
+{% endhighlight %}
 
 <p>The important things in this code are:</p>
 
@@ -100,7 +98,8 @@ public @interface Required {
 
 <p>If there are additional parameters you need for your own validator, you can specify them in your annotation. For example, the Hibernate <code>@Length</code> validation annotation specifies a min and a max, like this:</p>
 
-<pre class="prettyprint">@Documented
+{% highlight java %}
+@Documented
 @ValidatorClass(LengthValidator.class)
 @Target({METHOD, FIELD})
 @Retention(RUNTIME)
@@ -111,11 +110,12 @@ public @interface Length {
 
     String message() default "{validator.length}";
 }
-</pre>
+{% endhighlight %}
 
 <p>Now that we've defined the <code>@Required</code> validator annotation, we implement the actual validator class:</p>
 
-<pre class="prettyprint">public class RequiredValidator implements Validator&lt;Required>, Serializable {
+{% highlight java %}
+public class RequiredValidator implements Validator<Required>, Serializable {
 
     public void initialize(Required parameters) {
         // nothing to initialize
@@ -135,7 +135,7 @@ public @interface Length {
         return true;
     }
 }
-</pre>
+{% endhighlight %}
 
 <p>The important points in the validator implementation class are:</p>
 
@@ -147,4 +147,3 @@ public @interface Length {
 <p>The <code>Validator</code> interface is very simple consisting of only two methods: <code>initialize</code> and <code>isValid</code>. The <code>initialize</code> method allows  custom initialization, for example you can initialize parameters defined in your validation annotation such as the "min" and "max" in the Hibernate <code>@Length</code> annotation. The <code>isValid</code> method does the real work and validates the object supplied as an argument. That's pretty much it. Implementing class-level validators like the <code>@UserNameConfirmation</code> annotation I showed in an earlier example works exactly the same way. About the only difference is that you probably will restrict the annotation to types, i.e. classes using <code>@Target({ TYPE })</code>. Now, all that's left is to annotate your domain objects!</p>
 
 <p>In the next article I'll explain my earlier statement that I don't use the <code>@NotNull</code> or <code>@NotEmpty</code> annotations in my domain objects.</p> 
-{% endraw %}
