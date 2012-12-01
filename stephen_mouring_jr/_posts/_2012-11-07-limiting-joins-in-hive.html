@@ -3,12 +3,21 @@ title: Limiting Joins in Apache Hive
 tags:  hive hadoop mapreduce bigdata
 ---
 
-Working with large datasets in Hadoop / Hive works very well up until you have an "imbalanced" join. If you are trying to join two tables together where a large amount of data in one table joins to just a few keys in the other table, individual reducers will get overloaded and slow your job down to the point where it may never finish.<br/><br/>
-
-There are several ways to tackle this problem. Sometimes you can solve this by improving the quality of your data or filtering it with a where clause. Sometimes you can modify the join condition to include additional constraints that force the data to be better partitioned. You could try using Hive's support for "skew" joins where Hive handles dividing up the data landing on the same key, running it on separate reducers then merging the results. But sometimes none of these options are feasible or desirable. So what are your alternatives?
+Working with large datasets in Hadoop / Hive works is difficult when you have an "imbalanced" join. If you are trying to join two tables together where a large amount of data in one table joins to just a few keys in the other table, individual reducers will get overloaded and slow your job down to the point where it may never finish. This is referred to in Hive as a skew join.
 <br/><br/>
 
-One common case I have seen is where you have a null or blank key. Whenever you have a query in which all the reducers complete very quick except for one, you are often in this situation. You can tell especially when it is the zero reducer (the reducer id is 000000), because that is the reducer that null or blank keys are hashed to by Map Reduce by default.
+There are several ways to tackle this problem. If you have the ability to improve the quality of your data and fill in the blank values that is awesome, but that seldom is the case in the real world. You could also try to modify the join condition to include additional constraints that cause the data to be better partitioned, but again that is not likely to be the case in your problem domain.
+<br/><br/>
+
+Hive does claim to provide support some support for handling skew joins where it automatically divides up the data landing on the same key, runs it on separate reducers, then merges the results... Good luck with that.
+<br/><br/>
+
+So what are your alternatives?
+<br/><br/>
+
+A common cause of a skew join is when your data has a lot of null or blank keys. Whenever you see all the reducers except one complete very quickly you are often in this situation. You can verify that it is a null or blank key if the slow reducer has a reducer id of 0.<br/><br/>
+
+Map Reduce hashes each key to a number to determine which reducer it should land on (and ensure that all data with the same key lands on the same reducer!) A null or blank value is hashed to 0.
 <br/><br/>
 
 Sometimes you can just ignore these records in the join:
@@ -23,7 +32,7 @@ join
    bar on foo.bar_id = bar.id and foo.bar_id is not null
 {% endhighlight %}<br /><br />
 
-This does not always work because sometimes you need to keep the records with the null ids in the query, especially if you have nested joins. So you can do something like this:
+This does not always work because sometimes you need to keep the records with the null ids in the query, especially when you are nesting joins. So instead you can do something like this:
 <br/><br/>
 
 {% highlight sql %}
@@ -48,13 +57,16 @@ where
    f.bar_id is null
 {% endhighlight %}<br /><br />
 
-(Note: It would be tempting to use a left outer join here, but the problem is all the records in "foo" that have a null "bar_id" would still land on the same reducer, even though they do not join to anything.)</i>
+(Note: It would be tempting to use a left outer join here, but the problem is all the records in "foo" that have a null "bar_id" would still land on the same reducer, even though they do not join to anything.)
 <br/><br/>
 
-This is all well and good for blank and null keys... But what about cases where you legitimately have extreme distributions of data?
+Handling blank or null keys is easier because they are easy to filter. What about cases where you legitimately have extreme distributions of data?
 <br/><br/>
 
-I recently encountered an example in a dataset where less than 1% of the records in one table (Table A) joined to 50% of the records in another (Table B). The amount of data returned by the top 1% in Table A was so great our webservice could not handle returning it to the client. So we decided to prune the top 1% of Table A and only keep the remaining 99% of the records.
+I recently encountered an example in a dataset where less than 1% of the records in one table (Table A) joined to 50% of the records in another (Table B). And Table A had millions and millions of records, so I could not explicitly filter out the wayward 1% of records.
+<br/><br/>
+
+The amount of data returned by the top 1% in Table A was so great our webservice could not handle returning it to the client. So we decided to actually prune the top 1% of Table A and only keep the remaining 99% of the records.
 <br/><br/>
 
 My first attempt went something like this:
@@ -79,12 +91,12 @@ join (
 ) barJoin on f.bar_id = barJoin.id and barJoin.barCount < 1000
 {% endhighlight %}<br /><br />
 
-A little complex at first, but the basic approach was to get a count of how many "bar" records there are per id value (that is the inner join). Then when you join foo and bar, you can filter based on the count.
+A little complex, but the basic approach was to get a count of how many "bar" records there are per bar "id" value (that is what the inner join is doing). Then when you join foo and bar in the outer join, you can filter based on the count.
 <br/><br/>
 
-But there is a problem. Hive does not allow non equality conditions in joins! So the "barCount &lt; 1000" is silently ignored by hive. Bummer.<br /><br />
+But there is a problem. Hive does not allow non equality conditions in joins! It silently ignores them. Yes, you read that correctly. It SILENTLY ignores them. Bummer.<br /><br />
 
-Thankfully there are two alternatives. The next simplest thing to do is this:
+After some experimentation I found two options. The next alternative thing to do is this:<br/><br/>
 
 {% highlight sql %}
 select
@@ -104,10 +116,10 @@ join (
 ) barJoin on f.bar_id = barJoin.id
 {% endhighlight %}<br /><br />
 
-Note that I removed the condition in the join clause and added a having clause to the inner join. This whittles down the invalid "bar" ids before they join, which then also removes the bad keys from "foo" as well.
+I removed the condition in the join clause and added a having clause to the inner join. This whittles down the invalid "bar" ids before they join, which then also removes the bad keys from "foo" as well.
 <br /><br />
 
-A good solution, but what if you want to preserve the bad keys in "foo" but just omit the joined data from "bar"?
+A good solution if you are all right with throwing away the bad keys from the "foo" table. But what if you want to preserve those "foo" but just omit the joined data from the "bar" table?
 <br /><br />
 
 {% highlight sql %}
@@ -127,9 +139,10 @@ join (
       select id, count(*) as barCount from bar group by id
    ) bc on b.id = bc.id
 ) barJoin on f.bar_id = barJoin.id and barJoin.prune = 'N'
-{% endhighlight %}<br /><br />
+{% endhighlight %}
+<br /><br />
 
-I removed the having clause, but added an "if" statement to the inner select to create a flag indicating whether or not the joined data should be preserved. The outer join condition can now use the state of the "prune" flag (which is an equality operation!) to select which records should join.
+I removed the having clause, but added an "if" statement to the inner select to create a flag indicating whether or not the joined data should be preserved. The outer join condition can now use the state of the "prune" flag (which is an equality operation!) to select which records should join. In this situation all the keys from foo are preserved, but they only join to bar records if we decided the bar records are small enough.
 <br /><br />
 
 Please comment with any questions or additional thoughts!
