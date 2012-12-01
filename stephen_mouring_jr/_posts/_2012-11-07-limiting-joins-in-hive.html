@@ -3,12 +3,12 @@ title: Limiting Joins in Apache Hive
 tags:  hive hadoop mapreduce bigdata
 ---
 
-Working with large datasets in Hadoop / Hive works very well up until you have an "imbalanced" join. If you are trying to join two large tables together where a large amount of data in one table joins to a one or a few keys in the other table, individual reducers will get overloaded and slow your job down to the point where it may never finish.<br/><br/>
+Working with large datasets in Hadoop / Hive works very well up until you have an "imbalanced" join. If you are trying to join two tables together where a large amount of data in one table joins to just a few keys in the other table, individual reducers will get overloaded and slow your job down to the point where it may never finish.<br/><br/>
 
-There are several ways to tackle this problem. Sometimes you can solve this by improving the quality of your data or filtering it with a where clause. Sometimes you can modify the join condition to include additional constraints that force the data to be better partitioned. Or you could try using Hive's support for "skew" joins where Hive handles dividing up the data landing on the same key, running it on separate reducers then merging the results. Sometimes none of these options are feasible or desirable. So what are your alternatives?
+There are several ways to tackle this problem. Sometimes you can solve this by improving the quality of your data or filtering it with a where clause. Sometimes you can modify the join condition to include additional constraints that force the data to be better partitioned. You could try using Hive's support for "skew" joins where Hive handles dividing up the data landing on the same key, running it on separate reducers then merging the results. But sometimes none of these options are feasible or desirable. So what are your alternatives?
 <br/><br/>
 
-One common case I have seen is where you have a null or blank key. Whenever you have a query in which all the reducers complete very quick except for one, you are often in this situation. You can tell especially when it is the zero reducer (the reducer is is 000000), because that is the reducer that null or blank keys are hashed to by Map Reduce by default.
+One common case I have seen is where you have a null or blank key. Whenever you have a query in which all the reducers complete very quick except for one, you are often in this situation. You can tell especially when it is the zero reducer (the reducer id is 000000), because that is the reducer that null or blank keys are hashed to by Map Reduce by default.
 <br/><br/>
 
 Sometimes you can just ignore these records in the join:
@@ -82,7 +82,7 @@ join (
 A little complex at first, but the basic approach was to get a count of how many "bar" records there are per id value (that is the inner join). Then when you join foo and bar, you can filter based on the count.
 <br/><br/>
 
-<b>PROBLEM!</b> Hive does not allow <i>non equality</i> conditions in joins. So the "barCount &lt; 1000" is <b>silently ignored by hive</b>. Bummer.<br /><br />
+But there is a problem. Hive does not allow non equality conditions in joins! So the "barCount &lt; 1000" is silently ignored by hive. Bummer.<br /><br />
 
 Thankfully there are two alternatives. The next simplest thing to do is this:
 
@@ -104,10 +104,10 @@ join (
 ) barJoin on f.bar_id = barJoin.id
 {% endhighlight %}<br /><br />
 
-Note that I removed the conditional in the join clause and added a having clause to the inner join. This whittles down the invalid "bar" ids before they join, which removes the bad keys from "foo" as well.
+Note that I removed the condition in the join clause and added a having clause to the inner join. This whittles down the invalid "bar" ids before they join, which then also removes the bad keys from "foo" as well.
 <br /><br />
 
-A good solution, but what if you want to preserve the bad keys in "foo" but just omitted the joined data?
+A good solution, but what if you want to preserve the bad keys in "foo" but just omit the joined data from "bar"?
 <br /><br />
 
 {% highlight sql %}
