@@ -1,7 +1,8 @@
---- 
+---
 title: "Better Error Reporting for Linux Scripts"
 tags: Linux Reporting
 ---
+
 Recently I have been writing a lot of bash shell scripts to orchestrate hierarchies of jobs running on a batch processing cluster. I ran into several times where, in the middle of a complex script, a single step would fail. Instead of terminating, the shell script would continue executing, causing a cascade of confusing errors in subsequent steps.
 
 Incidentally, many of these failures were due to typos I had made in shell script variable names. By default if the shell sees a variable that is not bound it resolves it to a blank string instead of throwing an error, which can cause havoc if that value is required for a step or later steps to execute correctly.
