@@ -1,0 +1,19 @@
+---
+title: Your Bash scripts. Your Bash scripts on cron.
+tags:  bash linux unix shell
+---
+
+On my project we use a lot of Bash scripts to orchestrate MapReduce jobs. We have several of our scripts scheduled on cron to run at various time during the day.
+<br/><br/>
+
+<BETTER FOR A BLOG POST ABOUT USING GIT TO WORK ON SHELL SCRIPTS?>
+
+Running a bash script on cron exhibits different behavior than when you run the same script from a local directory. As with all Bash scripts, all relative paths in your script are evaluated <b>from the local you execute the script</b> not from the directory the script resides in. When a script runs on cron, its relative path context is the system root directory. So say if you try to execute a second bash script from the script you have running on cron you need to either use absolute paths (annoying and fragile) or
+<br/><br/>
+
+To mitigate this you can extract the path of the directory
+<br/><br/>
+
+{% highlight sh %}
+
+{% endhighlight %}<br /><br />

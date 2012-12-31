@@ -1,0 +1,18 @@
+---
+title: Writing Hive tables from MapReduce
+tags:  hive hdfs mapreduce bigdata
+---
+
+Hive is an awesome tool that integrates with HDFS and MapReduce by providing a SQL syntax and schema layer on top of HDFS files. This allows you to treat those files and their data like SQL tables and columns. You can run SQL queries against HDFS files or create new files by runnig SQL inserts.
+<br/><br/>
+
+Hive translates the SQL queries into a series of MapReduce jobs that emulate that query's behavior. While Hive is very useful, it is not always efficient (or even possible) to represent your business logic as a Hive query. Like SQL, Hive is sometimes limited in what it can do.
+<br/><br/>
+
+So this leaves you with the option of writing your own MapReduce job to perform the business logic you want in an efficient manner. But what if you want to have your data in a form that Hive can understand so you can conveniently query it in the future?
+<br/><br/>
+
+Add partitioning trick.
+
+{% highlight sql %}
+{% endhighlight %}<br /><br />
