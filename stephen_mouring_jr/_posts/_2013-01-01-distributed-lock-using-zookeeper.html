@@ -3,8 +3,124 @@ title: Distributed Lock using Zookeeper
 tags:  java concurrency zookeeper bigdata
 ---
 
-
+On my project we have a lot of software components that run concurrently, some on a cron, and some as part of our build process. Many of these components need to mutate data in our data store and have the possibility of conflicting with one another. What is worse is that many of these processes run on separate machines making language level or even file system level synchronization impossible.
 <br/><br/>
 
-{% highlight sql %}
-{% endhighlight %}<br /><br />
+Zookeeper is a natural solution to the problem. It is a distributed system for, among other things, managing coordination across a cluster of machines. Zookeeper manages information as a hierarchy system of "nodes" (much like a file system). Each node can contain data or can contain child nodes.
+<br/><br/>
+
+Zookeeper supports several types of nodes. A node can be either
+"ephemeral" or "persistent" meaning it is either deleted when the process that created it ends or it remains until manually deleted. A node can also be "sequential" meaning each time a node is created with a given name, a sequence number is postfixed to that name. This allows you to create a series of ordered nodes with the same name.
+<br/><br/>
+
+So back to our problem. We need to have a locking mechanism that works across proceses and across machines that allows one holder of the lock to execute at a given time. Provided below is the Java code to do this, followed by a detailed explanation:
+<br/><br/>
+
+{% highlight java %}
+public class DistributedLock {
+
+  private final ZooKeeper zk;
+  private final String lockBasePath;
+  private final String lockName;
+
+  private String lockPath;
+
+  public DistributedLock(ZooKeeper zk, String lockBasePath, String lockName) {
+    this.zk = zk;
+    this.lockBasePath = lockBasePath;
+  	this.lockName = lockName;
+  }
+
+  public void lock() throws IOException {
+  	try {
+	  // lockPath will be different than (lockBasePath + "/" + lockName) becuase of the sequence number ZooKeeper appends
+	  lockPath = zk.create(lockBasePath + "/" + lockName, null, Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
+
+	  final Object lock = new Object();
+
+	  synchronized(lock) {
+	    while(true) {
+          List<String> nodes = zk.getChildren(lockBasePath, new Watch() {
+            @Override
+            public void process(WatchedEvent event) {
+              synchronized (lock) {
+                lock.notifyAll();
+              }
+            }
+          });
+          Collections.sort(nodes); // ZooKeeper node names can be sorted lexographically
+          if (lockPath.endsWith(nodes.get(0)) {
+            return;
+          } else {
+            lock.wait();
+          }
+        }
+      }
+    } catch (KeeperException e) {
+      throw new IOException (e);
+    } catch (InterruptedException e) {
+      throw new IOException (e);
+    }
+  }
+
+  public void unlock() throws IOException {
+	try {
+	  zk.delete(lockPath, -1);
+	  lockPath = null;
+	} catch (KeeperException e) {
+	  throw new IOException (e);
+	} catch (InterruptedException e) {
+	  throw new IOException (e);
+	}
+  }
+}
+{% endhighlight %}
+<br /><br />
+
+(Disclaimer: Credit for this code goes to Aaron McCurry for developing the core mechanism of this lock as well as the design for using ZooKeeper. Kudos to Aaron!)
+<br /><br />
+
+\Each process that wants to use the lock should instantiate an object of the DistributedLock class. The DistributedLock constructor takes three parameters. The first parameter is a reference to the ZooKeeper client. The second parameter is the "base path" that you want this lock to reside in. Remember that ZooKeeper stores its nodes like a file system, so think of this base path as the directory you want your lock nodes created in. The third parameter is the name of the lock to use. Note you should use the same lock name for each process that you want to share the same lock. The lock name does not (and should not!) be unique. It is the common reference that multiple processes lock against. Think of it as the key to your lock.
+<br /><br />
+
+Note: This class can support multiple locks if you use a different lock name for each lock. So if you have two data stores and you want some processes to lock when accessing one data store and other processes to lock when accessing the other data source, you could create two locks, each one with a different lock name.
+<br /><br />
+
+Once your process has created a DistributedLock object it can then call the lock() method to attempt to acquire the lock. The lock() method will block until the lock is acquired.
+<br /><br />
+
+{% highlight java %}
+  // lockPath will be different than (lockBasePath + "/" + lockName) becuase of the sequence number ZooKeeper appends
+  lockPath = zk.create(lockBasePath + "/" + lockName, null, Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
+
+{% endhighlight %}
+<br /><br />
+
+First of all, the lock() method creates a node in ZooKeeper to represent its "position in line" waiting for the lock. The node created is EPHEMERAL which means if our process dies for some reason, its request for the lock with automatically disappear thanks to ZooKeeper, so we do not have worry about timing out locks or cleaning up stale lock requests.
+<br /><br />
+
+{% highlight java %}
+  final Object lock = new Object();
+
+  synchronized(lock) {
+	while(true) {
+	  List<String> nodes = zk.getChildren(lockBasePath, new Watch() {
+		@Override
+		public void process(WatchedEvent event) {
+		  synchronized (lock) {
+			lock.notifyAll();
+		  }
+		}
+	  });
+	  Collections.sort(nodes); // ZooKeeper node names can be sorted lexographically
+	  if (lockPath.endsWith(nodes.get(0)) {
+		return;
+	  } else {
+		lock.wait();
+	  }
+	}
+  }
+{% endhighlight %}
+<br /><br />
+
+To understand the code above you need to understand how ZooKeeper works. When you
