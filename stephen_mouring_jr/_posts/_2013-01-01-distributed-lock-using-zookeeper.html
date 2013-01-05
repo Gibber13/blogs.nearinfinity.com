@@ -111,7 +111,11 @@ First of all, the lock() method creates a node in ZooKeeper to represent its "po
 		  }
 		}
 	  });
-	  Collections.sort(nodes); // ZooKeeper node names can be sorted lexographically
+	  
+	  // Sequential ZooKeeper node names can be sorted lexographically! 
+	  Collections.sort(nodes); 
+	  
+	  // Are we the "topmost" node? (The node with the lowest sequence number that is.)
 	  if (lockPath.endsWith(nodes.get(0)) {
 		return;
 	  } else {
@@ -127,4 +131,27 @@ To understand the code above you need to understand how ZooKeeper works. ZooKeep
 The gist of what we are doing here is this. We are creating an ordered list of nodes (sharing the same name). Whenever the list changes, every process that has registered a node is notified. Since the nodes are ordered, one node will be "on top" or in other words have the lowest sequence number. That node is the node that owns the lock. When a process detects that its node is the top most node, it proceeds to execute. When it is finished, it deletes its node, triggering a notification to all other processes who then determine who the next node is who has the lock.
 <br /><br />
 
-The tricky part of the code from a Java perspective is the use of nested synchronized blocks.
+The tricky part of the code from a Java perspective is the use of nested synchronized blocks. The nested synchronization structure is used to ensure that the DistributedLock is able to process every update it gets from ZooKeeper and does not "lose" an update if two or more updates come from ZooKeeper in quick succession.<br/><br/>
+
+The inner synchronized block in the Watcher method is called from an outside thread whenever ZooKeeper reports a change to its children. Since the Watcher callback is in a synchronized block keyed to the same Java lock object as the outer synchronized block, it means that the update from ZooKeeper cannot be processed until the contents of the outer synchronized block is finished. In other words, when an update comes in from ZooKeeper, it fires a notifyAll() which wakes up the loop in the lock() method. That lock method gets the updated children and sets a new Watcher. (Watchers have to be reset once they fire as they are not a perpetual callback. They fire once and then disappear.) If the newly reset Watcher fires before the rest of the loop executes, it will block because it is synchronized on the same Java lock object as the loop. The loop finishes its pass, and if it has not acquired the distrubted lock, it waits on the Java lock object. This frees the Watcher to execute whenever a new update comes, repeating the cycle.<br/><br/>
+
+Once the lock() method returns, it means your process has the dsitributed lock and can continue to execute its business logic. Once it is complete it can release the lock by calling the unlock() method.
+
+{% highlight java %}
+  public void unlock() throws IOException {
+	try {
+	  zk.delete(lockPath, -1);
+	  lockPath = null;
+	} catch (KeeperException e) {
+	  throw new IOException (e);
+    } catch (InterruptedException e) {
+      throw new IOException (e);
+    }
+  }
+{% endhighlight %}
+<br /><br />
+
+All unlock() does is explictly delete this process's node which notifies all the other waiting processes and allows the next one in line to go. Because the nodes are EPHEMERAL, the process can exit without unlocking and ZooKeeper will eventually reap its node allowing the next process to execute. This is a good thing because it means if your process ends prematurely without you having a chance to call unlock() it will not block the remaining processes. Note that it is best to explicitly call unlock() if you can, because it is much faster than waiting for ZooKeeper to reap your node. You will delay the other processes less if you explicity unlock. <br/><br/>
+
+Thanks for reading! Please follow me on Twitter (@marlhammer) if you like my blogs!
+<br/><br/>
