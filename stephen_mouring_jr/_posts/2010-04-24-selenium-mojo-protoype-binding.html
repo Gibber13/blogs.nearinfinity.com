@@ -17,7 +17,7 @@ Selenium.prototype.setupProtoypeJS = function() {
   id = selenium.browserbot.getCurrentWindow().$;
   css = selenium.browserbot.getCurrentWindow().$$;
 }
-{% endhighlight %}<br />
+{% endhighlight %}<br /><br />
 
 In our code we have a base class for all our test cases. To this we added our own waitForPage() method:<br /><br />
 
@@ -26,7 +26,7 @@ public void waitForPage() {
   selenium.waitForPage('60000')
   proc.doCommand('setupPrototypeJS', [])
 }
-{% endhighlight %}<br />
+{% endhighlight %}<br /><br />
 
 Thus every time the page reloads (which clears the JavaScript context) we call waitForPage() and this command is re-executed. It creates two global variables (id and css) and binds them to Prototype's $ and $$ functions respectively.<br /><br /><i>Note: The reason we choose id and css instead of $ and $$ was that Groovy considers $ in Strings to be a special character and we would have had to escape it each time it was used</i>.<br /><br />The Prototype selectors can now be used in Selenium RC like this:<br /><br />
 
@@ -34,14 +34,14 @@ Thus every time the page reloads (which clears the JavaScript context) we call w
 selenium.click("dom=id('foo')")
 selenium.click("dom=css('.bar')")
 selenium.click("dom=css('span.foo a.baz')")
-{% endhighlight %}<br />
+{% endhighlight %}<br /><br />
 <i>Note: You still have to specify the dom locator type so Selenium RC will know to execute your locator string as JavaScript.&nbsp; <br /></i><br /><br /><font style="font-size: 1.25em;"><b>Selenium 1.0.3</b></font><br /><br />In more recent version of Selenium RC the project added the setExtensionJs() method. This allows you to set extension JavaScript programmatically prior to starting the selenium client:<br /><br />
 
 {% highlight javascript %}
 selenium = new DefaultSelenium(...)
 selenium.setExtensionJs('...')
 selenium.start()
-{% endhighlight %}<br />
+{% endhighlight %}<br /><br />
 
 This made it much easier to implement our Prototype bindings. The only trick was that the JavaScript seems to be executed prior to having access to a page context and is also only executed once. This required us to take a different approach.<br /><br />We created id and css as global functions instead of variables. This allowed us to defer accessing the current window until the functions were actually invoked. &nbsp; <br /><br />
 
@@ -61,6 +61,6 @@ selenium.setExtensionJs('''
 selenium.click("dom=id('foo')")
 selenium.click("dom=css('.bar')")
 selenium.click("dom=css('span.foo a.baz')")
-{% endhighlight %}<br /><br /><br />
+{% endhighlight %}<br /><br />
 
-I would be interested in hearing feedback from anyone who has a chance to use this technique!<br />
+Thanks for reading! See me on Twitter (@marlhammer) or contact me through email (smouring@nearinfinity.com) if you have any questions or comments!<br/><br/>

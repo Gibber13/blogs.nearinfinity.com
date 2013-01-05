@@ -49,10 +49,12 @@ public class FizzBuzz {
 
 The core part of the solution is the use of modulus and the Math.ceil() method. Any value of "i" that IS NOT evenly divisible
 by the factor (either 3 or 5) will return a modulus result greater than zero. Dividing that result by "n" ensures that the result will be a fraction
-that is greater than zero but less than one. The Math.ceil() method then pushes that result to be the integer 1. Any value of "i" that 
+that is greater than zero but less than one. The Math.ceil() method then pushes that result to be the integer 1. Any value of "i" that
 is evenly divisible by the factor (either 3 or 5) will return a modulus result of zero.
 <br /><br />
 
 By calculating the modulus result for the factors 3 and 5 separately, I now have two values (either 1 or 0) which I can use to index
 directly into the two dimensional array I have created. By initializing the [1][1] position to "i" each iteration, it will
 print the value of "i" if the modulus result is not divisible by 3 or 5 (as per the rules of FizzBuzz).<br /><br />
+
+Questions? Comments? Hit me up on Twitter (@marlhammer) or through email (smouring@nearinfinity.com) if you have any!<br/><br/>
