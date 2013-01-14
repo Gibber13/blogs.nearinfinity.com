@@ -9,6 +9,7 @@ user_info:
   nic_sports: Soccer
 social:
   twitter: http://www.twitter.com/jharwig
+  google-plus: https://plus.google.com/109501950525367618445
 ---
 Jason Harwig is a Senior Software Engineer at Near Infinity. Jason has found a niche inside Near Infinity in user interface and front-end development since he joined in 2003. He has spent the better part of the last decade focusing on mobile, and the latest front-end web technologies.
 
