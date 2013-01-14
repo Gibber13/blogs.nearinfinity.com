@@ -2,23 +2,20 @@
 atom_id: tag:nic-www01,2007:/blogs//7.603 # This is for backwards compatibility do not change!
 permalink: /blogs/scott_leberknight/validating_domain_objects_in_hibernate.html
 layout: blogs
-title: !binary |-
-  VmFsaWRhdGluZyBEb21haW4gT2JqZWN0cyBpbiBIaWJlcm5hdGUgUGFydCAx
-  OiBJbnRyb2R1Y3Rpb24=
+title: "Validating Domain Objects in Hibernate Part 1: Introduction"
 date: 2007-09-10 14:22:57.000000000 -04:00
-tags: !binary |-
-  SmF2YQ==
+tags: java hibernate
 ---
-{% raw %}
 <p>This is the first in a series of short blogs showing how you can use Hibernate to validate your domain objects. Here I'll provide a brief introduction to validating your domain objects using Hibernate and why it matters. In future installments I'll show you how to enable the validations you apply to your domain objects, how to create your own custom validators, and provide some tips about integrating the Hibernate validator into your applications.</p>
 
-<p>Every system needs data validation. In Java-based web applications using MVC frameworks like Struts, Spring MVC, or JSF, most developers simply use their framework's built-in validation scheme. Each of the aforementioned frameworks provides a way to validate form data, but this is usually restricted to the web tier. Struts provides ActionForms that have a <code>validate()</code> method you implement or you can use the Jakarta Commons Validator; JSF uses custom tags like <code>&lt;f:validateLength/></code> in the presentation tier; and Spring MVC has a <code>Validator</code> interface that can be easily plugged into Spring MVC's <code>SimpleFormController</code>. These solutions are either tied directly to the web tier or would require a bunch of infrastructure (or plumbing) code to make it work across all tiers seamlessly.</p>
+<p>Every system needs data validation. In Java-based web applications using MVC frameworks like Struts, Spring MVC, or JSF, most developers simply use their framework's built-in validation scheme. Each of the aforementioned frameworks provides a way to validate form data, but this is usually restricted to the web tier. Struts provides ActionForms that have a <code>validate()</code> method you implement or you can use the Jakarta Commons Validator; JSF uses custom tags like <code><f:validateLength/></code> in the presentation tier; and Spring MVC has a <code>Validator</code> interface that can be easily plugged into Spring MVC's <code>SimpleFormController</code>. These solutions are either tied directly to the web tier or would require a bunch of infrastructure (or plumbing) code to make it work across all tiers seamlessly.</p>
 
 <p>This is fine is many cases, but what happens when you expose functionality via a web service (I won't get into a REST vs WS-<i>Death Star</i> argument here, OK?) and you still need data validation? In fact usually you need the <i>exact same</i> validation for the domain objects. Now what? Many developers simply end up copy/pasting validation code. Ugh. Others come up with their own validation framework to keep things <a href="http://en.wikipedia.org/wiki/DRY">DRY</a> but end up making things more complicated, plus they are writing infrastructure code instead of business logic. Along came <a href="http://www.rubyonrails.org">Ruby on Rails</a> which made it trivial to declare validation on domain objects and have that validation automatically apply no matter where the domain objects are used, i.e. in web controllers, web services, etc. This was probably most Java developers' first experience with applying validation directly to domain objects, and they were jealous (or at least I was).</p>
 
 <p>Fortunately Hibernate provides the <a href="http://validator.hibernate.org/">Hibernate Validator</a> which allows you to annotate your domain objects with validation constraints. For example:</p>
 
-<pre class="prettyprint">@Entity
+{% highlight java %}
+@Entity
 public class User extends BaseEntity {
 	
     // id, version, etc. are defined in BaseEntity
@@ -46,7 +43,7 @@ public class User extends BaseEntity {
     public String getSsn() { return ssn; }
     public void setSsn(String ssn) { this.ssn = ssn; }
 }
-</pre>
+{% endhighlight %}
 
 <p>In the above code, we are mandating the following validation rules on <i>all</i> <code>User</code> objects:</p>
 
@@ -58,4 +55,3 @@ public class User extends BaseEntity {
 </ul>
 
 <p>With these annotations, we can now have any <code>User</code> object validated automatically and the same validation rules will apply no matter where the <code>User</code> object is used, i.e. the validation is where it should be, in the problem domain and not tied to the a specific application tier. In the next article, I'll show how to actually enable the Hibernate Validator and how to validate objects.</p> 
-{% endraw %}

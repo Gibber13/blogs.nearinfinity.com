@@ -9,6 +9,7 @@ user_info:
   nic_sports: Soccer
 social:
   twitter: https://twitter.com/kunklejr
+  google-plus: https://plus.google.com/108076180146802069516
 ---
 Jeff Kunkle is Near Infinity's Director of Mobile Solutions. Jeff joined Near Infinity in 2003 and is dedicated to building a company where the best and brightest software developers come to share ideas, create innovative software solutions, and actively participate in shaping a company. He has spent the past ten years leading Agile-focused development teams and creating web and network-based systems and applications. The majority of his programming experience lies in Ruby/Rails, Java, Objective-C, and most recently Node.js/JavaScript.
 

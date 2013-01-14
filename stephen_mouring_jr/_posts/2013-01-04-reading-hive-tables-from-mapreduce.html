@@ -1,0 +1,57 @@
+---
+title: Reading Hive tables from MapReduce
+tags:  hive hdfs mapreduce bigdata
+---
+
+This is part two of a two part blog series on how to read/write Apache Hive data from MapReduce jos. Part one (Writing Hive Tables from MapReduce) is <a href="http://www.nearinfinity.com/blogs/stephen_mouring_jr/2013/01/04/writing-hive-tables-from-mapreduce.html">here</a>.
+<br/><br/>
+
+So just as sometimes you need to write data to Hive with a custom MapReduce job, sometimes you need to read that data back from Hive with a custom MapReduce job. As covered in part one, Hive is a layer that sits on HDFS and imposes a standard convention on the structure of the files so it can interpret them as columns and rows. Reading data out of Hive is just a matter of parsing the files correctly.
+<br/><br/>
+
+Recall that files processed by MapReduce (and by extension, Hive) are output as key value pairs. Hive ignores the keys (read as a BytesWritable with a value of null) and reads/writes the values as Text objects. The value of the Text object for each row is the concatenation of all the column values delimited by the delimiter of the table (which Hive defaults to the "char 1" ASCII character).
+<br/><br/>
+
+Seems like a simple problem, so my first thought was to just using String.split() in the map() method of the MapReduce job.
+<br/><br/>
+
+{% highlight java %}
+String SEPARATOR_FIELD = new String(new char[] {1});
+
+String[] rowColumns = new String (rowTextObject.getBytes()).split(SEPARATOR_FIELD);
+{% endhighlight %}
+<br /><br />
+
+In theory this should have worked perfectly, but unfortunately I have found that String.split() actually consumes repeated delimiters. This is a problem if any of the values in the row are blank, since split() will shift the positions of your columns and you will be unable to match up what values belong with which columns.
+<br /><br />
+
+An alternative would be to create a String from the Text object and iterate through it using indexOf(). This approach however requires extra object creation and depending on the scale of your MapReduce job and the size of your rows, may slow you down needlessly. So an alternative is to use the Text object's find() method.
+<br /><br />
+
+{% highlight java %}
+
+String SEPARATOR_FIELD = new String(new char[] {1});
+
+String[] rowColumns = new String[NUMBER_OF_COLUMNS_IN_YOUR_HIVE_TABLE];
+
+int start = 0;
+int end = 0;
+
+for (int i = 0; i < rowColumns.length; ++i) {
+	end = rowTextObject.find(SEPARATOR_FIELD, start);
+    if (end == -1) {
+    	end = rowString.getLength();
+    }
+
+    rowColumns[i] = new String(rowTextObject.getBytes(), start, end-start);
+
+    start = end + 1;
+}
+{% endhighlight %}
+<br /><br />
+
+This will parse out each value into the appropriately index of the rowColumns array. Blank values will also be handled correctly and result in blank strings being inserted into the rowColumns array.
+<br /><br />
+
+Thanks for reading! Please follow me on Twitter (@marlhammer) if you like my blogs!
+<br /><br />

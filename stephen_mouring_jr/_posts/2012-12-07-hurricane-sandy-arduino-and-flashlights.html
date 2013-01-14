@@ -1,0 +1,39 @@
+---
+title: Hurricane Sandy, Arduino, and Flashlights
+date: 2012-12-07 17:08:33 -05:00
+tags:  arduino electronics hardware
+---
+
+So I will have to admit that I was not very prepared for Hurricane Sandy. It had already started raining heavily before I had the good sense to look for flashlights and batteries. I quickly realized that I had none of either. After visiting to three or four stores it was apparent that there was not a flashlight or a D battery to be had for love or money up and down the entire eastern seaboard.<br /><br />
+
+Standing at the battery stand in my local convenience store, scouring it for any hidden D batteries, I had a sudden flash of insight! I had recently been experimenting with an Arduino (thanks to Near Infinity's generous and discretionary book budget!) as a way of learning more about electronics and low level programming. I remembered I had a stash of LED lights and a box of resistors at home.<br /><br />
+
+A flashlight is really a simple concept. You need a power source (battery), a light bulb (an LED will serve just fine), and a resistor.  So I grabbed a pack of 9V batteries (easiest to work with because of their size and the fact that their terminals are exposed and adjacent to each other) and headed home. After a few minutes of engineering, I had built myself a primitive emergency flashlight!<br /><br />
+
+The steps are very simple. You start with an LED:
+<br /><br />
+
+<img alt="led_1.jpg" src="http://www.nearinfinity.com/blogs/stephen_mouring_jr/assets/led_1.jpg" class="mt-image-center" style="text-align: center; display: block; margin: 0pt auto 20px;" /><br /><br />
+
+NOTE: Notice that one pin of the LED is longer than the other. This is because it matters to an LED which direction the electricity flows. The <span style="font-weight: bold;">longer</span> pin connects to the positive (+) terminal of a battery, and the <span style="font-weight: bold;">shorter</span> pin connects to the negative / ground (-) terminal. <br /><br />
+
+The next step is to insert a resistor into your circuit. Without digressing too far, a resistor is needed to prevent the current of the battery from flowing unrestricted. If the current flows "too fast" it burns out your LED. Adding a resistor to the circuit brings the current from essentially infinite down to a range that your LED can handle.<br /><br />
+
+You can use a resistance calculator to calculate the precise resistance needed for this circuit... Or you can just use a 100 OHM resistor (which is usually sold with your LED) and not worry about it.<br /><br />
+
+Wrap one wire of the resistor tightly to the <span style="font-weight: bold;">shorter</span> pin of the LED. <br /><br />
+
+<img alt="led_2.jpg" src="http://www.nearinfinity.com/blogs/stephen_mouring_jr/assets/led_2.jpg" class="mt-image-center" style="text-align: center; display: block; margin: 0pt auto 20px;" /><br /><br />
+
+
+Now you need to connect the <span style="font-weight: bold;">longer</span> pin of the LED to the positive terminal of the 9V (which is the smaller / "male" terminal), and the <span style="font-weight: bold;">shorter</span> pin of the LED to the negative terminal of the nine volt (which is the larger / "female" terminal).<br /><br />
+
+<img alt="led_4.jpg" src="http://www.nearinfinity.com/blogs/stephen_mouring_jr/assets/led_4.jpg" class="mt-image-center" style="text-align: center; display: block; margin: 0pt auto 20px;" /><br /><br />
+
+NOTE: To clarify, the <span style="font-weight: bold;">larger</span> terminal of a 9V battery is the negative / ground terminal and the <span style="font-weight: bold;">smaller</span> terminal of a 9V battery is the positive terminal.<br /><br />
+
+Wrap free pin of the resistor tightly to the negative terminal of the battery. To make it light up, just touch the other end of the circuit to the positive terminal of the battery! Voila! A home made flashlight!<br /><br />
+
+<img alt="led_5.jpg" src="http://www.nearinfinity.com/blogs/stephen_mouring_jr/assets/led_5.jpg" class="mt-image-center" style="text-align: center; display: block; margin: 0pt auto 20px;" /><br /><br />
+
+Questions? Comments? Email me at smouring@nearinfinity.com or follow me on twitter at @marlhammer.<br />

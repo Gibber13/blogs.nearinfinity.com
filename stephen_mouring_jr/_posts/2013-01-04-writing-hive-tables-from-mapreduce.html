@@ -1,0 +1,99 @@
+---
+title: Writing Hive tables from MapReduce
+tags:  hive hdfs mapreduce bigdata
+---
+
+This is part one of a two part blog series on how to read/write Apache Hive data from MapReduce jos. Part two (Reading Hive Tables from MapReduce) is <a href="http://www.nearinfinity.com/blogs/stephen_mouring_jr/2013/01/04/reading-hive-tables-from-mapreduce.html">here</a>.
+<br/><br/>
+
+Hive is an awesome tool that integrates with HDFS and MapReduce by providing a SQL syntax and schema layer on top of HDFS files. It allows you to treat HDFS files like SQL tables with a row / column format. You can run SQL queries against HDFS files or create new files by running SQL insert statements.
+<br/><br/>
+
+Hive translates the SQL queries into a series of MapReduce jobs that emulate that query's behavior. While Hive is very useful, it is not always efficient (or even possible) to represent your business logic as a Hive query. Like SQL, Hive is sometimes limited in what it can do.
+<br/><br/>
+
+So this leaves you with the option of writing your own MapReduce job to perform the business logic you want in an efficient manner. But what if you want to have your data in a form that Hive can still understand so you can query it in Hive in the future?
+<br/><br/>
+
+Thankfully you can easily emulate Hive's expected file format and output files so that Hive will recognize them.
+<br/><br/>
+
+MapReduce operates on keys and values. When you write output from a MapReduce job, you have to emit a key and a value. If you want to emit multiple values you have to emit a value (or a key in some cases) that is delimited. Hive adds a layer on top of this paradigm by defining standard delimiters (which you can choose to override) and treating each delimited value in a file as a value of a column.
+<br/><br/>
+
+Hive by default use the "char 1" as the field delimiter, since it is a nonprintable character not likely to occur in text data. Hive also supports "array fields" which are multivalued fields that are still considered a single column value. Array fields have a separate delimiter for their individual values. Here is a sample Hive table definition where I have, for the sake of clarity, explicitly defined the delimiters:
+<br/><br/>
+
+{% highlight sql %}
+create table test (
+  foo string,
+  bar string,
+  baz array<string>
+)
+row format delimited
+  fields terminated by '\001'
+  collections terminated by '\002'
+{% endhighlight %}
+<br /><br />
+
+So how do we write to this table from a MapReduce job? For convenience, I like to first define a few constants:
+<br /><br />
+
+{% highlight java %}
+public static final String SEPARATOR_FIELD = new String(new char[] {1});
+public static final String SEPARATOR_ARRAY_VALUE = new String(new char[] {2});
+
+public static final BytesWritable NULL_KEY = new BytesWritable(null);
+{% endhighlight %}
+<br /><br />
+
+The first two constants are the delimitors. Note the use of the char constants 1 and 2. You do NOT want to do "new String(""+1)" because that would give you the ASCII value for the digit "1" (which is actually ASCII 49). You want the ASCII 1 value (which, for those who are interested, is the nonprintable "start of heading" character.) Same logic applies for ASCII 2. <br /><br />
+
+Remember that MapReduce emits files as key value pairs. Hive expects the key to be null, and the value to be a MapReduce Text object with delimited values inside. Hence the NULL_KEY constant above. So to emit a Hive row you first need to aggregate the values into a Text object and then emit that Text object as the value and the NULL_KEY as the key. If any of your values are of an array type (as "baz" is in our example), the individual array values must also be aggregated together using the appropriate delimiter.<br/><br/>
+
+{% highlight java %}
+
+// Build up the array values as a delimited string.
+StringBuilder bazValueBuilder = new StringBuilder();
+int i = 0;
+for (String bazValue : bazValues) {
+  bazValueBuilder.append(bazValue);
+  ++i;
+  if (i < bazValues.size()) {
+    bazValueBuilder.append(SEPARATOR_ARRAY_VALUE);
+  }
+}
+
+// Build up the column values / fields as a delimited string.
+StringBuilder hiveRow = new StringBuilder();
+hiveRow.append("fooValue");
+hiveRow.append(SEPARATOR_FIELD);
+hiveRow.append("barValue");
+hiveRow.append(SEPARATOR_FIELD);
+hiveRow.append(bazValueBuilder.toString());
+
+// Emit a null key and a Text object containing the delimited fields
+context.write(NULL_KEY, new Text(hiveRow))
+
+{% endhighlight %}
+<br /><br />
+
+When configuring your MapReduce job output path you have two choices. You can either write this output to a temporary directory. And then use the "load data" hive command:
+<br/><br/>
+
+{% highlight sql %}
+LOAD DATA LOCAL INPATH your_jobs_output_path OVERWRITE INTO TABLE yourtable;
+{% endhighlight %}
+<br/><br/>
+
+Or, if your Hive table is partitioned, you can write the file directly into Hive's HDFS directory structure into a partition directory. (For example: /user/hive/warehouse/yourdatabase.bd/yourtable/yourpartition=yourvalue) and then execute a Hive alter table command:
+<br/><br/>
+
+{% highlight sql %}
+alter table yourtable add partition (yourpartition='yourvalue');
+{% endhighlight %}
+<br/><br/>
+
+Thanks for reading! Please follow me on Twitter (@marlhammer) if you like my blogs!
+<br /><br />
+
