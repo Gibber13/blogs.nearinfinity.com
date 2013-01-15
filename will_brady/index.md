@@ -9,6 +9,7 @@ user_info:
   nic_sports: Soccer
 social:
   twitter: http://www.twitter.com/willb2
+  google-plus: https://plus.google.com/118040548868751300803
 ---
 Will Brady is a Software Engineer at Near Infinity. Will has spent most of his time at Near Infinity contributing to various web application projects as well as indvidual website efforts. Will has also spent a short amount of time in mobile development.
 
