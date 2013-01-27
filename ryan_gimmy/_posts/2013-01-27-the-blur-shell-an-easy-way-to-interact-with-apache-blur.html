@@ -1,0 +1,158 @@
+---
+title: Blur 0.2 - Getting an Interactive Shell
+tags: apache blur
+excerpt: I use Apache Blur on one of our projects at Near Infinity.  Currently it is version 1.2, and while it works well, Blur has been undergoing development in the Apache incubator project and now has a project that is going to add a repl to Blur.
+---
+
+<style type='text/css'>
+
+.title { 
+  font-weight: bolder;
+  font-size: 140%;
+}
+
+.section-title{
+  font-weight: bold;  
+}
+</style>
+
+
+<div class='title'>Blur 0.2 - Getting an interactive shell</div>
+
+<h4>Background</h4>
+<p>I use Apache Blur on one of our projects at Near Infinity.  Currently it is version 1.2, and while it works well, Blur has been undergoing development in the Apache incubator project and now has a project that is going to add a repl to Blur.  Using shell scripts and custom java programs to interact with blur is ok (if not a bit tedious), so the addition of a repl is a welcome addition to Blur. </p>
+
+<h4>Starting the shell</h4>
+
+<ul>
+ <li>You're going to need to build the Blur source by following the directions at <a href='http://incubator.apache.org/blur/get_involved.html'>http://incubator.apache.org/blur/get_involved.html</a></li>
+ <li>Start up blur, and index some data into it</li>
+ <li>Start the shell in the jar blur-shell project</li>
+</ul>
+
+<h4>A couple of commands for the shell</h4>
+ 
+<p>
+  (Not so) Pro tip:  Usually when I start using a repl (like in Cassandra or Hbase) it helps to just type in 'help' to see what commands are supported.
+</p>
+
+{% highlight bash %}
+  blur> help
+  help - display help
+  debug - toggle debugging on/off
+  timed - toggle timing of commands on/off
+  quit - exit the shell
+  list - list tables
+  create - create <table name> <table path> <number of shards>
+  enable - enable <tablename>
+  disable - disable <tablename>
+  remove - remove the named table, args; tablename
+  describe - describe <tablename>
+  schema - schema of the named table, args; tablename
+  search - query the named table, args; tablename query
+  add - add <tablename> <field[/type[/boost]]:value> ...
+{% endhighlight %}
+
+<p>
+  What are some of these commands?  Theyre pretty self explanatory: most of them control tables (create, enable, disable, remove) so lets start with creating a table:
+</p>
+
+{% highlight bash %}
+    blur> create repl-table hdfs://localhost:9000/blur/repl-table 1 
+{% endhighlight %}
+
+<p>
+ This command is pretty self-explanatory, we created a table that is named inside of blur, put the path that the blur table is going to be (in this case it is in hdfs) and the number of shards that the table will use.  What happened inside of blur?  We created the location of blur inside of hdfs, and blur put some blur related files were put into the specified directory.
+</p>
+
+<p>
+  Now that we created the table, what does it look like?  Use the describe command to see an overview of the table:
+</p>
+
+{% highlight bash %}
+    blur> describe repl-table
+    Name:     repl-table
+    Enabled:  true
+    Readonly: false
+    Path:     hdfs://localhost:9000/blur/repl-table
+    Shards:   1
+{% endhighlight %}
+
+<p>  and use the schema command to see what the table's schema looks like:</p>
+
+{% highlight bash %}
+    blur> schema repl-table
+    body | TEXT
+{% endhighlight %}
+ <p>
+  As you will probably immediately see, the newly created table isn't that interesting.  It shows us all the information we just gave it, along with if it is read-only or enabled.  Blur has created a table with a single column with the name of body and the type of TEXT.
+</p>
+
+<p>  So now we should add something to the table:</p>
+
+
+{% highlight bash %}
+
+
+    blur> add repl-table body:something
+    blur> add repl-table body:something_else
+{% endhighlight %}
+
+<p>Neither command returns a result, but it did add the data.
+
+  Now that we have two values in our table, we can search it using the repl:</p>
+
+{% highlight bash %}
+    blur> search repl-table something
+    Totalhits 1
+{% endhighlight %}
+
+<p>  As you can tell, blur pulls back the exact match that we put in, but we can also add in wildcard characters to pull both rows back:</p>
+    
+{% highlight bash %}
+    body | something
+    blur> search repl-table something*
+    Totalhits 2
+    
+    body | something
+    - - - - - - - - - - - - -
+    body | something_else
+{% endhighlight %}
+ <p>
+  Both of the results came back for us.</p>
+
+   <p>Enabling and disabling a table will allow/disallow tables to be searched:</p>
+{% highlight bash %}
+    blur> disable repl-table
+    blur> describe repl-table
+    Name:     repl-table
+    Enabled:  false
+    Readonly: false
+    Path:     hdfs://localhost:9000/blur/repl-table
+    Shards:   1
+
+    blur> enable repl-table 
+    blur> describe repl-table
+    Name:     repl-table
+    Enabled:  true
+    Readonly: false
+    Path:     hdfs://localhost:9000/blur/repl-table
+    Shards:   1
+{% endhighlight %}
+
+<p>
+  So now that we are done, we can remove the table we created:
+  {% highlight bash %}
+    blur> remove repl-table
+    java.io.IOException: Table [repl-table] is NOT disabled.
+{% endhighlight %} 
+<p>  Seems trivial, but Blur requires that we disable the table before removing it.  Disable the table and then remove it to remove it for good.</p>
+{% highlight bash %}
+    blur> disable repl-table
+    blur> remove repl-table
+    org.apache.zookeeper.KeeperException$NotEmptyException: KeeperErrorCode = Directory not empty for /blur/clusters/default/tables/repl-table
+{% endhighlight %} 
+
+<p>
+  We still get an error (Zookeeper is trying to delete a node that has nodes inside of it).  As with anything in apache with a release level of 0.*, the code is in beta and could change at any time.  Even though there are still a few things to work out, I am excited to see that blur will be easier to interact with in the future.
+</p>
