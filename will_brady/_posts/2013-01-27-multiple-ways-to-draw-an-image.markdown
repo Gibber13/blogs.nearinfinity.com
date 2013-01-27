@@ -7,7 +7,7 @@ I recently read an [article](http://webdesign.tutsplus.com/tutorials/htmlcss-tut
 by Vincent Durand on how to draw images using a single element. The article was very well laid out and I
 definitely recommend you take a look. I thought I'd take this concept of drawing images
 rather than linking to image files and apply it to our Near Infinity logo. In this post
-I'll go over 3 different ways you can draw images using CSS, HTML and Javascript.
+I'll go over 4 different ways you can draw images using CSS, HTML and Javascript.
 
 # Single Element with Multiple Backgrounds
 This is basically the method described in the Vincent's article. To draw the Near
@@ -191,3 +191,24 @@ if (canvas.getContext) {
 }
 {% endhighlight %}
 [View a demo](http://jsfiddle.net/ZrPZX/)
+
+
+EDIT: SVG
+
+# SVG
+I originally forgot probably the coolest of all the methods: SVG.
+SVG is awesome because it combines the best of both worlds. You
+can draw very specific graphics the way you would in a graphics
+program but each shape is also an HTML element so you can manipulate
+and animate it with CSS.
+
+HTML:
+{% highlight html %}
+<svg>
+  <ellipse cx="50" cy="51" rx="50" ry="30" fill="rgb(0,0,0)"/>
+  <ellipse cx="145" cy="37" rx="50" ry="30" fill="rgb(237, 128, 39)"/>
+  <ellipse cx="60" cy="47" rx="30" ry="17" fill="rgb(255, 255, 255)"/>
+  <ellipse cx="132" cy="40" rx="30" ry="17" fill="rgb(255, 255, 255)"/>
+</svg>
+{% endhighlight %}
+[View a demo](http://jsfiddle.net/joeferner/jsYbt/) (Credit: [Joe Ferner](http://www.nearinfinity.com/blogs/joe_ferner/))
