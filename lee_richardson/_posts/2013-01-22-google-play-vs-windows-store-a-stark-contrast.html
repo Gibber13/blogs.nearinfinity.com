@@ -89,7 +89,7 @@ tags: mobile, android, .net
 <p>Rejected. Again. This time for a different reason. In their defense I should have read their submission guidelines. But couldn't they have told me this during the first rejection? Did it really require 25 days for <em>this</em> response?</p>
 <p>I was crushed. They were asking for a massive rearchitecting that didn't make sense and maybe wasn't even possible. Google Play was beginning to look golden.</p>
 <p>The problem was in how my app works. It shows the realtime status of a continuous integration server, but requires a desktop app to collect the data and upload it to "the cloud". The mobile app just gives a view into the cloud data and receives push notifications and live tile updates from a server. Seems reasonable right? Apparently <i style="font-style:italic">the entire architecture violates Microsoft's submission guidelines</i>.</p>
-<p>My plan involved added a single CI server that didn't require a desktop app to sneak by their policies while leaving the existing process all other ci servers. Travis, since it's guaranteed to never be behind a firewall. I had a low confidence the plan would work.</p>
+<p>My plan involved adding a single CI server that didn't require a desktop app to sneak by their policies while leaving the existing process all other CI servers. I'd use Travis, since it's guaranteed to never be behind a firewall. I had a low confidence the plan would work.</p>
 <p>After a week of evenings followed by an all-nighter I resubmitted at 5 am EST (I'm a sick puppy, I know) and crossed my fingers that it wouldn't be another 22 days.</p>
 <p>3.5 hours later, at 8:30 am, I got an e-mail from Microsoft. With that kind of turn-around it couldn't be good news.</p>
 <p>It was. It passed. I was shocked. </p>
@@ -100,7 +100,31 @@ tags: mobile, android, .net
 <p>So who has the better process? Google. Hands down. They allow for a lean, minimum viable product style of development. Publish early and often, get feedback quickly, push the features your customers really want.</p>
 <p>But I like elements of the Windows Store process. Friendly customer support people rock. Manual testing made my app better. But were their "improvements" the kinds of things real customers would prioritize highly? Maybe, maybe not.</p>
 <p>I guess my ideal app store would cost $25 once; incorporate a manual tester that provides helpful suggestions not requirements; reject apps rarely if ever; give empathetic responses <i style="font-style:italic">and</i> quick resolutions when problems do happen; oh and turn submissions around in 3.5 hours or less every time.</p>
+<div style='float:right;padding:4px; text-align: center; width: 115px;'>
+<a class='twitter-share-button' data-count='horizontal' data-lang='en' data-related='lprichar:Lee Richardson Blog' data-text='RT @lprichar ' data-url='http://rapidapplicationdevelopment.blogspot.com/2013/01/google-play-vs-windows-store-stark.html' data-via='' href='http://twitter.com/share' rel='nofollow'></a>
+<script type='text/javascript'>
+    var currentPageUrl = 'http://www.nearinfinity.com/blogs/lee_richardson/2013/01/22/google-play-vs-windows-store-a-stark-contrast.html';
+
+    /* DotNetKicks */
+    var dotnetkicksLink = document.createElement('a');
+    dotnetkicksLink.setAttribute('href', 'http://www.dotnetkicks.com/kick/?url=' + currentPageUrl);
+    var dotnetkicksImg = document.createElement('img');
+    dotnetkicksImg.setAttribute('src', 'http://www.dotnetkicks.com/Services/Images/KickItImageGenerator.ashx?url=' + currentPageUrl);
+    dotnetkicksImg.setAttribute('alt', 'Kick this article (a good thing) on DotNetKicks');
+    dotnetkicksImg.setAttribute('border', '0');
+    dotnetkicksImg.setAttribute('style', 'margin-left:auto; margin-right:auto; display:block; text-align:center;');
+    dotnetkicksLink.appendChild(dotnetkicksImg);
+
+    var div = document.createElement('div');
+    div.appendChild(document.createElement('br'));
+    div.appendChild(dotnetkicksLink);
+    document.write(div.innerHTML);
+    </script>
+<p></p>
+<script src='http://platform.twitter.com/widgets.js' type='text/javascript'>
+</script>
+</div>
 <p>That's not too much to ask for, is it?</p>
 <br />
 <br />
-<p style="background: #F5F5F5; padding: 4px;"><i style="font-style:italic">Lee Richardson has been developing applications for public and private sector clients in the Washington DC area for over fourteen years.  You can follow him twitter <a href="http://twitter.com/lprichar">@lprichar</a>.</i></p>
+<p style="background: #F5F5F5; padding: 4px;"><i style="font-style:italic">Lee Richardson has been developing applications for public and private sector clients in the Washington DC area for over fourteen years.  You can follow him on twitter <a href="http://twitter.com/lprichar">@lprichar</a>.</i></p>
