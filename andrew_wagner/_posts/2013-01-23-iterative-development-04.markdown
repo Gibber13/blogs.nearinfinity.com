@@ -20,6 +20,6 @@ So the next few episodes will still add features, but will really look to flesh 
 
 I've got lots of other ideas - mining, shields, pirates, asteroids, planets, and so on. But I think this is plenty far ahead enough to plan. Stay tuned, though, it's going to be fun! In the meantime, here's episode 4:
 
-{% video_tag :youtube => ID3DsH4KikQ %}
+{% video_tag :youtube => UGe0V1IpIlQ %}
 
 
