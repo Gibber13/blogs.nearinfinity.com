@@ -5,7 +5,7 @@ tags: git
 
 Recently I wanted to transfer a presentation from
 one machine to another, and unfortunately I was
-unable to connect to the Internet. Like life when it
+unable to connect to the Internet. Similar to life when it
 was entirely offline or whenever Github is vexingly
 down, I was in a classic _sneakernet_ scenario. If you
 haven't heard the term, _sneakernet_ is slang for
