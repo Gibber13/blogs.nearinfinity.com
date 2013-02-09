@@ -7,7 +7,7 @@ tags:  mobile android
 
 One of the reasons Android is so appealing as an ecosystem is that it is so open. Android does not force you to stay in the confines of the design choices made by the carrier, the manufacturer, or even Google itself. It can upgraded, modified, and enhanced for devices that have long ceased to get manufacturer updates and it allows you to customize your device exactly the way you want it to be.<br/><br/>
 
-Android openness manifests itself in several ways, but perhaps the most interesting way being the enormous community of tinkerers and hackers who have built a whole world of custom operating system distributions, kernal modifications, and software tweaks for Android. There are literally hundreds of custom versions of the Android operating system (called "ROMs") that can replace the existing version on a given device.
+Android openness manifests itself in several ways, but perhaps the most interesting way being the enormous community of tinkerers and hackers who have built a whole world of custom operating system distributions, kernel modifications, and software tweaks for Android. There are literally hundreds of custom versions of the Android operating system (called "ROMs") that can replace the existing version on a given device.
 <br/><br/>
 
 When I bought my first Android and looked into the "ROM" world, it was a little overwhelming. There was so much complexity, so much information, so much terminology, and no definitive place to learn about it all.<br/><br/>
@@ -28,13 +28,13 @@ NOTE: Modifying your phone is not always officially sanctioned by the manufactur
 
 <h2>ADB and Fastboot</h2>
 
-To do any significant hacking on your Android you need to be able to communicate with it from your computer. There are two tools that allow you to send low level commands to your phone across a USB cable: adb (Android Debug Bridge) and fastboot (a protocal for communicate with the low level firmware of your Android device).
+To do any significant hacking on your Android you need to be able to communicate with it from your computer. There are two tools that allow you to send low level commands to your phone across a USB cable: adb (Android Debug Bridge) and fastboot (a protocol for communicate with the low level firmware of your Android device).
 <br/><br/>
 
-Both of these tools are available in the latest release of the <a href="http://developer.android.com/sdk/index.html">Google SDK for Android</a> (also referred to as the ADT). I also recommend downloading and installing a current version of the <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Java SE JDK</a> if your machine does not have one already. Once you have installed Java and ADT, the adb and fastboot tools can be found in the sdk/platform-tools subdirectory of the directory where you installed the ADT.
+Both of these tools are available in the latest release of the <a href="http://developer.android.com/sdk/index.html">Google SDK for Android</a> (also referred to as the ADT). I also recommend downloading and installing a current version of the <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Java SE JDK</a> if your machine does not have one already. Once you have installed Java and ADT, the adb and fastboot tools can be found in the sdk/platform-tools sub directory of the directory where you installed the ADT.
 <br/><br/>
 
-Note: As far as I can tell fastboot is installed with the ADT. However, if it is not, you must download a copy from the internet (XDA Forums preferrably) and copy it to the /sdk/platform-tools directory where the adb.exe resides.
+Note: As far as I can tell fastboot is installed with the ADT. However, if it is not, you must download a copy from the internet (XDA Forums preferably) and copy it to the /sdk/platform-tools directory where the adb.exe resides.
 <br/><br/>
 
 The next step is to put these two tools on your PATH. Instructions for modifying your PATH varying based on your operating system. Here is a <a href="http://java.com/en/download/help/path.xml">good starting point</a>. You should put the entire /sdk/platform-tools directory on your PATH so both adb and fastboot are accessible. To verify this is working correctly you can open your operating system's equivalent of a Command Prompt and type the command:
@@ -86,11 +86,9 @@ The bootloader of your phone is a small piece of firmware responsible for bootin
 Your first step to Android phone customization is to unlock your bootloader so it will accept further modifications. The procedure to unlock your bootloader vary widely from phone to phone and is not even possible on all phones due to manufacturer or carrier restrictions. If you own a Google Nexus device you are lucky. The bootloader can be unlocked via simple adb / fastboot commands. If you own an HTC device, you can unlock your phone through a slightly more lengthy process via <a href="https://www.htcdev.com/">HTC Dev</a> (note: however this requires you to wipe your phone). Most other phones require a combination of hacking and workarounds to achieve an unlocked bootloader.
 <br/><br/>
 
-Here is where the XDA Forums start to become useful. If you are unfortunate enough to have a manufacturer without a sanctioned bootloader unlocking method you can search the XDA Forums for instructions on how to unlock the bootloader of your device assuming a hack or workaround has been found.
-<br/<br/>
+Here is where the XDA Forums start to become useful. If you are unfortunate enough to have a manufacturer without a sanctioned bootloader unlocking method you can search the XDA Forums for instructions on how to unlock the bootloader of your device assuming a hack or workaround has been found.<br/><br/>
 
-Hopefully your device supports unlocking its bootloader, because if it does not, your customization abilities are very limited.
-<br/<br/>
+Hopefully your device supports unlocking its bootloader, because if it does not, your customization abilities are very limited.<br/><br/>
 
 <h2>Custom Recovery</h2>
 
@@ -103,7 +101,7 @@ In addition to checking / loading your device's version of the Android operating
 The default "recovery" program that comes with Android is very limited, and refuses to flash any copies of an operating system (or anything for that matter) that is not signed properly by Google. This is a good security mechanism to prevent hackers from subverting your phone's operating system, but it gets in the way when we want to install a custom operating system version!
 <br/><br/>
 
-Once your bootloader is unlocked, it becomes willing to let you change the recovery program that comes installed on the phone. You can replace the default recovery with another recovery that is more flexible and accepting of radical changes to your phone. Currently there are at least two good custom recoveries on the market: <a href="http://teamw.in/project/twrp2">TeamWin Recovery Pro</a> (abbreviated TWRP) and <a href="http://www.clockworkmod.com/rommanager">ClockworkMod Recovery</a> (appreviated CM). There may be others, but these two are the most commonly used. I personally recommend ClockworkMod Recovery as it seems the most polished and easy to use. Feel free to experiment.
+Once your bootloader is unlocked, it becomes willing to let you change the recovery program that comes installed on the phone. You can replace the default recovery with another recovery that is more flexible and accepting of radical changes to your phone. Currently there are at least two good custom recoveries on the market: <a href="http://teamw.in/project/twrp2">TeamWin Recovery Pro</a> (abbreviated TWRP) and <a href="http://www.clockworkmod.com/rommanager">ClockworkMod Recovery</a> (abbreviated CM). There may be others, but these two are the most commonly used. I personally recommend ClockworkMod Recovery as it seems the most polished and easy to use. Feel free to experiment.
 <br/><br/>
 
 You can download the appropriate recovery image and flash it to your phone, overwriting the default recovery. Instructions vary phone by phone, but the basic idea is that you connect your phone, reboot it into the bootloader program, download the recovery image, and run this command:
@@ -124,7 +122,7 @@ One of the benefits of having a custom recovery is that you can flash applicatio
 
 <h2>Rooting</h2>
 
-"Rooting" your phone is sometimes synonmous with installing a custom ROM or unlocking your bootloader. In reality the concepts are very different. Achieving "root" on your phone allows you run applications as the "root" (or administrator) user on your phone, much like you might run an application as the Administrator user on a Windows PC. Applications with root privileges can control more of the phone functionality (including setting CPU speeds, activating wireless hotspot functionality that is otherwise disabled by your carrier, etc.) than is otherwise possible.
+"Rooting" your phone is sometimes synonymous with installing a custom ROM or unlocking your bootloader. In reality the concepts are very different. Achieving "root" on your phone allows you run applications as the "root" (or administrator) user on your phone, much like you might run an application as the Administrator user on a Windows PC. Applications with root privileges can control more of the phone functionality (including setting CPU speeds, activating wireless hotspot functionality that is otherwise disabled by your carrier, etc.) than is otherwise possible.
 <br/><br/>
 
 You can achieve "root" on your stock ROM. Installing a custom ROM is not required, although most custom ROMs come with "root" automatically built in.
@@ -158,10 +156,10 @@ The kernel is the core part of the Linux operating system (which Android is base
 
 <h3>S-OFF</h3>
 
-On some devices it is possible to achieve "S-OFF" which disables internal security protocals in your phone. Achieving S-OFF gives you total and complete control over every aspect of your phone, even more so than a custom ROM does. It is highly sought after, but veyr hard to achieve on most phones due to manufacturer or carrier restrictions. Achieving S-OFF allows you to do things like flash custom "radios" (see below).<br/><br/>
+On some devices it is possible to achieve "S-OFF" which disables internal security protocols in your phone. Achieving S-OFF gives you total and complete control over every aspect of your phone, even more so than a custom ROM does. It is highly sought after, but very hard to achieve on most phones due to manufacturer or carrier restrictions. Achieving S-OFF allows you to do things like flash custom "radios" (see below).<br/><br/>
 
 <h3>Radios</h3>
-You can also flash custom "radios" (in other words, change the firmware that controls your phone's internal wireless atenenas). This is done sometimes to improve performance, fix bugs, or configure your phone to work on networks it was not otherwise intended to work on.
+You can also flash custom "radios" (in other words, change the firmware that controls your phone's internal wireless antennas). This is done sometimes to improve performance, fix bugs, or configure your phone to work on networks it was not otherwise intended to work on.
 
 <h2>Conclusion</h2>
 
@@ -169,57 +167,3 @@ Hopefully you now have enough understanding of the Android phone customization l
 
 I view this blog is a work in progress! I intend to modify it as I learn more and as I get more feedback. Please feel free to add commentary in the comments section or email me directly at smouring@nearinfinity.com. You can also follow me on Twitter at @marlhammer.
 <br/><br/>
-
-
-
-
-
-
-
-
-
-
-
-
-
-- intents with android dev incl popping off the stack
-- Android for Raspberry Pi
-- http://www.raspberrypi.org/phpBB3/viewtopic.php?f=29&t=19334&p=273944#p273944
-- http://www.engadget.com/2013/01/29/xbmc-12-frodo-launches-in-finished-form-with-android-support/
-- data mining: clustering via compression
-- data mining: dbscan explanation and applications and implement DBScan on mapreduce,
-
-- Add external GPU to computer: http://forum.techinferno.com/diy-e-gpu-projects/2728-13-retina-mbp-win7-th05-gtx570-internal-lcd.html
-- Algorithm for solving Reversi
-- Writing a linux driver
-- Bucket list blog
-- how to create more randomness on a linux server (*_entropyd daemons) http://www.vanheusden.com/te/  http://www.uncarved.com/static/aed/
-- security tutorial (guided attack on a server? maybe better as a talk?)
-- mobile processor technology / fabrication techniques (28nm etc)
-- cell phone call routing protocol
-- QR codes theory / generation
-- Google Go
-- Clojure
-- Tizen / WebOS / Jollo Sailfish / Ubuntu OS
-- git survival (HEAD and what it means, diff repos, commits, branches, etc., merge -s ours)
-
-- lua
-- lua: Lua / Wow AddOn
-- arduino
-- arduino: Servo Motors : http://www.adafruit.com/blog/2013/01/09/adafruits-raspberry-pi-lesson-8-using-a-servo-motor-raspberry_pi-raspberrypi/
-- arduino: Soldering: http://www.raspberrypi.org/archives/1494   http://mightyohm.com/files/soldercomic/FullSolderComic_EN.pdf
-- arduino: sensors
-- arduino: switch ground/resistor gotcha
-- data mining: weka / school project
-- mapreduce: how to write a hive aggregator function
-- mapreduce: how to aggregate json in hive?
-- mapreduce: join types in hive???
-- mapreduce: hive implemented as mr... include optimizing joins by grouping left outer joins
-- mapreduce: json analyzer in lucene!
-- mapreduce: tips for writing map reduce jobs (avoid object instantiation, reuse Text/BytesWritable objects, use String Builders)
-- raspberry pi
-- raspberry pi: gpio
-- raspberry pi: http://reviews.cnet.co.uk/desktops/how-to-install-android-2-3-on-the-raspberry-pi-50009931/
-- android
-- android Lucene in an android app
-- android: adventures in rooting (install SDK, which includes ADB (put on your path), then install usb drivers (device specific), power + volume down, had to kill HTC Sync process to stop adb from freaking out (constantly restarting itself)) http://www.droid-life.com/2012/07/17/how-to-unlock-the-nexus-7-bootloader/   http://www.ibtimes.com/how-root-android-421-jelly-bean-nexus-4-nexus-7-nexus-10-galaxy-nexus-tutorial-912992    android: process install drivers, install adb / fastboot, unlock boatloader, flash custom recovery, flash other apps like SuperSU, flash ROMs
