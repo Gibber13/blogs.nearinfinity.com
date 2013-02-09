@@ -5,9 +5,9 @@ tags:  mobile android
 
 <h1>Introduction</h1>
 
-One of the reasons Android is so appealing as an ecosystem is its openness. Android does not force you to stay in the confines of the design choices made by the carrier, the manufacturer, or even Google itself. It can upgraded, modified, and enhanced for devices that have long ceased to get manufacturer support or updates and allows you to customize your device to exactly what you want.<br/><br/>
+One of the reasons Android is so appealing as an ecosystem is that it is so open. Android does not force you to stay in the confines of the design choices made by the carrier, the manufacturer, or even Google itself. It can upgraded, modified, and enhanced for devices that have long ceased to get manufacturer updates and it allows you to customize your device exactly the way you want it to be.<br/><br/>
 
-Android's openness manifests itself in several ways, perhaps the most advanced being the enormous community of tinkerers and hackers who have developed a whole ecosystem of custom OS distributions, kernal modifications, and software tweaks for Android. Many people have created custom versions of the Android operating system (often called a "ROM") that can replace the existing version on a given device.
+Android openness manifests itself in several ways, but perhaps the most interesting way being the enormous community of tinkerers and hackers who have built a whole world of custom operating system distributions, kernal modifications, and software tweaks for Android. There are literally hundreds of custom versions of the Android operating system (called "ROMs") that can replace the existing version on a given device.
 <br/><br/>
 
 When I bought my first Android and looked into the "ROM" world, it was a little overwhelming. There was so much complexity, so much information, so much terminology, and no definitive place to learn about it all.<br/><br/>
@@ -15,10 +15,10 @@ When I bought my first Android and looked into the "ROM" world, it was a little 
 Most of the community of tinkerers and hackers who release ROMs for Android are based out of the <a href="http://forum.xda-developers.com/">XDA Forums</a>. While an excellent resources for advanced users, the XDA forums are bewildering at best for the novice who wants to learn the core concepts of Android hacking.
 <br/><br/>
 
-What I want to accomplish in this blog is to give you a resource to understand all the tools and concepts involved in customizing your Android. This blog post is not intended to be a comprehensive step by step set of instructions, but be more of a map that shows all the pieces and how they relate. You can then refer to Google for the nitty gritty specifics for your particular device.
+What I want to accomplish in this blog is to give you a resource to understand all the tools and concepts involved in customizing your Android. This blog post is not intended to be a comprehensive step by step set of instructions, but be more of a guide that shows you all the pieces and how they relate. You can then refer to Google / XDA Forums for the nitty gritty specifics for your particular device.
 <br/><br/>
 
-For clarity I want to divide this blog into two parts: tools and concepts. Under tools I will discuss the nuts and bolts of the software you use to modify your phone, such as adb and fastboot. Under concepts I will discuss the kinds of things you can do to your phone, such as rooting, unlocking the bootloader, flashing a new recovery, etc.
+For clarity I want to divide this blog into two parts: tools and concepts. Under tools I will discuss the nuts and bolts of the software you use to modify your phone and what you need to do to get them set up. Under concepts I will discuss the kinds of things you can do to your phone, such as rooting, unlocking the bootloader, flashing a new recovery, etc.
 <br/><br/>
 
 NOTE: Modifying your phone is not always officially sanctioned by the manufacturer. Please be aware that you take full responsibility for any damage caused to your device. Any information provided in this blog to be used at your own risk.
@@ -28,14 +28,16 @@ NOTE: Modifying your phone is not always officially sanctioned by the manufactur
 
 <h2>ADB and Fastboot</h2>
 
-To do any significant hacking on your Android you need to be able to communicate with it from your computer. There are two tools that allow you to send low level commands to your phone across a USB wire: adb (Android Debug Bridge) and fastboot (a protocal for communicate with the low level firmware of your Android device).
+To do any significant hacking on your Android you need to be able to communicate with it from your computer. There are two tools that allow you to send low level commands to your phone across a USB cable: adb (Android Debug Bridge) and fastboot (a protocal for communicate with the low level firmware of your Android device).
 <br/><br/>
 
-Both of these tools are available in the latest release of the <a href="http://developer.android.com/sdk/index.html">Google SDK for Android</a> (also referred to as the ADT). I also recommend downloading and installing a current version of <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Java</a> if your machine does not have one already. Once you install Java and ADT, the adb and fastboot tools can be found in the sdk/platform-tools subdirectory of the directory where you installed the ADT.
+Both of these tools are available in the latest release of the <a href="http://developer.android.com/sdk/index.html">Google SDK for Android</a> (also referred to as the ADT). I also recommend downloading and installing a current version of the <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Java SE JDK</a> if your machine does not have one already. Once you have installed Java and ADT, the adb and fastboot tools can be found in the sdk/platform-tools subdirectory of the directory where you installed the ADT.
 <br/><br/>
 
-The next step is to put these two tools on your PATH. Instructions for modifying your PATH varying based on your operating system. Here is a <a href="http://java.com/en/download/help/path.xml">good resource</a>. You should put the /sdk/platform-tools directory on your PATH. To verify this is working correctly you
-can open your operating system's equivalent of a Command Prompt and type the command:
+Note: As far as I can tell fastboot is installed with the ADT. However, if it is not, you must download a copy from the internet (XDA Forums preferrably) and copy it to the /sdk/platform-tools directory where the adb.exe resides.
+<br/><br/>
+
+The next step is to put these two tools on your PATH. Instructions for modifying your PATH varying based on your operating system. Here is a <a href="http://java.com/en/download/help/path.xml">good starting point</a>. You should put the entire /sdk/platform-tools directory on your PATH so both adb and fastboot are accessible. To verify this is working correctly you can open your operating system's equivalent of a Command Prompt and type the command:
 <br/><br/>
 
 {% highlight bash %}
@@ -43,10 +45,7 @@ adb
 {% endhighlight %}
 <br/><br/>
 
-It should display usage for adb instead of a "file not found" error.
-<br/><br/>
-
-Note: As far as I can tell fastboot is installed with the ADT. If it is not, download a copy from the internet and copy it to the ADT_INSTALL_DIRECTORY/sdk/platform-tools directory where adb resides.
+It should display usage for adb and not a "file not found" error. It may be necessary to restart any running instances of Command Prompt for your changes to the PATH to take effect.
 <br/><br/>
 
 Once adb and fastboot are on your path and can be executed from a Command Prompt window you are ready for the next step.
@@ -54,7 +53,7 @@ Once adb and fastboot are on your path and can be executed from a Command Prompt
 
 <h2>USB Drivers</h2>
 
-In order for adb / fastboot to work correctly you need to install the correct USB drivers for your specific device. If you are fortunate enough to have a Google Nexus device you can download and install drivers from <a href="http://developer.android.com/sdk/win-usb.html">here</a>. Otherwise you will need to download the appropriate USB drivers from the manufacturer. A good place to start is <a href="http://developer.android.com/tools/extras/oem-usb.html">here</a>. That link also includes good instructions on how to install USB drivers.
+In order for adb / fastboot to communicate with your device you need to install the correct USB drivers for your specific device. If you are fortunate enough to have a Google Nexus device you can download and install drivers from <a href="http://developer.android.com/sdk/win-usb.html">here</a>. Otherwise you will need to download the appropriate USB drivers from the manufacturer. A good place to start is <a href="http://developer.android.com/tools/extras/oem-usb.html">here</a>. That link also includes good instructions on how to actually install USB drivers once you have downloaded them.
 <br/><br/>
 
 Once your USB Drivers are installed you can test to make sure everything is setup correctly by opening a Command Prompt and typing:
@@ -65,10 +64,10 @@ adb devices -l
 {% endhighlight %}
 <br/><br/>
 
-It should connect to your device and display your device name in the Command Prompt.
+It should connect to your device and display your device name.
 <br/><br/>
 
-NOTE: As a user of HTC devices, you install the USB Drivers via the HTC Sync program. I had trouble with HTC Sync and adb not working together correctly. HTC Sync kept trying to restart the adb process repeatedly. So I found I needed to kill the HTC Sync process.
+NOTE: If you own an HTC device, you must install the USB Drivers via the HTC Sync program. I had trouble with HTC Sync and adb not working together correctly because HTC Sync kept trying to restart the adb process. To use adb I found I needed to kill the HTC Sync process from the Task Manager.
 <br/><br/>
 
 Congratulations! These are the basic tools you need to start modifying your phone!
@@ -84,27 +83,27 @@ So you can talk to your phone over a USB cable. Now what?
 The bootloader of your phone is a small piece of firmware responsible for booting your phone and checking / loading your operating system. It is akin to the BIOS on your computer. Most manufacturers ship their phones with the bootloader "locked". This means that the bootloader will not accept any changes to any of the software it loads (including the operating system and the "recovery" image discussed later).
 <br/><br/>
 
-Your first step to Android phone customization is to unlock your bootloader so it will accept further modifications. The procedure to unlock your bootloader vary widely from phone to phone and is not even possibly on all phones. If you own a Google Nexus device, the bootloader can be unlocked via adb / fastboot commands. If you own an HTC device, you can unlock your phone through a slightly more lengthy process via <a href="https://www.htcdev.com/">HTC Dev</a> (note: this requires you to wipe your phone).
+Your first step to Android phone customization is to unlock your bootloader so it will accept further modifications. The procedure to unlock your bootloader vary widely from phone to phone and is not even possible on all phones due to manufacturer or carrier restrictions. If you own a Google Nexus device you are lucky. The bootloader can be unlocked via simple adb / fastboot commands. If you own an HTC device, you can unlock your phone through a slightly more lengthy process via <a href="https://www.htcdev.com/">HTC Dev</a> (note: however this requires you to wipe your phone). Most other phones require a combination of hacking and workarounds to achieve an unlocked bootloader.
 <br/><br/>
 
-Here is where the XDA Forums start to become useful. If you are unfortunate enough to not have a manufacturer with a sanctioned bootloader unlocking method you can search te XDA Forums for instructions on how to unlock the bootloader of your device assuming a hack or workaround has been found.
+Here is where the XDA Forums start to become useful. If you are unfortunate enough to have a manufacturer without a sanctioned bootloader unlocking method you can search the XDA Forums for instructions on how to unlock the bootloader of your device assuming a hack or workaround has been found.
 <br/<br/>
 
-Hopefully your device supports unlcoking its bootloader, because if it does not, your customization abilities are more limited.
+Hopefully your device supports unlocking its bootloader, because if it does not, your customization abilities are very limited.
 <br/<br/>
 
 <h2>Custom Recovery</h2>
 
-Unlocking your bootloader is not very exiting in and off itself. Its what an unlocked bootloader lets you do next that is really exciting.
+Unlocking your bootloader is not exiting in and of itself. Its what an unlocked bootloader lets you do next that is really exciting.
 <br/><br/>
 
-In addition to checking / loading your device's version of the Android operating system, your bootloader is also responsible for booting into "recovery mode" if necessary. Think of recovery like the an emergency boot disk for your operating system. It is the program that is run in case your operating system is corrupted. It can flash a fresh copy of the operating system if necessary to correct a corrupted ROM.
+In addition to checking / loading your device's version of the Android operating system, your bootloader is also responsible for booting into "recovery mode" if necessary. Think of recovery like the an emergency boot disk for your PC operating system. It is the program that is run in case your operating system is corrupted. It can flash a fresh copy of the operating system if necessary to correct a corrupted ROM.
 <br/><br/>
 
-The default "recovery" program that comes with Android is very limited, and refuses to flash any copies of an operating system that are not signed properly by Google. This is a good security mechanism to prevent hackers from subverting your phone's operating system, but it gets in the way when we want to install a custom operating system version!
+The default "recovery" program that comes with Android is very limited, and refuses to flash any copies of an operating system (or anything for that matter) that is not signed properly by Google. This is a good security mechanism to prevent hackers from subverting your phone's operating system, but it gets in the way when we want to install a custom operating system version!
 <br/><br/>
 
-Once your bootloader is unlocked, it becomes willing to let you change the recovery program that comes installed on the phone. You can replace the default recovery with another recovery that is more flexible and accepting of radical changes to your phone. Currently there are two good custom recoveries on the market that I know of: <a href="http://teamw.in/project/twrp2">TeamWin Recovery Pro</a> (abbreviated TWRP) and <a href="http://www.clockworkmod.com/rommanager">ClockwordMod Recovery</a> (appreviated CM). There may be others, but these two are the most commonly used.
+Once your bootloader is unlocked, it becomes willing to let you change the recovery program that comes installed on the phone. You can replace the default recovery with another recovery that is more flexible and accepting of radical changes to your phone. Currently there are at least two good custom recoveries on the market: <a href="http://teamw.in/project/twrp2">TeamWin Recovery Pro</a> (abbreviated TWRP) and <a href="http://www.clockworkmod.com/rommanager">ClockworkMod Recovery</a> (appreviated CM). There may be others, but these two are the most commonly used. I personally recommend ClockworkMod Recovery as it seems the most polished and easy to use. Feel free to experiment.
 <br/><br/>
 
 You can download the appropriate recovery image and flash it to your phone, overwriting the default recovery. Instructions vary phone by phone, but the basic idea is that you connect your phone, reboot it into the bootloader program, download the recovery image, and run this command:
@@ -115,31 +114,31 @@ fastboot flash recovery YOUR_RECOVERY_FILE.img
 {% endhighlight %}
 <br/><br/>
 
-A custom recovery lets you do several things. It can flash a custom version of the operating system which is the holy grail of phone modification. It can also flash programs and files into the system partition of your phone. This is important when you want to get "root access" on your phone, as you will need to flash the Superuser or SuperSU program to the system partition to then grant root access to other programs.
+A custom recovery lets you do several things. It can flash a custom version of the operating system which is of course the holy grail of phone modification. It can also flash programs and files into the system partition of your phone. This is important when you want to get "root access" on your phone, as you will need to flash the Superuser or SuperSU program to the system partition to then grant root access to other programs (more on this later).
 <br/><br/>
 
-Finally and most importantly, a custom recovery lets you perform a full backup of your system. Such a backup is called a "nandroid" backup (for reasons that are unclear to me). It is ABSOLUTELY essential that you perform a full nandroid backup and copy it off your phone before proceeding with further customizations. If you corrupt your phone to the point where it becomes unusable (called "bricking" your phone) you want a backup to restore it with. <br/><br/>
+Finally and most importantly, a custom recovery lets you perform a full backup of your system. Such a backup is called a "nandroid" backup (for reasons that are unclear to me). It is ABSOLUTELY essential that you perform a full nandroid backup and copy it off your phone before proceeding with further customizations. If you corrupt your phone to the point where it becomes unusable (referred in the community as "bricking" your phone because you just turned your expensive phone into an inoperable brick) you want a backup to restore it with. <br/><br/>
 
-One of the benefits of having a custom recovery is that you can flash applications or scripts to the system partition of your phone. This is useful for several reasons. If you do not want to change your ROM but you want to remove the "bloatware" applications that the manufacturer or carrier put on your phone, you can flash control scripts that will uninstall these applications from the system partition. In some cases you can flash tweaks to your existing ROM (such as muting startup sounds, or changing the transparency / color / icons of system elements). You can also flash new applications to the system partition. This leads us to the next step.
+One of the benefits of having a custom recovery is that you can flash applications or scripts to the system partition of your phone. This is useful for several reasons. If you do not want to change your ROM but you want to remove the "bloatware" applications that the manufacturer or carrier put on your phone, you can flash scripts that will uninstall these applications from the system partition (consult XDA Forums for more details). In some cases you can also flash tweaks to your existing ROM (such as muting startup sounds, or changing the transparency / color / icons of system elements). You can also flash new applications to the system partition, which leads us to the next step.
 <br/><br/>
 
 <h2>Rooting</h2>
 
-"Rooting" your phone is sometimes synonmous with installing a custom ROM. In reality the two concepts are very different. Achieving "root" on your phone allows you run applications as the "root" (or administrator) user on your phone. Applications with root privileges can controll more of the phone functionality (including setting CPU speeds, activating wireless hotspot functionality that is otherwise disabled by your carrier, etc.) than is otherwise possible.
+"Rooting" your phone is sometimes synonmous with installing a custom ROM or unlocking your bootloader. In reality the concepts are very different. Achieving "root" on your phone allows you run applications as the "root" (or administrator) user on your phone, much like you might run an application as the Administrator user on a Windows PC. Applications with root privileges can control more of the phone functionality (including setting CPU speeds, activating wireless hotspot functionality that is otherwise disabled by your carrier, etc.) than is otherwise possible.
 <br/><br/>
 
 You can achieve "root" on your stock ROM. Installing a custom ROM is not required, although most custom ROMs come with "root" automatically built in.
 <br/><br/>
 
-Achieving root is simple once you have a custom recovery. You can download a program such as <a href="http://androidsu.com/superuser/">Superuser</a> or SuperSU from the XDA Forums, and put it on your phones internal memory. Then you reboot into your custom recovery and "flash" the zip. This will install the Superuser or SuperSU program into the system partition of your device, which gives it root access. Once it is installed there, it can grant additional non-system partition apps root access.
+Achieving root is simple once you have a custom recovery. You can download a program such as <a href="http://androidsu.com/superuser/">Superuser</a> or SuperSU from the XDA Forums, and put it on your phones internal memory. Then you reboot into your custom recovery and "flash" the zip. This will install the Superuser or SuperSU program into the system partition of your device, which gives it root access. Once it is installed there, it can grant additional non-system partition apps root access whenever they ask for it.
 <br/><br/>
 
-Achieving root allows you to install applications such as <a href="https://play.google.com/store/apps/details?id=stericson.busybox&hl=en">BusyBox</a>, <a href="https://play.google.com/store/apps/details?id=com.koushikdutta.rommanager">RomManager</a> (if you are using ClockworkMod Recovery), and <a href="https://play.google.com/store/apps/details?id=com.keramidas.TitaniumBackup">Titanium Backup</a>, all of which make it easier to control customizations (such as custom recoveries, custom ROMs, nandroid backups, application backups, etc.) all from your phone's home screen instead of a Command Prompt with adb / fastboot.
+Achieving root allows you to install applications such as <a href="https://play.google.com/store/apps/details?id=stericson.busybox&hl=en">BusyBox</a>, <a href="https://play.google.com/store/apps/details?id=com.koushikdutta.rommanager">RomManager</a> (if you are using ClockworkMod Recovery), and <a href="https://play.google.com/store/apps/details?id=com.keramidas.TitaniumBackup">Titanium Backup</a>, all of which make it easier to control customizations (such as custom recoveries, custom ROMs, do nandroid backups, do application backups, etc.) all from your phone's home screen instead of a Command Prompt with adb / fastboot.
 <br/><br/>
 
 <h2>Custom ROM</h2>
 
-The final and ultimate step in Android customization is installing a custom ROM. Now that you have a custom recovery you can replace the stock ROM image with one downloaded from XDA Forums. Instructions for installation really vary with each ROM, so I will not try to go through step by step instructions, just summarize the principles involved.<br/><br/>
+The final and ultimate step in Android customization is flashing a custom ROM. Now that you have a custom recovery you can instruct it to replace the stock ROM image with a custom one downloaded from XDA Forums. Instructions for installation vary with each ROM, so I will not try to go through step by step instructions, just summarize the principles involved.<br/><br/>
 
 A ROM is composed of a copy of the Android operating system together with system applications, usually from Google (such as Gmail). It can include a version of a manufacturer's skin (such as HTC's Sense or Samsung's TouchWiz). It can include a root granting application (such as Superuser or SuperSU) and a host of other tweaks and modifications.<br/><br/>
 
@@ -147,10 +146,29 @@ ROMs are purpose built for specific phones. A Galaxy S3 ROM will not work on a H
 
 ROMs advertise on their XDA Forum page what features they include (including what performance, battery, or sound tweaks they include, as well as things such as "bloatware removed" and "Superuser / Busybox" included). Read all descriptions and instructions very carefully so you know exactly what you are getting into when you install a ROM.<br/><br/>
 
+ROMs can be advertised as being "zip-aligned" and "deodexed" which essentially means the are eligible for theme-ing or installing custom icon sets, among other things.<br/><br/>
+
+<h2>More Advanced Topics</h2>
+
+There is even more to Android customization than what I have discussed above. I will give a short summary of some more advanced topics, but I will be short because I do not have much personal experience working with them.<br/><br/>
+
+<h3>Custom Kernels</h3>
+
+The kernel is the core part of the Linux operating system (which Android is based on). To improve capabilities or compatibility some folks on the XDA Forums can created custom versions of the Android kernel. These can be flashed to your phone along with a custom ROM to achieve specific functionality.
+
+<h3>S-OFF</h3>
+
+On some devices it is possible to achieve "S-OFF" which disables internal security protocals in your phone. Achieving S-OFF gives you total and complete control over every aspect of your phone, even more so than a custom ROM does. It is highly sought after, but veyr hard to achieve on most phones due to manufacturer or carrier restrictions. Achieving S-OFF allows you to do things like flash custom "radios" (see below).<br/><br/>
+
+<h3>Radios</h3>
+You can also flash custom "radios" (in other words, change the firmware that controls your phone's internal wireless atenenas). This is done sometimes to improve performance, fix bugs, or configure your phone to work on networks it was not otherwise intended to work on.
+
 <h2>Conclusion</h2>
 
-This blog is a work in progress! I intend to modify it as I learn more and as I get more feedback. Please feel free to add commentary in the comments section or email me directly at smouring@nearinfinity.com. You can also follow me on Twitter at @marlhammer.
+Hopefully you now have enough understanding of the Android phone customization landscape to start working on your own phone!<br/><br/>
 
+I view this blog is a work in progress! I intend to modify it as I learn more and as I get more feedback. Please feel free to add commentary in the comments section or email me directly at smouring@nearinfinity.com. You can also follow me on Twitter at @marlhammer.
+<br/><br/>
 
 
 
