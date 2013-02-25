@@ -1,6 +1,20 @@
 ---
-title: Android Intents and the Intent Stack
+title: Android Dev: Going Back
 tags:  mobile android java
 ---
 
+Last week I was working on my first Android application (open sourced, I encountered a problem. 
 
+Android applications are comprised of one or more activities (represented by objects that inherit from android.app.Activity). Each activity is responsible for defining its own layout, components, and launching other activities via intents. 
+
+
+
+Back one step:
+
+super.finish();
+
+Back more than one step: 
+
+Launch intent and use flags
+
+Good practice to implement onSavedState method
