@@ -3,23 +3,24 @@ title: Android Dev: Going Back
 tags:  mobile android java
 ---
 
-Last week, when as I was working on my <a href="https://github.com/marlhammer/1650ForAndroid">first Android application</a>, I wanted to implement the equivalent of a "back" button. I one view that launched another view. I wanted to be able to 
+An Android application, referred to as a "task" in Google parlance, is comprised of one or more Activity objects which interact with each other in a workflow to represent your application to the user. Each Activity is responsible for defining its own layout, components, and so forth. Depending on the actions a user takes in an Activity, it can also launch other activities by firing sending an Intent object to the Android OS. Intents specify that the current activity wants to start another activity (which can reside either in the current application or in another application.) An activity can pass data to the other activity through the Intent object as well.
 <br/><br/>
 
-Android applications are comprised of one or more activities (represented by objects that inherit from android.app.Activity). Each activity is responsible for defining its own layout, components, and launching other activities via intents. 
+Most Android Apps you write will have more than one activity. These activities are usually organized in some sort of workflow. For example, consider a simple email application as an example. You might have one activity to represent the Inbox. Clicking on an email in the Inbox might fire an intent to open another activity to view that email. Clicking the Reply button in the view email acitivty might fire an intent to open another acitivity to send a reply email.
+<br/><br/>
 
 
-The concept of a "back" button is ubiquitous 
+Activities are tracked by the Android OS in a stack. When you fire an Intent for a new Activity that Activity is created and placed on the activity stack.
+<br/><br/> 
 
-common need in developing an Android application 
+Of course most workflows are not one directional. So you will quickly find cases that you want to go "back" to a previous activity on the stack. This might be because the current activity is finished, or because the user changed their mind and wants to just go back a step.
+<br/><br/>
 
 
-Back one step:
+Outline:
 
-super.finish();
+Back one step: super.finish();
 
-Back more than one step: 
-
-Launch intent and use flags
+Back more than one step:  Launch intent and use flags
 
 Good practice to implement onSavedState method
