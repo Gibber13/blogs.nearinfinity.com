@@ -1,0 +1,88 @@
+---
+title: USB Device Not Recognized in USB 3.0
+tags: Arduino
+---
+<p>
+Unless you’re having this problem:<p>
+
+<a href="http://3.bp.blogspot.com/-DK7_j5_MpsM/UTDJpfERtAI/AAAAAAAACUE/5xP2JDyM5xA/s1600/USB-device-not-recognized.png" imageanchor="1" ><img border="0" style="margin-left: 0px;" src="http://3.bp.blogspot.com/-DK7_j5_MpsM/UTDJpfERtAI/AAAAAAAACUE/5xP2JDyM5xA/s320/USB-device-not-recognized.png" /></a>
+
+<p>
+For USB 3.0 ports on an Arduino-like stack you may safely stop reading.  Nothing to see here just trying to fill out the Internet.</p>
+
+<h2>
+The Problem</h2>
+
+<p>
+This problem occurred for me on an ATMEL ATMEGA32U2 chip with the <a href=" https://code.google.com/p/lufa-lib/">LUFA USB framework for AVRs</a> and the HID USB driver.  Everything worked fine for USB 2.0, but on modern PC's it would pop up "USB device not recognized".</p>
+
+<p>
+In device manager the device showed up as Unknown device.  Device status would look like this:</p>
+
+<blockquote style="background: #F5F5F5; padding: 5px; margin-left: 40px;">
+Windows has stopped this device because it has reported problems. (Code 43)</blockquote>
+
+<p>
+And in the event viewer it showed something like this:</p>
+
+<pre>
+<blockquote style="background: #F5F5F5; padding: 5px; margin-left: 40px;">
+Device USB\VID_0000&PID_0002\5&ea89d57&0&2 had a problem starting.
+
+Driver Name: null
+Class GUID: {00000000-0000-0000-0000-000000000000}
+Service: 
+Lower Filters: 
+Upper Filters: 
+Problem: 0x2B
+Status: 0x0</blockquote></pre>
+
+<h2>
+The Solution</h2>
+
+<p>
+Despite a lot of fruitless packet monitoring and upgrading various packages and help from master-hacker <a href="http://twitter.com/joeferner">Joe Ferner</a>, solving this ultimately boiled down to compiling the GenericHid sample project from LUFA (which did work in USB 3.0) and then commenting out more and more of my project until it worked and then incrementally adding everything back via binary search.</p>
+
+<p>
+The problem ended up being the amount of time that passed between the call to LUFA's</p>
+
+<blockquote style="background: #F5F5F5; padding: 5px; margin-left: 40px;">
+USB_Init();</blockquote>
+
+<p>
+And the USB calls in the main program loop.  So essentially I was doing something like this:</p>
+
+<pre style="background: #F5F5F5; padding: 5px; margin-left: 40px;">
+<code>
+int main(void);
+
+&nbsp;&nbsp;MCUSR &= ~(1 << WDRF);
+
+&nbsp;&nbsp;wdt_disable();
+
+&nbsp;&nbsp;clock_prescale_set(clock_div_1);
+
+&nbsp;&nbsp;USB_Init();
+
+&nbsp;&nbsp;_delay_ms(500); // &lt;- DON'T DO THIS
+
+&nbsp;&nbsp;for (;;)
+
+&nbsp;&nbsp;{
+
+&nbsp;&nbsp;&nbsp;&nbsp;HID_Device_USBTask(&Generic_HID_Interface);
+
+&nbsp;&nbsp;&nbsp;&nbsp;USB_USBTask();
+
+&nbsp;&nbsp;}
+
+}</code>
+</pre>
+
+<p>
+Take that delay out and everything works.</p>
+
+<h2>Summary</h2>
+
+<p>
+The takeaway: move all of your initialization logic - anything that might take any time at all - prior to the USB_Init call.  It might just save you a lot of pain down the road.  That's it.  Hope this helps someone, somewhere.</p>
