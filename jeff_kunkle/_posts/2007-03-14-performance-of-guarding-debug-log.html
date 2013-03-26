@@ -16,7 +16,7 @@ if (log.isDebugEnabled()) {
 
 <p>It's generally accepted that guarding your log statements with an if block will improve performance if your log statements involve some kind of string concatenation, such as the example above. But what kind of performance improvement are we really talking about here?</p>
 
-<p>To determine the impact of this log guarding, I wrote a simple program that repeatedly calls log statements with three different logging implementations. See <a href="/jeff_kunkle/assets/logguard.zip">attachment</a> for the actual code.</p>
+<p>To determine the impact of this log guarding, I wrote a simple program that repeatedly calls log statements with three different logging implementations. See <a href="/blogs/jeff_kunkle/assets/logguard.zip">attachment</a> for the actual code.</p>
 
 <ol>
 <li>UnguardedLogger.java has no if block guarding the log statement at all.</li>
@@ -50,4 +50,4 @@ if (log.isDebugEnabled()) {
 <ol>
 <li>Guarding your log statements is a lot faster (in this case, 50x faster) than not guarding them at all or guarding them using an aspect. Even so, we're still down in the microsecond range here. If you're doing a lot of logging, you may notice a small improvement from guarding your log statements. Otherwise, you may not want to bother.</li>
 <li>Guarding your log statements with an around aspect is really no better than not guarding them at all. I'm not familiar with the internals of AspectJ, but my hunch is that even an around aspect will have to do the log statement string concatenation so that it could potentially be exposed as context for an advice. Hence, it ends up being about the same as not guarding the log statements at all.</li>
-</ol> 
+</ol>

@@ -13,7 +13,7 @@ Keynote has a really handy presenters view that will show the
 current slide, next slide, and timing information on your laptop display
 while showing the presentation on the secondary display/projector.
 
-![presenter-view](/blogs/jeff_kunkle/assets/tech_presentation_tip_3/presenter-view.png "Presenter View")
+<img src="/blogs/jeff_kunkle/assets/presenter-view.png" alt="presenter-view" title="Presenter View" />
 
 Unfortunately, presenter view and live coding don't work well together.
 If you're using presenter view then your laptop and projector are

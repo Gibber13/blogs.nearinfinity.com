@@ -1,4 +1,4 @@
---- 
+---
 permalink: /blogs/andrew_homeyer/display_a_custom_uiview_like_a.html
 layout: blogs
 title: Display a custom UIView like a UIActionSheet
@@ -17,7 +17,7 @@ CustomUIActionSheetViewController *customUIActionSheetViewController;{% endhighl
 
 <div><div>
 
-{% highlight text %}- (void)showCustomView {   
+{% highlight text %}- (void)showCustomView {
     [self.navigationController.view
         addSubview:self.customUIActionSheetViewController.view];
 
@@ -32,16 +32,16 @@ CustomUIActionSheetViewController *customUIActionSheetViewController;{% endhighl
 
 {% highlight text %}- (void)viewDidLoad {
     [super viewDidLoad];
-    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] 
-        initWithBarButtonSystemItem:UIBarButtonSystemItemAction 
-        target:self 
+    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc]
+        initWithBarButtonSystemItem:UIBarButtonSystemItemAction
+        target:self
         action:@selector(showCustomView)] autorelease];
 }
 
 {% endhighlight %}
 
 <div>
-At this point, when you click the button in the navigation bar, you should see the custom view immediately appear without any transition.</div><div><br /></div><div><font class="Apple-style-span" style="font-size: 1.25em; ">3. Make background semi-transparent</font></div><div><br /></div><div>When the custom view loads, we want the parent view to be covered by a semi-transparent view.</div><div><br /></div><div>Open our custom action sheet NIB (CustomUIActionSheetViewController.xib) in Interface Builder.&nbsp;</div><div>In the Attributes Inspector for the UIView (there should only be one right now), click the background field. Change it's color to black (or the darkTextColor property), and change the Opacity to 50%.</div><div><br /></div><div><img alt="view_background_properties.png" src="http://www.nearinfinity.com/andrew_homeyer/assets/view_background_properties.png" width="228" height="383" class="mt-image-none" style="" /></div><div><br /></div><div>When you build and run and click the right navigation button you should now see the semi-transparent view cover the parent view.</div><div><br /></div><div><font class="Apple-style-span" style="font-size: 1.25em; ">4. Add a view to hold our custom fields</font></div><div><br /></div><div>Drag a new UIView onto the NIB and attach it to a new outlet in View Controller. I'm calling it the actionSheetView.</div><div><br /></div>
+At this point, when you click the button in the navigation bar, you should see the custom view immediately appear without any transition.</div><div><br /></div><div><font class="Apple-style-span" style="font-size: 1.25em; ">3. Make background semi-transparent</font></div><div><br /></div><div>When the custom view loads, we want the parent view to be covered by a semi-transparent view.</div><div><br /></div><div>Open our custom action sheet NIB (CustomUIActionSheetViewController.xib) in Interface Builder.&nbsp;</div><div>In the Attributes Inspector for the UIView (there should only be one right now), click the background field. Change it's color to black (or the darkTextColor property), and change the Opacity to 50%.</div><div><br /></div><div><img src="/blogs/andrew_homeyer/assets/view_background_properties.png" alt="view_background_properties.png" width="228" height="383" class="mt-image-none" style="" /></div><div><br /></div><div>When you build and run and click the right navigation button you should now see the semi-transparent view cover the parent view.</div><div><br /></div><div><font class="Apple-style-span" style="font-size: 1.25em; ">4. Add a view to hold our custom fields</font></div><div><br /></div><div>Drag a new UIView onto the NIB and attach it to a new outlet in View Controller. I'm calling it the actionSheetView.</div><div><br /></div>
 
 {% highlight text %}@property(nonatomic, retain) IBOutlet UIView *actionSheetView;
 {% endhighlight %}
@@ -55,7 +55,7 @@ At this point, when you click the button in the navigation bar, you should see t
 <div><br /></div><div>At this point, when you click the right nav button, you won't see the view we just created because we haven't added it as a subview yet.</div><div><br /></div><div><font class="Apple-style-span" style="font-size: 1.25em; ">5. Add the slide up transition</font></div><div><br /></div><div>Create a new method to slide up the actionSheetView, and call it from the viewWillAppear method.</div><div><br /></div>
 
 {% highlight text %}- (void)viewWillAppear:(BOOL)animated {
-    [self slideIn];	
+    [self slideIn];
 }
 
 - (void)slideIn {
@@ -64,12 +64,12 @@ At this point, when you click the button in the navigation bar, you should see t
     frame.origin = CGPointMake(0.0, self.view.bounds.size.height);
     self.actionSheetView.frame = frame;
     [self.view addSubview:self.actionSheetView];
-	
+
     //animate to new location, determined by height of the view in the NIB
     [UIView beginAnimations:@"presentWithSuperview" context:nil];
-    frame.origin = CGPointMake(0.0, 
+    frame.origin = CGPointMake(0.0,
         self.view.bounds.size.height - self.actionSheetView.bounds.size.height);
-	
+
     self.actionSheetView.frame = frame;
     [UIView commitAnimations];
 }
@@ -80,17 +80,17 @@ At this point, when you click the button in the navigation bar, you should see t
 
 {% highlight text %}- (void) slideOut {
     [UIView beginAnimations:@"removeFromSuperviewWithAnimation" context:nil];
-	
+
     // Set delegate and selector to remove from superview when animation completes
     [UIView setAnimationDelegate:self];
     [UIView setAnimationDidStopSelector:@selector(animationDidStop:finished:context:)];
-	
+
     // Move this view to bottom of superview
     CGRect frame = self.actionSheetView.frame;
     frame.origin = CGPointMake(0.0, self.view.bounds.size.height);
     self.actionSheetView.frame = frame;
-	
-    [UIView commitAnimations]; 
+
+    [UIView commitAnimations];
 }
 
 - (void)animationDidStop:(NSString *)animationID finished:(NSNumber *)finished context:(void *)context {
@@ -100,4 +100,4 @@ At this point, when you click the button in the navigation bar, you should see t
 }
 {% endhighlight %}
 
-<div><br /></div><div>Like before, we're going to change the origin of the frame wrapped in an animation block to slide out the view. We're doing a little extra work with setAnimationDidStopSelector. When the animation finishes, we want to remove our entire view (including the semi-transparent view), to go back to the state we were in before it was slid in. In the callback selector we simply use removeFromSuperview to do this.</div><div><br /></div><div>That's it! The actionSheetView should slide in when you click the right navigation button, and the done button should slide it out.</div><div><br /></div><div>Thanks to <a href="http://stackoverflow.com/questions/587681/how-to-use-presentmodalviewcontroller-to-create-a-transparent-view">this answer on Stack Overflow</a> for getting me started.</div><div><br /></div><div>Download or fork the sample code from&nbsp;<a href="http://github.com/homeyer/CustomUIActionSheet" style="text-decoration: underline; ">github</a>.</div><div><br /></div>  
+<div><br /></div><div>Like before, we're going to change the origin of the frame wrapped in an animation block to slide out the view. We're doing a little extra work with setAnimationDidStopSelector. When the animation finishes, we want to remove our entire view (including the semi-transparent view), to go back to the state we were in before it was slid in. In the callback selector we simply use removeFromSuperview to do this.</div><div><br /></div><div>That's it! The actionSheetView should slide in when you click the right navigation button, and the done button should slide it out.</div><div><br /></div><div>Thanks to <a href="http://stackoverflow.com/questions/587681/how-to-use-presentmodalviewcontroller-to-create-a-transparent-view">this answer on Stack Overflow</a> for getting me started.</div><div><br /></div><div>Download or fork the sample code from&nbsp;<a href="http://github.com/homeyer/CustomUIActionSheet" style="text-decoration: underline; ">github</a>.</div><div><br /></div>

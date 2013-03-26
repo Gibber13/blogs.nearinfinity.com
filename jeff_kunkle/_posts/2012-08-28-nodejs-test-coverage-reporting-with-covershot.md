@@ -21,7 +21,7 @@ for saying it's a tool that generates nice code coverage output in
 several formats, no matter which test framework you use. A sample of the
 HTML summary page is shown below.
 
-![Coverage Summary](/blogs/jeff_kunkle/assets/nodejs_test_coverage_reporting_with_covershot/coverage.png "Coverage Summary")
+<img src="/blogs/jeff_kunkle/assets/coverage.png" alt="Coverage Summary" title="Coverage Summary" />
 
 Some of the most interesting features of CoverShot include:
 

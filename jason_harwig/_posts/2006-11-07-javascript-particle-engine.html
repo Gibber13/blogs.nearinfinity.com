@@ -7,13 +7,13 @@ date: 2006-11-07 23:28:54 -05:00
 tags: JavaScript
 ---
 <h1 style="display:none">Javascript particle Engine</h1>
-<div style="padding:15px;background-color:#ffffcc">Updated: <a href="http://www.nearinfinity.com/blogs/jason_harwig/javascript_particle_engine_in_canvas.html">Particle Engine using Canvas</a></div>
+<div style="padding:15px;background-color:#ffffcc">Updated: <a href="/blogs/jason_harwig/javascript_particle_engine_in_canvas.html">Particle Engine using Canvas</a></div>
 
 <p>I was at the No Fluff Just Stuff Software Symposium in Reston, VA this past weekend and had some time in between sessions to work on something. As most of the people I work with know, I rarely code things that might actually be useful to someone in my spare time.  So, I had no reason to attempt to rationalize the use for a particle engine in Javascript.</p>
 
 <p>I think I've written a particle engine in almost every language I've used for an extended period of time. This includes python, java, objective-c, and c.  What's surprising is that it has taken me this long to write a particle engine in the language I probably spend the most time coding in -- Javascript.</p>
 
-<p>By the way, this is probably the worst particle engine ever created (TM), but it is written in Javascript, so give me a break.  It doesn't support colors yet as I couldn't think of an efficient way to change the color of a png.  I've only tested it in Firefox and Safari because I'm on a Powerbook. It's also pretty slow, in that it can handle only a dozen or so particles.</p> 
+<p>By the way, this is probably the worst particle engine ever created (TM), but it is written in Javascript, so give me a break.  It doesn't support colors yet as I couldn't think of an efficient way to change the color of a png.  I've only tested it in Firefox and Safari because I'm on a Powerbook. It's also pretty slow, in that it can handle only a dozen or so particles.</p>
 <p>Let me know what you think!
 
 </p><h3>features</h3>
@@ -52,7 +52,7 @@ tags: JavaScript
 	<tr><td>Applied Y force</td><td><input type="text" value="0" name="y_force" /></td></tr>
 	<tr><td>Particle Size</td><td><input type="text" value="25" name="size" /></td></tr>
 	<tr><td align="right" colspan="2"><input type="button" onclick="go()" value="Save" /></td></tr>
-	
+
 </tbody></table>
 </div>
 
@@ -68,8 +68,8 @@ tags: JavaScript
 <script type="text/javascript" src="scriptaculous.js"></script>
 <script type="text/javascript" src="particle.js"></script>
 
-<input type="button" value="Click Me" 
-   class="emitter" 
+<input type="button" value="Click Me"
+   class="emitter"
    options="y_force:-.28, max_particles: 10, respawn: 20,
             event_type: 'click', vel:[-2, 2], life:[.03,.07]" / />
 </code>
@@ -80,17 +80,17 @@ Download the <form mt:asset-id="277" class="mt-enclosure mt-enclosure-file" styl
 <br />
 
 <!-- scripts -->
-<script type="text/javascript" src="http://www.nearinfinity.com/jason_harwig/assets/prototype.js"></script>
-<script type="text/javascript" src="http://www.nearinfinity.com/jason_harwig/assets/effects.js"></script>
-<script type="text/javascript" src="http://www.nearinfinity.com/jason_harwig/assets/builder.js"></script>
-<script type="text/javascript" src="http://www.nearinfinity.com/jason_harwig/assets/particle.js"></script>
+<script src="/blogs/jason_harwig/assets/prototype.js" type="text/javascript"></script>
+<script src="/blogs/jason_harwig/assets/effects.js" type="text/javascript"></script>
+<script src="/blogs/jason_harwig/assets/builder.js" type="text/javascript"></script>
+<script src="/blogs/jason_harwig/assets/particle.js" type="text/javascript"></script>
 <script type="text/javascript" charset="utf-8">
 	function go() {
 		var options = '';
 		$$('#cfg_tbl input').each(function(value,index) {
 			if (value.name != '') {
-				options = options + (options == ''?'':',') + value.name + ':' + 
-					(value.name == 'event_type' ? '\'' + value.value + '\'' : value.value); 
+				options = options + (options == ''?'':',') + value.name + ':' +
+					(value.name == 'event_type' ? '\'' + value.value + '\'' : value.value);
 			}
 		});
 		var el = $('configure');

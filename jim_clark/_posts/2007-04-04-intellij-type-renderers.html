@@ -10,20 +10,20 @@ tags: Java
 When debugging in <a href="http://www.jetbrains.com/idea/">IntelliJ</a> you may need to inspect byte arrays as these byte arrays may contain meaningful text.  Out of the box individual byte array values will be rendered as numeric byte values.   This makes it difficult to decipher what it is you're debugging.
 </p>
 
-<form mt:asset-id="223" class="mt-enclosure mt-enclosure-image" style="display: inline;" contenteditable="false"><img alt="pre_renderer.gif" src="http://www.nearinfinity.com/blogs/jim_clark/assets/pre_renderer.gif" class="mt-image-none" style="" height="252" width="260" /></form><br /> 
+<form mt:asset-id="223" class="mt-enclosure mt-enclosure-image" style="display: inline;" contenteditable="false"><img src="/blogs/jim_clark/assets/pre_renderer.gif" alt="pre_renderer.gif" class="mt-image-none" style="" height="252" width="260" /></form><br />
 
 <p>
-Fortunately IntelliJ gives a way to customize your data views when debugging.  The way to handle this is create a custom Type Renderer.  While inspecting values during a debug session, in the Frame tab right click and select "Customize Data Views...".  A dialog will appear, select the Type Renderers tab.  IntelliJ allows you to create a renderer for objects of a particular type.  Apply renderer to a byte[] and use the expression "new String(this)".  
+Fortunately IntelliJ gives a way to customize your data views when debugging.  The way to handle this is create a custom Type Renderer.  While inspecting values during a debug session, in the Frame tab right click and select "Customize Data Views...".  A dialog will appear, select the Type Renderers tab.  IntelliJ allows you to create a renderer for objects of a particular type.  Apply renderer to a byte[] and use the expression "new String(this)".
 </p>
 
-<form mt:asset-id="224" class="mt-enclosure mt-enclosure-image" style="display: inline;" contenteditable="false"><img alt="customize_data_views.gif" src="http://www.nearinfinity.com/blogs/jim_clark/assets/customize_data_views.gif" class="mt-image-none" style="" height="578" width="665" /></form><br />
+<form mt:asset-id="224" class="mt-enclosure mt-enclosure-image" style="display: inline;" contenteditable="false"><img src="/blogs/jim_clark/assets/customize_data_views.gif" alt="customize_data_views.gif" class="mt-image-none" style="" height="578" width="665" /></form><br />
 
 <p><br />
 </p><p>This will render the byte array as a String:
 </p>
 
-<form mt:asset-id="222" class="mt-enclosure mt-enclosure-image" style="display: inline;" contenteditable="false"><img alt="post_renderer.gif" src="http://www.nearinfinity.com/blogs/jim_clark/assets/post_renderer.gif" class="mt-image-none" style="" height="243" width="265" /></form>
+<form mt:asset-id="222" class="mt-enclosure mt-enclosure-image" style="display: inline;" contenteditable="false"><img src="/blogs/jim_clark/assets/post_renderer.gif" alt="post_renderer.gif" class="mt-image-none" style="" height="243" width="265" /></form>
 
 <p>
 For cases when you don't want this type renderer enabled, IntelliJ allows you to disable the renderer by unchecking the checkbox next to the renderer name.
-</p><div><br /></div><div><br /></div><div><br /></div> 
+</p><div><br /></div><div><br /></div><div><br /></div>

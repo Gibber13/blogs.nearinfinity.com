@@ -6,9 +6,9 @@ This is the first in a series of posts extracted from my [Presentation Tips Vide
 
 If you're a developer, chances are you do most work with your screen resolution cranked up as high as it'll go. As I write this, my pre-retina 15-inch MacBook Pro resolution is set at 1440x900. So what happens when you plug your laptop into a projector displaying at 1024x768?
 
-![hires](/blogs/jeff_kunkle/assets/tech_presentation_tip_1/hires.png "High Resolution Laptop")
+<img src="/blogs/jeff_kunkle/assets/hires.png" alt="hires" title="High Resolution Laptop" />
 
-![lowres](/blogs/jeff_kunkle/assets/tech_presentation_tip_1/lowres.png "Low Resolution Projector")
+<img src="/blogs/jeff_kunkle/assets/lowres.png" alt="lowres" title="Low Resolution Projector" />
 
 Suddenly everything that fit so nicely on your laptop screen has been zoomed in to the point where things are barely recognizable. And despite this predictable behavior, I continue to see "screen resolution shock" derail presentation after presentation as the presenter scrambles to rearrange windows and figure out how to operate with the reduced real estate.
 
