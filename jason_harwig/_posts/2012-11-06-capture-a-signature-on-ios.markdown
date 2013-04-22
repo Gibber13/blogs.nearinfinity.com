@@ -65,7 +65,7 @@ Quadratic Bézier Curves
 
 <img src="/blogs/jason_harwig/assets/signature-diagram-quadratic.png" title="signature diagram quadratic" />
 
-Instead of connected lines between the touch points, quadratic bézier curves connect the points using the technique discussed in the aforementioned WWDC session (Seek to 42:15.) Connect the touch points with a quadratic curve using the touch points as the control points and the mid points as start and end.
+Instead of connecting the lines using touch points we'll use quadratic bézier curves to connect the points using the technique discussed in the aforementioned WWDC session (Seek to 42:15.) Connect the touch points with a quadratic curve using the touch points as the control points and the mid points as start and end.
 
 Adding quadratic curves to the previous code requires the storing the previous touch point, so add an instance variable for that.
 
